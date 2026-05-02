@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Nanny - Moderation Settings</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #000;
+    --card: #1e1e28;
+    --card2: #252530;
+    --border: #2e2e3e;
+    --text: #f0f0f5;
+    --muted: #8888aa;
+    --accent: #5b8dee;
+    --green: #34d399;
+    --red: #ff4d6d;
+    --yellow: #fbbf24;
+    --orange: #fb923c;
+    --sev-mild:     #34d399;
+    --sev-moderate: #fbbf24;
+    --sev-high:     #fb923c;
+    --sev-severe:   #ff4d6d;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    padding: 28px 20px 48px;
+    overflow-x: hidden;
+  }
+
+  h1.title { font-size: 13px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; text-align: center; }
+  h2.subtitle { font-size: 30px; font-weight: 700; color: var(--text); margin-bottom: 8px; text-align: center; letter-spacing: -0.5px; }
+  h2.subtitle span { color: var(--accent); }
+  .intro { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 28px; line-height: 1.6; max-width: 560px; }
+  .intro span { color: var(--accent); font-weight: 600; }
+
+  .stage { display: flex; align-items: center; justify-content: center; width: 100%; max-width: 1200px; min-height: 560px; }
+  .slot { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .slot .lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); text-align: center; }
+
+  .phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+  .phone {
+    width: 340px; height: 650px;
+    background: #111118;
+    border-radius: 42px;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 0 1px var(--accent)44, 0 24px 64px #00000099;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+
+  /* YouTube bottom nav */
+  .yt-nav { background: #0f0f0f; border-top: 1px solid #1c1c1c; display: flex; align-items: center; justify-content: space-around; padding: 6px 0 8px; flex-shrink: 0; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 8px; color: var(--muted); flex: 1; transition: color 0.3s; }
+  .nav-item.active { color: #fff; }
+  .nav-item.ai-nav { color: var(--accent); }
+  .nav-icon-wrap { width: 26px; height: 26px; border-radius: 50%; background: var(--accent)22; border: 1px solid var(--accent)55; display: flex; align-items: center; justify-content: center; }
+
+  .notch { width: 120px; height: 28px; background: #000; border-radius: 0 0 18px 18px; margin: 0 auto; flex-shrink: 0; }
+  .screen { flex: 1; overflow: hidden; display: flex; flex-direction: column; background: #0d0d14; }
+  .sbar { display: flex; justify-content: space-between; padding: 5px 20px; font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; }
+
+  .app-header {
+    padding: 10px 20px 12px;
+    background: #0d0d14;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .app-name { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.14em; }
+  .app-page { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  .prog-wrap { display: flex; gap: 5px; justify-content: center; padding: 8px 0 4px; flex-shrink: 0; }
+  .pdot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); transition: background 0.4s; }
+  .pdot.on { background: var(--accent); }
+
+  .content {
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    scrollbar-width: none;
+    padding: 10px 16px 20px;
+    display: flex; flex-direction: column; gap: 9px;
+  }
+  .content::-webkit-scrollbar { display: none; }
+
+  .slide-head { flex-shrink: 0; }
+  .slide-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .slide-sub { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+  .toggle {
+    width: 40px; height: 23px;
+    background: var(--border);
+    border-radius: 12px;
+    position: relative; flex-shrink: 0;
+    transition: background 0.35s;
+  }
+  .toggle.on      { background: var(--red); }
+  .toggle.allowed { background: var(--green); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 17px; height: 17px;
+    background: #fff; border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: transform 0.35s;
+    box-shadow: 0 1px 4px #00000050;
+  }
+  .toggle.on::after      { transform: translateX(17px); }
+  .toggle.allowed::after { transform: translateX(17px); }
+
+  .sub-tog {
+    width: 34px; height: 20px;
+    background: var(--border);
+    border-radius: 10px;
+    position: relative; flex-shrink: 0; margin-top: 2px;
+    transition: background 0.35s;
+  }
+  .sub-tog.on      { background: var(--red); }
+  .sub-tog.allowed { background: var(--green); }
+  .sub-tog::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    background: #fff; border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: transform 0.35s;
+    box-shadow: 0 1px 3px #00000050;
+  }
+  .sub-tog.on::after      { transform: translateX(14px); }
+  .sub-tog.allowed::after { transform: translateX(14px); }
+
+  .cat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    opacity: 0; transform: translateY(10px);
+    transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.4s, background 0.4s;
+    flex-shrink: 0; position: relative;
+  }
+  .cat-card.show { opacity: 1; transform: translateY(0); }
+  .cat-card.blocked { border-color: var(--red)55; background: #1e1520; }
+  .cat-top { display: flex; align-items: center; gap: 10px; }
+  .cat-icon { font-size: 18px; width: 30px; text-align: center; flex-shrink: 0; }
+  .cat-info { flex: 1; }
+  .cat-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .cat-desc { font-size: 10px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+
+  .blocked-row {
+    display: none; align-items: center; gap: 5px;
+    margin-top: 8px; padding-top: 8px;
+    border-top: 1px solid var(--border);
+    font-size: 10px; color: var(--red); font-weight: 600;
+  }
+  .cat-card.blocked .blocked-row { display: flex; }
+  .bdot { width: 5px; height: 5px; border-radius: 50%; background: var(--red); animation: bpulse 2s infinite; }
+  @keyframes bpulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  .cust-btn {
+    background: var(--accent)18;
+    border: 1px solid var(--accent)55;
+    color: var(--accent);
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 12px; font-weight: 600;
+    width: 100%; text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.4s;
+    flex-shrink: 0;
+  }
+  .cust-btn.show { opacity: 1; transform: translateY(0); }
+  .cust-btn.pulse { box-shadow: 0 0 0 4px var(--accent)33, 0 0 0 10px var(--accent)12; }
+
+  /* SEVERITY BADGE */
+  .sev-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    border-radius: 5px;
+    padding: 2px 6px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 4px;
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 0.4s, transform 0.4s;
+  }
+  .sev-badge.show { opacity: 1; transform: scale(1); }
+  .sev-mild     { background: var(--sev-mild)1a;     color: var(--sev-mild);     border: 1px solid var(--sev-mild)40; }
+  .sev-moderate { background: var(--sev-moderate)1a; color: var(--sev-moderate); border: 1px solid var(--sev-moderate)40; }
+  .sev-high     { background: var(--sev-high)1a;     color: var(--sev-high);     border: 1px solid var(--sev-high)40; }
+  .sev-severe   { background: var(--sev-severe)1a;   color: var(--sev-severe);   border: 1px solid var(--sev-severe)40; }
+  .sev-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+  /* INFO BUTTON */
+  .info-btn {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--accent)44;
+    background: var(--accent)14;
+    color: var(--accent);
+    font-size: 9px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    font-family: serif;
+    line-height: 1;
+    user-select: none;
+  }
+  .info-btn:hover { background: var(--accent)28; border-color: var(--accent)88; transform: scale(1.1); }
+  .info-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  /* INFO PANEL */
+  .info-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.35s;
+    opacity: 0;
+    background: #131320;
+    border-top: 0px solid var(--accent)22;
+  }
+  .info-panel.open {
+    max-height: 240px;
+    opacity: 1;
+    border-top-width: 1px;
+  }
+  .info-panel-inner {
+    padding: 8px 14px 10px;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .info-label {
+    font-size: 8px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .info-label::before { content: ''; display: inline-block; width: 8px; height: 1px; background: var(--accent)55; }
+  .info-text {
+    font-size: 9px; color: var(--muted); line-height: 1.55;
+  }
+  .info-sources {
+    display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px;
+  }
+  .src-chip {
+    font-size: 7px; font-weight: 600;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 5px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Slide 2 */
+  .tip-box {
+    background: var(--accent)10;
+    border: 1px solid var(--accent)30;
+    border-radius: 12px;
+    padding: 10px 13px;
+    font-size: 10px; color: var(--muted); line-height: 1.6;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 0.5s, transform 0.5s;
+    flex-shrink: 0;
+  }
+  .tip-box.show { opacity: 1; transform: translateY(0); }
+  .tip-box span { color: var(--accent); font-weight: 600; }
+
+  .exp-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    opacity: 0; transform: translateY(10px);
+    transition: opacity 0.5s, transform 0.5s;
+    flex-shrink: 0;
+  }
+  .exp-block.show { opacity: 1; transform: translateY(0); }
+
+  .exp-head {
+    padding: 11px 14px;
+    background: var(--card2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .exp-head-icon { font-size: 16px; width: 26px; text-align: center; }
+  .exp-head-title { font-size: 13px; font-weight: 700; color: var(--text); flex: 1; }
+  .exp-head-count { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  .sub {
+    border-bottom: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    opacity: 0; transform: translateX(-8px);
+    transition: opacity 0.4s, transform 0.4s, background 0.4s;
+    flex-shrink: 0; position: relative;
+  }
+  .sub:last-child { border-bottom: none; }
+  .sub.show { opacity: 1; transform: translateX(0); }
+  .sub.blocked { background: #1e1520; }
+  .sub.allowed { background: #111a14; }
+
+  .sub-row {
+    padding: 10px 14px 8px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .sub-left { flex: 1; min-width: 0; }
+  .sub-name { font-size: 11px; font-weight: 600; color: var(--text); }
+  .sub-desc { font-size: 9px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+  .sub-eg { font-size: 9px; color: #55557a; margin-top: 2px; font-style: italic; }
+
+  .sub-ctrl { display: flex; flex-direction: column; align-items: center; gap: 5px; flex-shrink: 0; }
+
+  .callout {
+    position: absolute;
+    top: 8px; right: 58px;
+    background: #1a1a2e;
+    border: 1px solid var(--accent)55;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 8px; color: var(--accent);
+    font-weight: 600; white-space: nowrap;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.4s, transform 0.4s;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .callout::after {
+    content: '';
+    position: absolute;
+    right: -5px; top: 50%;
+    transform: translateY(-50%);
+    border: 4px solid transparent;
+    border-left-color: var(--accent)55;
+  }
+  .callout.show { opacity: 1; transform: translateY(0); }
+
+  .save-btn {
+    background: var(--green)18;
+    border: 1px solid var(--green)55;
+    color: var(--green);
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 12px; font-weight: 600;
+    width: 100%; text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 0.5s, transform 0.5s, box-shadow 0.4s;
+    flex-shrink: 0;
+  }
+  .save-btn.show { opacity: 1; transform: translateY(0); }
+  .save-btn.pulse { box-shadow: 0 0 0 4px var(--green)22, 0 0 0 10px var(--green)10; }
+
+  .tog-legend {
+    display: flex; gap: 14px; justify-content: center;
+    padding: 0; flex-wrap: wrap;
+  }
+  .tleg { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); }
+  .tleg-tog { width: 28px; height: 16px; border-radius: 8px; position: relative; }
+  .tleg-tog::after { content: ''; position: absolute; width: 10px; height: 10px; background: #fff; border-radius: 50%; top: 3px; left: 3px; box-shadow: 0 1px 3px #00000040; transition: transform 0.3s; }
+  .tleg-tog.right::after { transform: translateX(12px); }
+  .tleg-grey  { background: var(--border); }
+  .tleg-red   { background: var(--red); }
+  .tleg-green { background: var(--green); }
+
+  .sev-legend { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 8px; }
+  .sev-legend-title { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .sev-legend-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .sev-leg { display: flex; align-items: center; gap: 4px; font-size: 9px; color: var(--muted); }
+  .sev-leg-pip { width: 8px; height: 8px; border-radius: 2px; }
+
+  .legend-wrap { display: flex; flex-direction: column; align-items: center; gap: 7px; margin-top: 4px; }
+  .legend-title { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .gctrl { margin-top: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .rbtn { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 24px; padding: 8px 22px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 6px; }
+  .rbtn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<p class="title">AI Mediator</p>
+<h2 class="subtitle">Moderation <span>Settings</span></h2>
+<p class="intro">A parent sets broad content rules then fine-tunes sub-categories. Each sub-type carries a <span>severity badge</span> grounded in child media standards. Tap <span>ℹ</span> on any row to see the academic rationale.</p>
+
+<div class="stage">
+  <div class="slot focused" id="sl1">
+    <div class="lbl">Content Settings</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+      <div class="sbar"><span>9:41</span><span id="page-lbl">Step 1 of 2</span></div>
+      <div class="app-header">
+        <div class="app-name">AI Mediator</div>
+        <div class="app-page" id="app-page">Content Boundaries</div>
+      </div>
+      <div class="prog-wrap">
+        <div class="pdot on" id="pd1"></div>
+        <div class="pdot" id="pd2"></div>
+      </div>
+
+      <div class="content" id="main-content">
+
+        <!-- SLIDE 1 -->
+        <div id="s1" style="display:flex;flex-direction:column;gap:9px">
+          <div class="slide-head">
+            <div class="slide-title">Choose what to block</div>
+            <div class="slide-sub">Toggle categories to restrict them for your child across all YouTube content.</div>
+          </div>
+
+          <div class="cat-card" id="cc-v">
+            <div class="cat-top">
+              <div class="cat-icon">&#x2694;&#xFE0F;</div>
+              <div class="cat-info">
+                <div class="cat-name">Violence</div>
+                <div class="cat-desc">Fighting, combat, injuries, and graphic content</div>
+              </div>
+              <div class="toggle" id="tog-v"></div>
+            </div>
+            <div class="blocked-row"><div class="bdot"></div>All violence types blocked</div>
+          </div>
+
+          <div class="cat-card" id="cc-p">
+            <div class="cat-top">
+              <div class="cat-icon">&#x1F92C;</div>
+              <div class="cat-info">
+                <div class="cat-name">Profanity &amp; Language</div>
+                <div class="cat-desc">Swearing, slurs, and aggressive verbal content</div>
+              </div>
+              <div class="toggle" id="tog-p"></div>
+            </div>
+            <div class="blocked-row"><div class="bdot"></div>All language types blocked</div>
+          </div>
+
+          <div class="cat-card" id="cc-d">
+            <div class="cat-top">
+              <div class="cat-icon">&#x26A0;&#xFE0F;</div>
+              <div class="cat-info">
+                <div class="cat-name">Dangerous Challenges</div>
+                <div class="cat-desc">Stunts, physical risks, and viral dare content</div>
+              </div>
+              <div class="toggle" id="tog-d"></div>
+            </div>
+            <div class="blocked-row"><div class="bdot"></div>Blocked</div>
+          </div>
+
+          <div class="cat-card" id="cc-s">
+            <div class="cat-top">
+              <div class="cat-icon">&#x1F6AC;</div>
+              <div class="cat-info">
+                <div class="cat-name">Substance Use</div>
+                <div class="cat-desc">Alcohol, smoking, and drug-related content</div>
+              </div>
+              <div class="toggle" id="tog-s"></div>
+            </div>
+            <div class="blocked-row"><div class="bdot"></div>Blocked</div>
+          </div>
+
+          <div class="cat-card" id="cc-x">
+            <div class="cat-top">
+              <div class="cat-icon">&#x1F51E;</div>
+              <div class="cat-info">
+                <div class="cat-name">Sexual Content</div>
+                <div class="cat-desc">Suggestive, mature, or explicit content</div>
+              </div>
+              <div class="toggle" id="tog-x"></div>
+            </div>
+            <div class="blocked-row"><div class="bdot"></div>Blocked</div>
+          </div>
+
+          <div class="cust-btn" id="cust-btn">Customize further &nbsp;&#x2192;</div>
+        </div>
+
+        <!-- SLIDE 2 -->
+        <div id="s2" style="display:none;flex-direction:column;gap:9px">
+          <div class="slide-head">
+            <div class="slide-title">Fine-tune your rules</div>
+            <div class="slide-sub">Each sub-type has a severity level based on child media standards. Tap &#x2139; to see why.</div>
+          </div>
+
+          <div class="tip-box" id="tip">
+            <span>Customizing:</span> Violence and Profanity are fully blocked above. Here you can allow specific sub-types back. Severity levels are grounded in ESRB, TV Parental Guidelines, and BBFC official standards : tap &#x2139; on any row to see the exact descriptor.
+          </div>
+
+          <!-- VIOLENCE -->
+          <div class="exp-block" id="eb-v">
+            <div class="exp-head">
+              <div class="exp-head-icon">&#x2694;&#xFE0F;</div>
+              <div class="exp-head-title">Violence</div>
+              <div class="exp-head-count" id="v-cnt">5 / 5 blocked</div>
+            </div>
+
+            <!-- sv1: Cartoon Action - MILD -->
+            <div class="sub" id="sv1">
+              <div class="sub-row">
+                <div class="sub-left">
+                  <div class="sub-name">Cartoon Action</div>
+                  <div class="sub-desc">Animated comic conflict with no real harm depicted</div>
+                  <div class="sub-eg">e.g. Tom &amp; Jerry, SpongeBob fight scenes</div>
+                  <div class="sev-badge sev-mild" id="badge-v1"><span class="sev-dot"></span>Mild</div>
+                </div>
+                <div class="sub-ctrl">
+                  <div class="sub-tog on" id="st-v1"></div>
+                  <div class="info-btn" id="ib-v1" onclick="toggleInfo('ip-v1','ib-v1')">i</div>
+                </div>
+              </div>
+              <div class="info-panel" id="ip-v1">
+                <div class="info-panel-inner">
+                  <div class="info-label">Why Mild?</div>
+                  <div class="info-text">The ESRB defines "Cartoon Violence" as "violent actions involving cartoon-like situations and characters" where "a character is unharmed after the action has been inflicted." TV Parental Guidelines place this under TV-Y7: "mild fantasy violence or comedic violence" appropriate for children 7+. BBFC notes that "stylised, comic" violence is the lowest-concern tier when classifying violence.</div>
+                  <div class="info-sources">
+                    <span class="src-chip">ESRB: Cartoon Violence descriptor</span>
+                    <span class="src-chip">TV Parental Guidelines: TV-Y7 (FV)</span>
+                    <span class="src-chip">BBFC Classification Guidelines</span>
+                  </div>
+                </div>
+              </div>
+              <div class="callout" id="co-v1">Now allowed</div>
+            </div>
+
+            <!-- sv2: Fantasy / Adventure - MODERATE -->
+            <div class="sub" id="sv2">
+              <div class="sub-row">
+                <div class="sub-left">
+                  <div class="sub-name">Fantasy &amp; Adventure</div>
+                  <div class="sub-desc">Battles and conflict in clearly fictional or game settings</div>
+                  <div class="sub-eg">e.g. Minecraft PvP, Fortnite, anime battles</div>
+                  <div class="sev-badge sev-moderate" id="badge-v2"><span class="sev-dot"></span>Moderate</div>
+                </div>
+                <div class="sub-ctrl">
+                  <div class="sub-tog on" id="st-v2"></div>
+                  <div class="info-btn" id="ib-v2" onclick="toggleInfo('ip-v2','ib-v2')">i</div>
+                </div>
+              </div>
+              <div class="info-panel" id="ip-v2">
+                <div class="info-panel-inner">
+                  <div class="info-label">Why Moderate?</div>
+                  <div class="info-text">The ESRB defines "Fantasy Violence" as "violent actions of a fantasy nature, involving human or non-human characters in situations easily distinguishable from real life." This descriptor appears at the E10+ and T (Teen, 13+) rating levels. TV Parental Guidelines assign "V" (violence) at TV-PG for moderate violence in clearly non-realistic contexts.</div>
+                  <div class="info-sources">
+                    <span class="src-chip">ESRB: Fantasy Violence descriptor</span>
+                    <span class="src-chip">ESRB: E10+ / T rating categories</span>
+                    <span class="src-chip">TV Parental Guidelines: TV-PG (V)</span>
+                  </div>
+                </div>
+              </div>
+              <div class="callout" id="co-v2">Now allowed</div>
+            </div>
+
+            <!-- sv3: Real-World Fighting - HIGH -->
+            <div class="sub" id="sv3">
+              <div class="sub-row">
+                <div class="sub-left">
+                  <div class="sub-name">Real-World Fighting</div>
+                  <div class="sub-desc">Actual physical confrontation, martial arts, or brawls</div>
+                  <div class="sub-eg">e.g. MMA clips, street fight compilations</div>
+                  <div class="sev-badge sev-high" id="badge-v3"><span class="sev-dot"></span>High</div>
+                </div>
+                <div class="sub-ctrl">
+                  <div class="sub-tog on" id="st-v3"></div>
+                  <div class="info-btn" id="ib-v3" onclick="toggleInfo('ip-v3','ib-v3')">i</div>
+                </div>
+              </div>
+              <div class="info-panel" id="ip-v3">
+                <div class="info-panel-inner">
+                  <div class="info-label">Why High?</div>
+                  <div class="info-text">The ESRB defines "Violence" (unqualified) as "scenes involving aggressive conflict" and places it at the Teen (13+) rating tier. TV Parental Guidelines assign "V" at TV-14, meaning "parents are strongly urged to exercise greater care" and children under 14 should not watch unattended. BBFC considers "realistic" violence a key escalating factor in classification.</div>
+                  <div class="info-sources">
+                    <span class="src-chip">ESRB: Violence descriptor (T rating)</span>
+                    <span class="src-chip">TV Parental Guidelines: TV-14 (V)</span>
+                    <span class="src-chip">BBFC Classification Guidelines</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- sv4: Upsetting / Scary - HIGH -->
+            <div class="sub" id="sv4">
+              <div class="sub-row">
+                <div class="sub-left">
+                  <div class="sub-name">Upsetting or Scary Content</div>
+                  <div class="sub-desc">Scenes that may be distressing, including visible injuries</div>
+                  <div class="sub-eg">e.g. accident clips, injury reaction videos</div>
+                  <div class="sev-badge sev-high" id="badge-v4"><span class="sev-dot"></span>High</div>
+                </div>
+                <div class="sub-ctrl">
+                  <div class="sub-tog on" id="st-v4"></div>
+                  <div class="info-btn" id="ib-v4" onclick="toggleInfo('ip-v4','ib-v4')">i</div>
+                </div>
+              </div>
+              <div class="info-panel" id="ip-v4">
+                <div class="info-panel-inner">
+                  <div class="info-label">Why High?</div>
+                  <div class="info-text">BBFC explicitly classifies "threat and horror" as a distinct category, stating there "may be strong threat and horror" at the 15 certificate level. Their 2024 guidelines note audiences are "more concerned about depictions of violence on screen" that are "distressing or disturbing." TV Parental Guidelines flag this type of content under TV-14 requiring strong parental caution.</div>
+                  <div class="info-sources">
+                    <span class="src-chip">BBFC: 15 cert: threat &amp; horror</span>
+                    <span class="src-chip">BBFC Classification Guidelines (2024)</span>
+                    <span class="src-chip">TV Parental Guidelines: TV-14 (V)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- sv5: Graphic / Disturbing - SEVERE -->
+            <div class="sub" id="sv5">
+              <div class="sub-row">
+                <div class="sub-left">
+                  <div class="sub-name">Graphic or Disturbing Content</div>
+                  <div class="sub-desc">Highly explicit depictions not suitable for any age group</div>
+                  <div class="sub-eg">e.g. shock content, extreme horror clips</div>
+                  <div class="sev-badge sev-severe" id="badge-v5"><span class="sev-dot"></span>Severe</div>
+                </div>
+                <div class="sub-ctrl">
+                  <div class="sub-tog on" id="st-v5"></div>
+                  <div class="info-btn" id="ib-v5" onclick="toggleInfo('ip-v5','ib-v5')">i</div>
+                </div>
+              </div>
+              <div class="info-panel" id="ip-v5">
+                <div class="info-panel-inner">
+                  <div class="info-label">Why Severe?</div>
+                  <div class="info-text">The ESRB defines "Intense Violence" as "graphic and realistic-looking depictions of physical conflict" that "may involve extreme and/or realistic blood, gore, weapons and depictions of human injury and death" - reserved for Mature 17+ and Adults Only 18+ ratings. TV Parental Guidelines assign "graphic violence (V)" exclusively to TV-MA, the highest adult-only tier.</div>
+                  <div class="info-sources">
+                    <span class="src-chip">ESRB: Intense Violence descriptor (M/AO)</span>
+                    <span class="src-chip">TV Parental Guidelines: TV-MA (V)</span>
+                    <span class="src-chip">BBFC: 18 cert guidance</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PROFANITY -->
+          <div class="exp-block" id="eb-p">
+            <div class="exp-head">
+              <div class="exp-head-icon">&#x1F92C;</div>
+              <div class="exp-head-title">Profanity &amp; Language</div>
+              <div class="exp-head-count" id="p-cnt">4 / 4 blocked</div>
+            </div>
+
+            <!-- sp1: Casual Language - MILD -->
+            <div class="sub" id="sp1">
+              <div class="sub-row">
+                <div class="sub-left">
+                  <div class="sub-name">Casual Language</div>
+                  <div class="sub-desc">Mild words that appear in everyday conversation</div>
+                  <div class="sub-eg">e.g. "What the hell?!", common casual speech</div>
+                  <div class="sev-badge sev-mild" id="badge-p1"><span class="sev-dot"></span>Mild</div>
+                </div>
+                <div class="sub-ctrl">
+                  <div class="sub-tog on" id="st-p1"></div>
+                  <div class="info-btn" id="ib-p1" onclick="toggleInfo('ip-p1','ib-p1')">i</div>
+                </div>
+              </div>
+              <div class="info-panel" id="ip-p1">
+                <div class="info-panel-inner">
+                  <div class="info-label">Why Mild?</div>
+                  <div class="info-text">The ESRB "Language" descriptor covers "mild to moderate use of profanity" and appears at the E10+ and T (13+) rating tiers. TV Parental Guidelines define "L" (coarse or crude language) at TV-PG as "infrequent" and requiring parental guidance, not outright restriction. BBFC allows "mild bad language" at their PG rating, "suitable for general viewing."</div>
+                  <div class="info-sources">
+                    <span class="src-chip">ESRB: Language descriptor (E10+/T)</span>
+                    <span class="src-chip">TV Parental Guidelines: TV-PG (L)</span>
+                    <span class="src-chip">BBFC: PG: mild bad language</span>
+                  </div>
+                </div>
+              </div>
+              <div class="callout" id="co-p1">Now allowed</div>
+            </div>
+
+            <!-- sp2: Strong Language - MODERATE -->
+            <div class="sub" id="sp2">
+              <div class="sub-row">
+                <div class="sub-left">
+                  <div class="sub-name">Strong Language</div>
+                  <div class="sub-desc">Frequent or emphatic swear words in conversation</div>
+                  <div class="sub-eg">e.g. gaming rage clips, reaction videos</div>
+                  <div class="sev-badge sev-moderate" id="badge-p2"><span class="sev-dot"></span>Moderate</div>
+                </div>
+                <div class="sub-ctrl">
+                  <div class="sub-tog on" id="st-p2"></div>
+                  <div class="info-btn" id="ib-p2" onclick="toggleInfo('ip-p2','ib-p2')">i</div>
+                </div>
+              </div>
+              <div class="info-panel" id="ip-p2">
+                <div class="info-panel-inner">
+                  <div class="info-label">Why Moderate?</div>
+                  <div class="info-text">The ESRB "Strong Language" descriptor covers "explicit and/or frequent use of profanity" and is assigned at the Mature (17+) rating. TV Parental Guidelines assign "L" at TV-14 for "infrequent coarse language," warning that content is "unsuitable for children under 14." BBFC permits "moderate bad language" at their 12A/12 cert, but "strong language" escalates to 15.</div>
+                  <div class="info-sources">
+                    <span class="src-chip">ESRB: Strong Language descriptor (M)</span>
+                    <span class="src-chip">TV Parental Guidelines: TV-14 (L)</span>
+                    <span class="src-chip">BBFC: 12 cert: moderate bad language</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- sp3: Aggressive / Threatening - HIGH -->
+            <div class="sub" id="sp3">
+              <div class="sub-row">
+                <div class="sub-left">
+                  <div class="sub-name">Aggressive or Threatening Speech</div>
+                  <div class="sub-desc">Language used to intimidate or demean specific people</div>
+                  <div class="sub-eg">e.g. callout videos, rant content</div>
+                  <div class="sev-badge sev-high" id="badge-p3"><span class="sev-dot"></span>High</div>
+                </div>
+                <div class="sub-ctrl">
+                  <div class="sub-tog on" id="st-p3"></div>
+                  <div class="info-btn" id="ib-p3" onclick="toggleInfo('ip-p3','ib-p3')">i</div>
+                </div>
+              </div>
+              <div class="info-panel" id="ip-p3">
+                <div class="info-panel-inner">
+                  <div class="info-label">Why High?</div>
+                  <div class="info-text">TV Parental Guidelines assign "L" at TV-MA for "crude indecent language," the highest adult-only tier. BBFC's 2024 guidelines flag "strong language" and language used to "demean" as a 15 or 18 concern, noting parents are specifically worried about "normalisation" of aggressive or misogynistic terms among younger viewers.</div>
+                  <div class="info-sources">
+                    <span class="src-chip">TV Parental Guidelines: TV-MA (L)</span>
+                    <span class="src-chip">BBFC Classification Guidelines (2024)</span>
+                    <span class="src-chip">BBFC: 15–18 language guidance</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- sp4: Hateful / Discriminatory - SEVERE -->
+            <div class="sub" id="sp4">
+              <div class="sub-row">
+                <div class="sub-left">
+                  <div class="sub-name">Hateful or Discriminatory Language</div>
+                  <div class="sub-desc">Language that demeans people based on identity or background</div>
+                  <div class="sub-eg">e.g. slurs, targeted harassment language</div>
+                  <div class="sev-badge sev-severe" id="badge-p4"><span class="sev-dot"></span>Severe</div>
+                </div>
+                <div class="sub-ctrl">
+                  <div class="sub-tog on" id="st-p4"></div>
+                  <div class="info-btn" id="ib-p4" onclick="toggleInfo('ip-p4','ib-p4')">i</div>
+                </div>
+              </div>
+              <div class="info-panel" id="ip-p4">
+                <div class="info-panel-inner">
+                  <div class="info-label">Why Severe?</div>
+                  <div class="info-text">BBFC's 2024 Classification Guidelines specifically flag "very strong language" and "discriminatory language or behaviour" as restricted to the 18 certificate. Their research found UK audiences are particularly concerned about language that demeans people based on identity. TV Parental Guidelines place this category squarely within TV-MA, content "designed to be viewed by adults only."</div>
+                  <div class="info-sources">
+                    <span class="src-chip">BBFC: 18 cert: discriminatory language</span>
+                    <span class="src-chip">BBFC Classification Guidelines (2024)</span>
+                    <span class="src-chip">TV Parental Guidelines: TV-MA (L)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="save-btn" id="save-btn">&#x2713; &nbsp;Save Settings</div>
+        </div>
+
+      </div>
+      <div class="yt-nav"><div class="nav-item active"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="10" height="10" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#5b8dee" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Toggle legend -->
+  <div class="legend-wrap" style="margin-top:10px">
+    <div class="legend-title">Toggle Key</div>
+    <div class="tog-legend">
+      <div class="tleg"><div class="tleg-tog tleg-grey"></div><span>Not set</span></div>
+      <div class="tleg"><div class="tleg-tog tleg-red right"></div><span>Blocked</span></div>
+      <div class="tleg"><div class="tleg-tog tleg-green right"></div><span>Allowed</span></div>
+    </div>
+  </div>
+
+  <!-- Severity legend -->
+  <div class="sev-legend">
+    <div class="sev-legend-title">Severity Scale</div>
+    <div class="sev-legend-row">
+      <div class="sev-leg"><div class="sev-leg-pip" style="background:var(--sev-mild)"></div><span>Mild</span></div>
+      <div class="sev-leg"><div class="sev-leg-pip" style="background:var(--sev-moderate)"></div><span>Moderate</span></div>
+      <div class="sev-leg"><div class="sev-leg-pip" style="background:var(--sev-high)"></div><span>High</span></div>
+      <div class="sev-leg"><div class="sev-leg-pip" style="background:var(--sev-severe)"></div><span>Severe</span></div>
+    </div>
+    <div style="font-size:9px;color:#55557a;text-align:center;max-width:280px;line-height:1.5;margin-top:2px">Based on official descriptors from ESRB, TV Parental Guidelines (V-chip), and BBFC Classification Guidelines (2024)</div>
+  </div>
+
+  <div class="gctrl">
+    <button class="rbtn" onclick="startDemo()">&#x21BA; &nbsp;Replay</button>
+  </div>
+
+<script>
+  let timers = [];
+  function tm(fn, d) { timers.push(setTimeout(fn, d)); }
+  function clearAll() { timers.forEach(clearTimeout); timers = []; }
+
+  function show(id)  { const e = document.getElementById(id); if (e) e.classList.add('show'); }
+  function togOn(id) { const e = document.getElementById(id); if (e) { e.classList.remove('allowed'); e.classList.add('on'); } }
+  function togAllow(id) { const e = document.getElementById(id); if (e) { e.classList.remove('on'); e.classList.add('allowed'); } }
+  function cardBlock(id) { const e = document.getElementById(id); if (e) e.classList.add('blocked'); }
+  function subBlock(id)  { const e = document.getElementById(id); if (e) e.classList.add('blocked'); }
+  function subAllow(id)  { const e = document.getElementById(id); if (e) { e.classList.remove('blocked'); e.classList.add('allowed'); } }
+  function pulse(id) { const e = document.getElementById(id); if (e) e.classList.add('pulse'); }
+  function setCount(id, v, m) { const e = document.getElementById(id); if (e) e.textContent = `${v} / ${m} blocked`; }
+  function scrollContent(px) { const c = document.getElementById('main-content'); if (c) c.scrollTo({ top: px, behavior: 'smooth' }); }
+  function showCallout(id) {
+    const e = document.getElementById(id); if (!e) return;
+    e.classList.add('show');
+    timers.push(setTimeout(() => e.classList.remove('show'), 2200));
+  }
+  function showBadge(id) { const e = document.getElementById(id); if (e) e.classList.add('show'); }
+
+  // Interactive toggle for manual use
+  function toggleInfo(panelId, btnId) {
+    const panel = document.getElementById(panelId);
+    const btn   = document.getElementById(btnId);
+    if (!panel) return;
+    const isOpen = panel.classList.contains('open');
+    document.querySelectorAll('.info-panel.open').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.info-btn.active').forEach(b => b.classList.remove('active'));
+    if (!isOpen) {
+      panel.classList.add('open');
+      if (btn) btn.classList.add('active');
+    }
+  }
+
+  // Demo helpers: open/close without toggling
+  function demoOpenInfo(panelId, btnId) {
+    document.querySelectorAll('.info-panel.open').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.info-btn.active').forEach(b => b.classList.remove('active'));
+    const panel = document.getElementById(panelId);
+    const btn   = document.getElementById(btnId);
+    if (panel) panel.classList.add('open');
+    if (btn)   btn.classList.add('active');
+  }
+  function demoCloseInfo(panelId, btnId) {
+    const panel = document.getElementById(panelId);
+    const btn   = document.getElementById(btnId);
+    if (panel) panel.classList.remove('open');
+    if (btn)   btn.classList.remove('active');
+  }
+
+  function goSlide2() {
+    const s1 = document.getElementById('s1');
+    const s2 = document.getElementById('s2');
+    s1.style.transition = 'opacity 0.5s';
+    s1.style.opacity = '0';
+    setTimeout(() => {
+      s1.style.display = 'none';
+      s2.style.display = 'flex';
+      document.getElementById('main-content').scrollTop = 0;
+      document.getElementById('app-page').textContent = 'Fine-tune Rules';
+      document.getElementById('page-lbl').textContent = 'Step 2 of 2';
+      document.getElementById('pd1').classList.remove('on');
+      document.getElementById('pd2').classList.add('on');
+    }, 520);
+  }
+
+  function startDemo() {
+    clearAll();
+    resetUI();
+
+    const T = 3200;
+
+    // SLIDE 1
+    tm(() => show('cc-v'),    T * 0.5);
+    tm(() => show('cc-p'),    T * 1.0);
+    tm(() => show('cc-d'),    T * 1.5);
+    tm(() => show('cc-s'),    T * 2.0);
+    tm(() => show('cc-x'),    T * 2.5);
+    tm(() => show('cust-btn'),T * 3.1);
+    tm(() => { togOn('tog-v'); cardBlock('cc-v'); }, T * 3.9);
+    tm(() => { togOn('tog-p'); cardBlock('cc-p'); }, T * 4.8);
+    tm(() => pulse('cust-btn'), T * 5.5);
+    tm(() => goSlide2(), T * 6.3);
+
+    const base = T * 6.3 + 700;
+
+    // SLIDE 2
+    tm(() => show('tip'), base);
+    tm(() => show('eb-v'), base + T * 0.7);
+
+    const vsubs   = ['sv1','sv2','sv3','sv4','sv5'];
+    const vbadges = ['badge-v1','badge-v2','badge-v3','badge-v4','badge-v5'];
+    vsubs.forEach((id, i) => {
+      tm(() => {
+        show(id);
+        timers.push(setTimeout(() => showBadge(vbadges[i]), 320));
+      }, base + T * 0.7 + T * 0.5 + i * (T * 0.55));
+    });
+
+    const afterVSubs = base + T * 0.7 + T * 0.5 + vsubs.length * (T * 0.55);
+
+    tm(() => { subBlock('sv3'); subBlock('sv4'); subBlock('sv5'); }, afterVSubs + 200);
+    tm(() => scrollContent(100), afterVSubs + T * 0.4);
+
+    // Demo: open Mild rationale panel on sv1 to show how it works
+    tm(() => demoOpenInfo('ip-v1','ib-v1'), afterVSubs + T * 0.85);
+    tm(() => demoCloseInfo('ip-v1','ib-v1'), afterVSubs + T * 1.6);
+
+    // Allow cartoon
+    tm(() => {
+      togAllow('st-v1');
+      subAllow('sv1');
+      showCallout('co-v1');
+      setCount('v-cnt', 4, 5);
+    }, afterVSubs + T * 1.9);
+
+    // Allow fantasy
+    tm(() => {
+      togAllow('st-v2');
+      subAllow('sv2');
+      showCallout('co-v2');
+      setCount('v-cnt', 3, 5);
+    }, afterVSubs + T * 2.8);
+
+    const pStart = afterVSubs + T * 3.8;
+    tm(() => { show('eb-p'); scrollContent(420); }, pStart);
+
+    const psubs   = ['sp1','sp2','sp3','sp4'];
+    const pbadges = ['badge-p1','badge-p2','badge-p3','badge-p4'];
+    psubs.forEach((id, i) => {
+      tm(() => {
+        show(id);
+        timers.push(setTimeout(() => showBadge(pbadges[i]), 320));
+      }, pStart + T * 0.5 + i * (T * 0.5));
+    });
+
+    const afterPSubs = pStart + T * 0.5 + psubs.length * (T * 0.5);
+
+    tm(() => { subBlock('sp2'); subBlock('sp3'); subBlock('sp4'); }, afterPSubs + 200);
+    tm(() => scrollContent(660), afterPSubs + T * 0.3);
+
+    // Demo: open Severe rationale on sp4
+    tm(() => demoOpenInfo('ip-p4','ib-p4'), afterPSubs + T * 0.75);
+    tm(() => demoCloseInfo('ip-p4','ib-p4'), afterPSubs + T * 1.5);
+
+    // Allow casual language
+    tm(() => {
+      togAllow('st-p1');
+      subAllow('sp1');
+      showCallout('co-p1');
+      setCount('p-cnt', 3, 4);
+    }, afterPSubs + T * 1.8);
+
+    tm(() => scrollContent(9999), afterPSubs + T * 2.6);
+    tm(() => show('save-btn'), afterPSubs + T * 2.8);
+    tm(() => pulse('save-btn'), afterPSubs + T * 3.5);
+  }
+
+  function resetUI() {
+    const s1 = document.getElementById('s1');
+    const s2 = document.getElementById('s2');
+    s1.style.display = 'flex'; s1.style.opacity = '1';
+    s2.style.display = 'none';
+
+    ['cc-v','cc-p','cc-d','cc-s','cc-x'].forEach(id => {
+      const e = document.getElementById(id);
+      if (e) e.classList.remove('show','blocked');
+    });
+    const cb = document.getElementById('cust-btn');
+    if (cb) cb.classList.remove('show','pulse');
+
+    ['tog-v','tog-p','tog-d','tog-s','tog-x'].forEach(id => {
+      const e = document.getElementById(id);
+      if (e) e.classList.remove('on','allowed');
+    });
+    ['tip','eb-v','eb-p','save-btn'].forEach(id => {
+      const e = document.getElementById(id);
+      if (e) e.classList.remove('show','pulse');
+    });
+    ['sv1','sv2','sv3','sv4','sv5','sp1','sp2','sp3','sp4'].forEach(id => {
+      const e = document.getElementById(id);
+      if (e) e.classList.remove('show','blocked','allowed');
+    });
+    ['st-v1','st-v2','st-v3','st-v4','st-v5','st-p1','st-p2','st-p3','st-p4'].forEach(id => {
+      const e = document.getElementById(id);
+      if (e) { e.classList.remove('allowed'); e.classList.add('on'); }
+    });
+    ['co-v1','co-v2','co-p1'].forEach(id => {
+      const e = document.getElementById(id);
+      if (e) e.classList.remove('show');
+    });
+
+    document.querySelectorAll('.info-panel').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.info-btn').forEach(b => b.classList.remove('active'));
+
+    ['badge-v1','badge-v2','badge-v3','badge-v4','badge-v5',
+     'badge-p1','badge-p2','badge-p3','badge-p4'].forEach(id => {
+      const e = document.getElementById(id);
+      if (e) e.classList.remove('show');
+    });
+
+    setCount('v-cnt', 5, 5);
+    setCount('p-cnt', 4, 4);
+    document.getElementById('app-page').textContent = 'Content Boundaries';
+    document.getElementById('page-lbl').textContent = 'Step 1 of 2';
+    document.getElementById('pd1').classList.add('on');
+    document.getElementById('pd2').classList.remove('on');
+    document.getElementById('main-content').scrollTop = 0;
+  }
+
+  window.addEventListener('load', () => setTimeout(startDemo, 800));
+</script>
+</body>
+</html>

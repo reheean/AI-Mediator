@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Mediator - How It Works</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #000;
+    --card: #1e1e28;
+    --border: #2e2e3e;
+    --text: #f0f0f5;
+    --muted: #8888aa;
+    --accent: #5b8dee;
+    --green: #34d399;
+    --red: #ff4d6d;
+    --yt-red: #ff0000;
+    --tr: 0.55s cubic-bezier(0.4,0,0.2,1);
+    --phone-w: 330px;
+    --phone-h: 630px;
+    --phone-sm-w: 200px;
+    --phone-sm-h: 390px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding: 28px 20px 52px;
+    overflow-x: hidden;
+  }
+
+  h1.title { font-size: 13px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; text-align: center; }
+  h2.subtitle { font-size: 30px; font-weight: 700; color: var(--text); margin-bottom: 8px; text-align: center; letter-spacing: -0.5px; }
+  h2.subtitle span { color: var(--accent); }
+  .intro { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 32px; line-height: 1.6; max-width: 560px; }
+  .intro span { color: var(--accent); font-weight: 600; }
+
+  /* STAGE */
+  .stage {
+    display: flex; align-items: center; justify-content: center;
+    gap: 18px; width: 100%; max-width: 1200px;
+    min-height: 560px; position: relative;
+  }
+
+  .slot {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 14px; transition: var(--tr); cursor: pointer;
+    position: relative; flex-shrink: 0;
+  }
+  .slot .lbl {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted);
+    transition: var(--tr); text-align: center;
+  }
+  .slot.focused .lbl { color: var(--accent); }
+  .slot.side .lbl { opacity: 0.5; }
+
+  /* PHONE */
+  .phone {
+    width: var(--phone-sm-w); height: var(--phone-sm-h);
+    background: #111118; border-radius: 36px;
+    border: 2px solid var(--border);
+    box-shadow: 0 8px 32px #00000060;
+    overflow: hidden; display: flex; flex-direction: column;
+    transition: var(--tr); position: relative;
+  }
+  .slot.focused .phone {
+    width: var(--phone-w); height: var(--phone-h);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent)44, 0 24px 64px #00000099;
+    cursor: default;
+  }
+  .slot.side .phone { opacity: 0.45; filter: blur(0.5px); }
+  .slot.side:hover .phone { opacity: 0.65; }
+
+  .notch { width: 80px; height: 22px; background: #000; border-radius: 0 0 14px 14px; margin: 0 auto; flex-shrink: 0; }
+  .slot.focused .notch { width: 110px; height: 26px; }
+
+  .screen { flex: 1; overflow: hidden; display: flex; flex-direction: column; background: #0f0f0f; }
+
+  .sbar {
+    display: flex; justify-content: space-between;
+    padding: 3px 14px; font-size: 9px;
+    font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0;
+  }
+  .slot.focused .sbar { font-size: 11px; padding: 5px 18px; }
+
+  /* YouTube header */
+  .yth {
+    background: #0f0f0f; padding: 5px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #1c1c1c; flex-shrink: 0;
+  }
+  .slot.focused .yth { padding: 8px 16px; }
+  .ytlogo { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 800; color: #fff; }
+  .slot.focused .ytlogo { font-size: 16px; }
+  .ytico { background: var(--yt-red); border-radius: 3px; width: 14px; height: 10px; display: flex; align-items: center; justify-content: center; font-size: 6px; color: #fff; }
+  .slot.focused .ytico { width: 18px; height: 13px; font-size: 8px; border-radius: 4px; }
+  .ytright { display: flex; gap: 8px; font-size: 11px; color: var(--muted); }
+  .slot.focused .ytright { font-size: 14px; gap: 12px; }
+
+  /* Search bar */
+  .yt-search {
+    margin: 6px 12px; background: #1c1c1c; border-radius: 20px;
+    padding: 5px 12px; font-size: 9px; color: #666; flex-shrink: 0;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .slot.focused .yt-search { margin: 8px 16px; font-size: 11px; padding: 7px 14px; }
+
+  /* Feed thumbnails */
+  .yt-feed { flex: 1; overflow: hidden; padding: 6px 10px; display: flex; flex-direction: column; gap: 8px; }
+  .slot.focused .yt-feed { padding: 10px 14px; gap: 12px; }
+
+  .thumb-row { display: flex; gap: 8px; align-items: flex-start; }
+  .thumb-img {
+    width: 56px; height: 36px; border-radius: 6px; flex-shrink: 0;
+    background: var(--card); overflow: hidden; position: relative;
+  }
+  .slot.focused .thumb-img { width: 90px; height: 56px; border-radius: 8px; }
+  .thumb-img-inner { width: 100%; height: 100%; }
+  .thumb-info { display: flex; flex-direction: column; gap: 1px; }
+  .thumb-title { font-size: 7.5px; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .slot.focused .thumb-title { font-size: 11px; }
+  .thumb-meta { font-size: 6.5px; color: var(--muted); }
+  .slot.focused .thumb-meta { font-size: 9px; }
+
+  /* YouTube bottom nav */
+  .yt-nav {
+    background: #0f0f0f; border-top: 1px solid #1c1c1c;
+    display: flex; align-items: center; justify-content: space-around;
+    padding: 6px 0 8px; flex-shrink: 0;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    font-size: 6px; color: var(--muted); flex: 1;
+    transition: color 0.3s;
+  }
+  .slot.focused .nav-item { font-size: 8.5px; gap: 3px; }
+  .nav-item svg { transition: transform 0.3s; }
+  .nav-item.active { color: #fff; }
+  .nav-item.ai-nav { color: var(--accent); position: relative; }
+  .nav-item.ai-nav .nav-icon-wrap {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent)22; border: 1px solid var(--accent)55;
+    display: flex; align-items: center; justify-content: center;
+    transition: var(--tr);
+  }
+  .slot.focused .nav-item.ai-nav .nav-icon-wrap { width: 28px; height: 28px; }
+  .nav-icon-wrap.pulse { animation: navpulse 1.5s ease-out 2; }
+  @keyframes navpulse {
+    0% { box-shadow: 0 0 0 0 var(--accent)66; }
+    70% { box-shadow: 0 0 0 8px var(--accent)00; }
+    100% { box-shadow: 0 0 0 0 var(--accent)00; }
+  }
+
+  /* ── OVERLAY PANEL (bottom sheet) ── */
+  .hub-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #12121e;
+    border-top: 1px solid var(--accent)44;
+    border-radius: 18px 18px 0 0;
+    padding: 12px 14px 16px;
+    transform: translateY(100%);
+    transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+    z-index: 50;
+  }
+  .hub-overlay.open { transform: translateY(0); }
+  .hub-handle { width: 32px; height: 3px; border-radius: 2px; background: var(--border); margin: 0 auto 10px; }
+  .hub-title { font-size: 8px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 8px; }
+  .slot.focused .hub-title { font-size: 11px; margin-bottom: 10px; }
+  .hub-items { display: flex; flex-direction: column; gap: 6px; }
+  .hub-item {
+    display: flex; align-items: center; gap: 8px;
+    background: #1e1e2e; border: 1px solid var(--border);
+    border-radius: 10px; padding: 7px 10px;
+    opacity: 0; transform: translateY(6px);
+    transition: opacity 0.35s, transform 0.35s, border-color 0.2s;
+    cursor: pointer;
+  }
+  .slot.focused .hub-item { padding: 10px 12px; border-radius: 12px; }
+  .hub-item.show { opacity: 1; transform: translateY(0); }
+  .hub-item:hover { border-color: var(--accent)66; }
+  .hub-ico { font-size: 14px; flex-shrink: 0; }
+  .slot.focused .hub-ico { font-size: 18px; }
+  .hub-item-text { display: flex; flex-direction: column; gap: 1px; }
+  .hub-item-name { font-size: 8px; font-weight: 600; color: var(--text); }
+  .slot.focused .hub-item-name { font-size: 11px; }
+  .hub-item-desc { font-size: 6.5px; color: var(--muted); }
+  .slot.focused .hub-item-desc { font-size: 9px; }
+  .hub-item-arrow { margin-left: auto; font-size: 10px; color: var(--muted); }
+
+  /* tap-hint arrow pointing at nav icon */
+  .tap-hint {
+    position: absolute; bottom: 62px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    opacity: 0; transition: opacity 0.4s;
+    pointer-events: none; z-index: 10;
+  }
+  .tap-hint.show { opacity: 1; }
+  .tap-hint-label { font-size: 8px; color: var(--accent); font-weight: 600; white-space: nowrap; }
+  .slot.focused .tap-hint-label { font-size: 10px; }
+  .tap-arrow { font-size: 14px; color: var(--accent); animation: bounce 1s ease-in-out infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(3px)} }
+
+  /* ── PANEL 2: Parent Hub ── */
+  .parent-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--accent)18; border: 1px solid var(--accent)44;
+    border-radius: 6px; padding: 2px 7px; margin-bottom: 8px;
+    font-size: 7px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .slot.focused .parent-badge { font-size: 9px; margin-bottom: 10px; }
+
+  /* ── PANEL 3: Child Hub ── */
+  .child-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #c084fc18; border: 1px solid #c084fc44;
+    border-radius: 6px; padding: 2px 7px; margin-bottom: 8px;
+    font-size: 7px; font-weight: 600; color: #c084fc; text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .slot.focused .child-badge { font-size: 9px; margin-bottom: 10px; }
+
+  .hub-item.child-item { border-color: #c084fc33; }
+  .hub-item.child-item:hover { border-color: #c084fc66; }
+
+  /* replay / hint */
+  .rbtn {
+    font-size: 10px; color: var(--muted); cursor: pointer;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 4px 10px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .rbtn:hover { color: var(--accent); border-color: var(--accent)44; }
+  .clickhint { font-size: 10px; color: var(--muted); opacity: 0; transition: opacity 0.5s; }
+  .slot.side .clickhint { opacity: 1; }
+  .slot.focused .clickhint { opacity: 0; }
+
+  /* global controls */
+  .gctrl { margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .hint { font-size: 12px; color: var(--muted); text-align: center; }
+  .hint span { color: var(--accent); font-weight: 600; }
+  .grbtn {
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+    background: var(--card); color: var(--muted);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 7px 18px; cursor: pointer; transition: color 0.2s, border-color 0.2s;
+  }
+  .grbtn:hover { color: var(--accent); border-color: var(--accent)55; }
+
+  /* connector line between panels */
+  .arrow-between {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    color: var(--muted); font-size: 11px; flex-shrink: 0; opacity: 0.5;
+  }
+  .arrow-between span { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<p class="title">AI Mediator</p>
+<h2 class="subtitle">Meet <span>AI Mediator</span></h2>
+<p class="intro">AI Mediator lives inside YouTube as a built-in feature for linked family accounts. <span>Click a panel to expand it.</span></p>
+
+<div class="stage">
+
+  <!-- SLOT 2: Parent taps AI icon → Hub opens -->
+  <div class="slot side" id="sl2" onclick="handleClick(2)">
+    <div class="lbl">Parent's View</div>
+    <div class="phone" id="ph2">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="sbar"><span>9:41</span><span>▊▊▊▊</span></div>
+        <div class="yth">
+          <div class="ytlogo"><div class="ytico">▶</div>YouTube</div>
+          <div class="ytright"><span>🔍</span><span>👤</span></div>
+        </div>
+        <div class="yt-search">🔍 &nbsp;Search</div>
+        <div class="yt-feed">
+          <div class="thumb-row">
+            <div class="thumb-img"><svg class="thumb-img-inner" viewBox="0 0 90 56"><rect width="90" height="56" fill="#1a1a2e"/><rect x="20" y="10" width="50" height="28" rx="4" fill="#252540"/><polygon points="38,16 38,32 52,24" fill="#5b8dee" opacity="0.8"/></svg></div>
+            <div class="thumb-info"><div class="thumb-title">Minecraft Build Tutorial #12</div><div class="thumb-meta">PixelKing · 420K views</div></div>
+          </div>
+          <div class="thumb-row">
+            <div class="thumb-img"><svg class="thumb-img-inner" viewBox="0 0 90 56"><rect width="90" height="56" fill="#1a2a1a"/><circle cx="45" cy="28" r="16" fill="#34d39933"/><circle cx="45" cy="28" r="8" fill="#34d399" opacity="0.6"/></svg></div>
+            <div class="thumb-info"><div class="thumb-title">Slime DIY — New Recipe!</div><div class="thumb-meta">SlimyFun · 198K views</div></div>
+          </div>
+          <div class="thumb-row">
+            <div class="thumb-img"><svg class="thumb-img-inner" viewBox="0 0 90 56"><rect width="90" height="56" fill="#2a1a1a"/><rect x="15" y="15" width="60" height="26" rx="3" fill="#ff4d6d22"/><text x="45" y="33" font-size="14" text-anchor="middle" fill="#ff4d6d" opacity="0.6">▶</text></svg></div>
+            <div class="thumb-info"><div class="thumb-title">SpongeBob Best Moments</div><div class="thumb-meta">CartoonVault · 1.1M views</div></div>
+          </div>
+          <div class="thumb-row">
+            <div class="thumb-img"><svg class="thumb-img-inner" viewBox="0 0 90 56"><rect width="90" height="56" fill="#0a1a0a"/><path d="M20 40 Q45 10 70 40" stroke="#34d399" stroke-width="2" fill="none" opacity="0.7"/><circle cx="45" cy="20" r="6" fill="#34d39955"/></svg></div>
+            <div class="thumb-info"><div class="thumb-title">Science Experiments at Home</div><div class="thumb-meta">CuriousMinds · 542K views</div></div>
+          </div>
+          <div class="thumb-row">
+            <div class="thumb-img"><svg class="thumb-img-inner" viewBox="0 0 90 56"><rect width="90" height="56" fill="#1a1a10"/><rect x="25" y="12" width="40" height="32" rx="4" fill="#fbbf2422"/><text x="45" y="34" font-size="18" text-anchor="middle" opacity="0.7">🎨</text></svg></div>
+            <div class="thumb-info"><div class="thumb-title">How to Draw Anime Eyes</div><div class="thumb-meta">ArtWithTom · 2.3M views</div></div>
+          </div>
+          <div class="thumb-row">
+            <div class="thumb-img"><svg class="thumb-img-inner" viewBox="0 0 90 56"><rect width="90" height="56" fill="#10101a"/><rect x="10" y="8" width="70" height="40" rx="3" fill="#1e1e30"/><circle cx="30" cy="28" r="8" fill="#5b8dee33"/><circle cx="60" cy="28" r="8" fill="#c084fc33"/></svg></div>
+            <div class="thumb-info"><div class="thumb-title">Top 10 Cooking Hacks for Kids</div><div class="thumb-meta">FoodieKids · 87K views</div></div>
+          </div>
+        </div>
+        <!-- BOTTOM NAV -->
+        <div class="yt-nav">
+          <div class="nav-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.5"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Home
+          </div>
+          <div class="nav-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Shorts
+          </div>
+          <div class="nav-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"><circle cx="12" cy="12" r="10"/></svg>
+            Sub
+          </div>
+          <div class="nav-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>
+            Library
+          </div>
+          <div class="nav-item ai-nav" id="nav2">
+            <div class="nav-icon-wrap" id="navwrap2">
+              <svg width="11" height="11" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#5b8dee" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg>
+            </div>
+            AI
+          </div>
+        </div>
+        <!-- Hub overlay -->
+        <div class="hub-overlay" id="hub2">
+          <div class="hub-handle"></div>
+          <div class="parent-badge">👤 Parent Account</div>
+          <div class="hub-title">AI Mediator</div>
+          <div class="hub-items">
+            <div class="hub-item" id="h2-1">
+              <div class="hub-item-text">
+                <div class="hub-item-name">Daily Reports</div>
+                <div class="hub-item-desc">See what your child watched today</div>
+              </div>
+              <div class="hub-item-arrow">›</div>
+            </div>
+            <div class="hub-item" id="h2-2">
+              <div class="hub-item-text">
+                <div class="hub-item-name">Moderation Settings</div>
+                <div class="hub-item-desc">Set content rules and restrictions</div>
+              </div>
+              <div class="hub-item-arrow">›</div>
+            </div>
+            <div class="hub-item" id="h2-3">
+              <div class="hub-item-text">
+                <div class="hub-item-name">Access Requests</div>
+                <div class="hub-item-desc">Review videos your child asked to unlock</div>
+              </div>
+              <div class="hub-item-arrow">›</div>
+            </div>
+            <div class="hub-item" id="h2-4">
+              <div class="hub-item-text">
+                <div class="hub-item-name">Feature Settings</div>
+                <div class="hub-item-desc">Manage your child's AI Mediator options</div>
+              </div>
+              <div class="hub-item-arrow">›</div>
+            </div>
+            <div class="hub-item" id="h2-5">
+              <div class="hub-item-text">
+                <div class="hub-item-name">Chat with AI Mediator</div>
+                <div class="hub-item-desc">Ask questions about your child's activity</div>
+              </div>
+              <div class="hub-item-arrow">›</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="rbtn" onclick="event.stopPropagation();replaySlot(2)">↺ Replay</div>
+    <div class="clickhint">Tap to expand</div>
+  </div>
+
+  <div class="arrow-between"><span>vs</span></div>
+
+  <!-- SLOT 3: Child taps AI icon → Hub opens (chat only) -->
+  <div class="slot side" id="sl3" onclick="handleClick(3)">
+    <div class="lbl">Child's View</div>
+    <div class="phone" id="ph3">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="sbar"><span>9:41</span><span>▊▊▊▊</span></div>
+        <div class="yth">
+          <div class="ytlogo"><div class="ytico">▶</div>YouTube</div>
+          <div class="ytright"><span>🔍</span><span>👤</span></div>
+        </div>
+        <div class="yt-search">🔍 &nbsp;Search</div>
+        <div class="yt-feed">
+          <div class="thumb-row">
+            <div class="thumb-img"><svg class="thumb-img-inner" viewBox="0 0 90 56"><rect width="90" height="56" fill="#1a1a2e"/><rect x="20" y="10" width="50" height="28" rx="4" fill="#252540"/><polygon points="38,16 38,32 52,24" fill="#5b8dee" opacity="0.8"/></svg></div>
+            <div class="thumb-info"><div class="thumb-title">Minecraft Build Tutorial #12</div><div class="thumb-meta">PixelKing · 420K views</div></div>
+          </div>
+          <div class="thumb-row">
+            <div class="thumb-img"><svg class="thumb-img-inner" viewBox="0 0 90 56"><rect width="90" height="56" fill="#1a2a1a"/><circle cx="45" cy="28" r="16" fill="#34d39933"/><circle cx="45" cy="28" r="8" fill="#34d399" opacity="0.6"/></svg></div>
+            <div class="thumb-info"><div class="thumb-title">Slime DIY — New Recipe!</div><div class="thumb-meta">SlimyFun · 198K views</div></div>
+          </div>
+          <div class="thumb-row">
+            <div class="thumb-img"><svg class="thumb-img-inner" viewBox="0 0 90 56"><rect width="90" height="56" fill="#2a1a1a"/><rect x="15" y="15" width="60" height="26" rx="3" fill="#ff4d6d22"/><text x="45" y="33" font-size="14" text-anchor="middle" fill="#ff4d6d" opacity="0.6">▶</text></svg></div>
+            <div class="thumb-info"><div class="thumb-title">SpongeBob Best Moments</div><div class="thumb-meta">CartoonVault · 1.1M views</div></div>
+          </div>
+          <div class="thumb-row">
+            <div class="thumb-img"><svg class="thumb-img-inner" viewBox="0 0 90 56"><rect width="90" height="56" fill="#0a1a0a"/><path d="M20 40 Q45 10 70 40" stroke="#34d399" stroke-width="2" fill="none" opacity="0.7"/><circle cx="45" cy="20" r="6" fill="#34d39955"/></svg></div>
+            <div class="thumb-info"><div class="thumb-title">Science Experiments at Home</div><div class="thumb-meta">CuriousMinds · 542K views</div></div>
+          </div>
+          <div class="thumb-row">
+            <div class="thumb-img"><svg class="thumb-img-inner" viewBox="0 0 90 56"><rect width="90" height="56" fill="#1a1010"/><rect x="8" y="8" width="74" height="40" rx="4" fill="#2a1a1a"/><text x="45" y="34" font-size="16" text-anchor="middle" opacity="0.8">⚽</text></svg></div>
+            <div class="thumb-info"><div class="thumb-title">Best Goals of the Week</div><div class="thumb-meta">FootballDaily · 3.1M views</div></div>
+          </div>
+          <div class="thumb-row">
+            <div class="thumb-img"><svg class="thumb-img-inner" viewBox="0 0 90 56"><rect width="90" height="56" fill="#10101a"/><rect x="10" y="8" width="70" height="40" rx="3" fill="#1e1e30"/><text x="45" y="34" font-size="16" text-anchor="middle" opacity="0.8">🎮</text></svg></div>
+            <div class="thumb-info"><div class="thumb-title">Among Us Funny Moments</div><div class="thumb-meta">GamersHub · 1.8M views</div></div>
+          </div>
+        </div>
+        <!-- BOTTOM NAV -->
+        <div class="yt-nav">
+          <div class="nav-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.5"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Home
+          </div>
+          <div class="nav-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Shorts
+          </div>
+          <div class="nav-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"><circle cx="12" cy="12" r="10"/></svg>
+            Sub
+          </div>
+          <div class="nav-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>
+            Library
+          </div>
+          <div class="nav-item ai-nav" id="nav3">
+            <div class="nav-icon-wrap" id="navwrap3">
+              <svg width="11" height="11" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#5b8dee" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg>
+            </div>
+            AI
+          </div>
+        </div>
+        <!-- Hub overlay child -->
+        <div class="hub-overlay" id="hub3">
+          <div class="hub-handle"></div>
+          <div class="child-badge">🧒 Child Account</div>
+          <div class="hub-title">AI Mediator</div>
+          <div class="hub-items">
+            <div class="hub-item child-item" id="h3-1">
+              <div class="hub-item-text">
+                <div class="hub-item-name">Chat with AI Mediator</div>
+                <div class="hub-item-desc">Ask questions about blocked videos</div>
+              </div>
+              <div class="hub-item-arrow">›</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="rbtn" onclick="event.stopPropagation();replaySlot(3)">↺ Replay</div>
+    <div class="clickhint">Tap to expand</div>
+  </div>
+
+</div>
+
+<div class="gctrl">
+  <p class="hint"><span>Click a panel</span> to expand and watch</p>
+  <button class="grbtn" onclick="replayAll()">↺ &nbsp;Replay All</button>
+</div>
+
+<script>
+  const state = { focused: null, tms: {} };
+  function tm(n, fn, d) { if (!state.tms[n]) state.tms[n] = []; state.tms[n].push(setTimeout(fn, d)); }
+  function clr(n) { if (state.tms[n]) { state.tms[n].forEach(clearTimeout); state.tms[n] = []; } }
+
+  function playSlot2() {
+    clr(2);
+    const hub = document.getElementById('hub2');
+    const navwrap = document.getElementById('navwrap2');
+    const items = ['h2-1', 'h2-2', 'h2-3', 'h2-4', 'h2-5'];
+    hub.classList.remove('open');
+    items.forEach(id => document.getElementById(id).classList.remove('show'));
+    navwrap.classList.remove('pulse');
+    tm(2, () => navwrap.classList.add('pulse'), 600);
+    tm(2, () => hub.classList.add('open'), 1200);
+    items.forEach((id, i) => {
+      tm(2, () => document.getElementById(id).classList.add('show'), 1500 + i * 140);
+    });
+  }
+
+  function playSlot3() {
+    clr(3);
+    const hub = document.getElementById('hub3');
+    const navwrap = document.getElementById('navwrap3');
+    const item = document.getElementById('h3-1');
+    hub.classList.remove('open');
+    item.classList.remove('show');
+    navwrap.classList.remove('pulse');
+    tm(3, () => navwrap.classList.add('pulse'), 600);
+    tm(3, () => hub.classList.add('open'), 1200);
+    tm(3, () => item.classList.add('show'), 1500);
+  }
+
+  function resetSlot2() {
+    document.getElementById('hub2').classList.remove('open');
+    ['h2-1','h2-2','h2-3','h2-4','h2-5'].forEach(id => document.getElementById(id).classList.remove('show'));
+    document.getElementById('navwrap2').classList.remove('pulse');
+  }
+  function resetSlot3() {
+    document.getElementById('hub3').classList.remove('open');
+    document.getElementById('h3-1').classList.remove('show');
+    document.getElementById('navwrap3').classList.remove('pulse');
+  }
+
+  function handleClick(n) {
+    if (state.focused === n) return;
+    clr(2); clr(3);
+    state.focused = n;
+    [2, 3].forEach(i => {
+      const s = document.getElementById('sl' + i);
+      s.classList.remove('focused', 'side');
+      s.classList.add(i === n ? 'focused' : 'side');
+    });
+    setTimeout(() => {
+      if (n === 2) playSlot2();
+      if (n === 3) playSlot3();
+    }, 640);
+  }
+
+  function replaySlot(n) {
+    clr(n);
+    if (n === 2) { resetSlot2(); if (state.focused === 2) playSlot2(); }
+    if (n === 3) { resetSlot3(); if (state.focused === 3) playSlot3(); }
+  }
+
+  function replayAll() {
+    clr(2); clr(3);
+    [2, 3].forEach(i => {
+      const s = document.getElementById('sl' + i);
+      s.classList.remove('focused');
+      s.classList.add('side');
+    });
+    state.focused = null;
+    resetSlot2(); resetSlot3();
+  }
+</script>
+</body>
+</html>

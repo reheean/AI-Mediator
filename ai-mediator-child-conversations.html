@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Mediator - AI Child Conversations</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #06060f; --card: #12121e; --card2: #1a1a2a; --border: #252538;
+  --text: #eeeef5; --muted: #7070a0; --accent: #5b8dee;
+  --green: #34d399; --red: #ff4d6d; --teal: #2dd4bf;
+  --child: #c084fc; --ai-col: #60a5fa;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px 52px; }
+h1.title { font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; text-align: center; }
+h2.subtitle { font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 5px; text-align: center; letter-spacing: -0.5px; }
+h2.subtitle span { color: var(--accent); }
+.intro { font-size: 12px; color: var(--muted); text-align: center; margin-bottom: 20px; line-height: 1.6; max-width: 820px; }
+.stage-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; max-width: 1200px; }
+.stage { display: flex; flex-direction: row; align-items: flex-start; justify-content: center; gap: 24px; width: 100%; min-height: 580px; }
+.phone-slot { display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0;
+  opacity: 0; transform: translateY(16px); transition: opacity 0.55s cubic-bezier(0.4,0,0.2,1), transform 0.55s cubic-bezier(0.4,0,0.2,1); pointer-events: none; }
+.phone-slot.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.phone-slot .slot-lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-align: center; }
+.phone-slot.lbl-off .slot-lbl { color: var(--red); }
+.phone-slot.lbl-on  .slot-lbl { color: var(--green); }
+.phone-slot.lbl-child  .slot-lbl { color: var(--child); }
+.phone-slot.lbl-parent .slot-lbl { color: var(--teal); }
+.outer-phone { width: 300px; height: 560px; background: #111118; border-radius: 40px;
+  border: 2px solid var(--border); box-shadow: 0 8px 32px #00000060;
+  overflow: hidden; display: flex; flex-direction: column;
+  transition: border-color 0.4s, box-shadow 0.4s; }
+.phone-slot.lbl-on  .outer-phone { border-color: var(--green)66; box-shadow: 0 0 0 1px var(--green)22, 0 16px 48px #00000088; }
+.phone-slot.lbl-off .outer-phone { border-color: var(--red)55; box-shadow: 0 0 0 1px var(--red)18, 0 16px 48px #00000088; }
+.phone-slot.lbl-child  .outer-phone { border-color: var(--child)55; }
+.phone-slot.lbl-parent .outer-phone { border-color: var(--teal)55; }
+.phone-slot.single .outer-phone { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent)44, 0 24px 64px #00000099; width: 320px; height: 580px; }
+.op-notch { width: 80px; height: 22px; background: #000; border-radius: 0 0 14px 14px; margin: 0 auto; flex-shrink: 0; }
+.op-sbar { display: flex; justify-content: space-between; padding: 4px 16px; font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; }
+.op-header { background: #0f0f0f; padding: 7px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1c1c1c; flex-shrink: 0; }
+.op-appname { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; }
+.op-page { font-size: 9px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.op-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.click-hint { font-size: 11px; color: var(--accent); text-align: center; opacity: 0; transition: opacity 0.5s; margin-top: 2px; }
+.click-hint.show { opacity: 1; }
+.yt-nav { background: #0f0f0f; border-top: 1px solid #1c1c1c; display: flex; align-items: center; justify-content: space-around; padding: 6px 0 8px; flex-shrink: 0; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 8px; color: var(--muted); flex: 1; }
+.nav-item.active { color: #fff; }
+.nav-item.ai-nav { color: var(--accent); }
+.nav-icon-wrap { width: 24px; height: 24px; border-radius: 50%; background: var(--accent)22; border: 1px solid var(--accent)55; display: flex; align-items: center; justify-content: center; }
+.slide-header { width: 100%; max-width: 700px; padding: 8px 14px 14px; }
+.slide-header-sup { font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
+.slide-header-title { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+.sog-section { display: flex; flex-direction: column; gap: 4px; }
+.sog-section-label { font-size: 7.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 0 2px; margin-top: 2px; }
+.sog-indent { padding-left: 8px; border-left: 2px solid var(--green)44; margin-left: 4px; display: flex; flex-direction: column; gap: 6px; }
+.scen-line { width: 1px; flex: 1; background: var(--border); min-height: 40px; }
+.scen-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); writing-mode: vertical-rl; text-orientation: mixed; white-space: nowrap; }
+.scenario-group { display: flex; flex-direction: row; align-items: flex-start; gap: 16px; flex-shrink: 0; }
+.scenario-title { font-size: 10px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; text-align: center; margin-bottom: 6px; }
+.scenario-title.yes { color: var(--green); }
+.scenario-title.discuss { color: var(--teal); }
+.slide-counter { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); }
+.dots { display: flex; gap: 5px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); transition: background 0.4s; cursor: pointer; }
+.dot.on { background: var(--accent); }
+.dot.done { background: var(--green)88; }
+
+.click-hint { font-size: 10px; color: var(--muted); text-align: center; padding: 6px 0 0; opacity: 0; transition: opacity 0.5s; }
+.click-hint.show { opacity: 1; }
+
+.tab-body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+.tab-body::-webkit-scrollbar { display: none; }
+.settings-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.settings-sub { font-size: 9.5px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+.master-row { display: flex; align-items: center; gap: 12px; background: var(--card2); border: 1px solid var(--border); border-radius: 13px; padding: 12px 14px; opacity: 0; transform: translateY(8px); transition: opacity 0.5s,transform 0.5s,border-color 0.4s,background 0.4s; }
+.master-row.show { opacity: 1; transform: translateY(0); }
+.master-row.on { border-color: var(--green)55; background: #0d1912; }
+.mr-icon { font-size: 20px; flex-shrink: 0; }
+.mr-info { flex: 1; }
+.mr-name { font-size: 11px; font-weight: 700; color: var(--text); }
+.mr-desc { font-size: 9px; color: var(--muted); margin-top: 2px; }
+.btog { width: 44px; height: 25px; border-radius: 13px; background: var(--border); position: relative; flex-shrink: 0; transition: background 0.35s; }
+.btog.on { background: var(--green); }
+.btog::after { content: ''; position: absolute; width: 19px; height: 19px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.35s; box-shadow: 0 1px 4px #00000050; }
+.btog.on::after { transform: translateX(19px); }
+.sog-grid { display: grid; grid-template-columns: 1fr; gap: 6px; }
+.sog { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: row; align-items: flex-start; gap: 8px; opacity: 0; transform: translateY(5px); transition: opacity 0.45s,transform 0.45s,border-color 0.4s,background 0.4s; }
+.sog.show { opacity: 1; transform: translateY(0); }
+.sog.on { border-color: var(--green)44; background: #0c1810; }
+.sog-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex: 1; }
+.sog-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.sog-name { font-size: 9.5px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.sog-desc { font-size: 8px; color: var(--muted); line-height: 1.4; margin-top: 2px; }
+.stog { width: 24px; height: 14px; border-radius: 7px; background: var(--border); position: relative; flex-shrink: 0; transition: background 0.35s; }
+.stog.on { background: var(--green); }
+.stog::after { content: ''; position: absolute; width: 10px; height: 10px; background: #fff; border-radius: 50%; top: 2px; left: 2px; transition: transform 0.35s; }
+.stog.on::after { transform: translateX(10px); }
+
+/* two-panels no longer used - single phones per slot */
+.label-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+.phone-body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+.phone-body::-webkit-scrollbar { display: none; }
+
+.brow { display: flex; flex-direction: column; opacity: 0; transform: translateY(5px); transition: opacity 0.4s,transform 0.4s; flex-shrink: 0; }
+.brow.show { opacity: 1; transform: translateY(0); }
+.brow.ai     { align-items: flex-start; }
+.brow.child  { align-items: flex-end; }
+.brow.parent { align-items: flex-end; }
+.brow.sys    { align-items: center; }
+.bsender { font-size: 7px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 2px; padding: 0 3px; }
+.brow.ai     .bsender { color: var(--ai-col); }
+.brow.child  .bsender { color: var(--child); }
+.brow.parent .bsender { color: var(--teal); }
+.bubble { border-radius: 12px; padding: 7px 10px; font-size: 10px; line-height: 1.5; max-width: 88%; }
+.brow.ai     .bubble { background: #131c32; border: 1px solid var(--ai-col)25; color: var(--text); border-bottom-left-radius: 3px; }
+.brow.child  .bubble { background: #1b0e2e; border: 1px solid var(--child)25; color: var(--text); border-bottom-right-radius: 3px; }
+.brow.parent .bubble { background: #0a1f1e; border: 1px solid rgba(45,212,191,0.2); color: var(--text); border-bottom-right-radius: 3px; }
+.brow.sys    .bubble { background: var(--accent)10; border: 1px solid var(--accent)28; color: var(--accent); font-size: 8.5px; font-weight: 600; border-radius: 6px; text-align: center; max-width: 94%; padding: 4px 9px; }
+
+.typing-row { align-items: flex-start; opacity: 0; transition: opacity 0.3s; flex-shrink: 0; display: flex; flex-direction: column; }
+.typing-row.show { opacity: 1; }
+.typing-dots { display: flex; align-items: center; gap: 3px; padding: 7px 11px; background: #131c32; border: 1px solid var(--ai-col)25; border-radius: 12px; border-bottom-left-radius: 3px; }
+.typing-dots span { width: 4px; height: 4px; border-radius: 50%; background: var(--ai-col)80; animation: td 1.2s infinite; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes td { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-3px)} }
+
+.vc { background: var(--card2); border: 1px solid var(--border); border-radius: 9px; padding: 7px 8px; display: flex; align-items: center; gap: 7px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.vc.show { opacity: 1; transform: translateY(0); }
+.vc-thumb { width: 34px; height: 26px; border-radius: 5px; background: linear-gradient(135deg,#1a1a2e,#252540); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.vc-title { font-size: 9.5px; font-weight: 600; color: var(--text); }
+.vc-meta  { font-size: 8px; color: var(--muted); margin-top: 1px; }
+.vc-badge { font-size: 7px; font-weight: 700; text-transform: uppercase; padding: 1px 5px; border-radius: 3px; width: fit-content; margin-top: 2px; }
+.badge-playing  { background: var(--green)18; color: var(--green); border: 1px solid var(--green)40; }
+.badge-blocked  { background: var(--red)18;   color: var(--red);   border: 1px solid var(--red)40; }
+.badge-unlocked { background: var(--green)18; color: var(--green); border: 1px solid var(--green)40; }
+
+.blocked-card { background: var(--red)08; border: 1px solid var(--red)33; border-radius: 9px; padding: 9px; display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.blocked-card.show { opacity: 1; transform: translateY(0); }
+.bc-icon  { font-size: 18px; }
+.bc-title { font-size: 10px; font-weight: 700; color: var(--red); }
+.bc-sub   { font-size: 8.5px; color: var(--muted); line-height: 1.4; }
+
+.chat-fab-mini { display: flex; align-items: center; gap: 5px; background: var(--accent)18; border: 1px solid var(--accent)55; border-radius: 20px; padding: 4px 10px; font-size: 8.5px; color: var(--accent); font-weight: 600; flex-shrink: 0; opacity: 0; transform: translateY(3px); transition: opacity 0.4s,transform 0.4s; width: fit-content; }
+.chat-fab-mini.show { opacity: 1; transform: translateY(0); }
+.cfm-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+.notice { background: var(--card2); border: 1px solid var(--border); border-radius: 9px; padding: 7px 9px; font-size: 9.5px; color: var(--muted); line-height: 1.5; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.notice.show { opacity: 1; transform: translateY(0); }
+.notice.off { border-color: var(--red)28; background: var(--red)06; }
+.notice span { font-weight: 600; color: var(--text); }
+
+.parent-notif { background: #081a18; border: 1px solid rgba(45,212,191,0.25); border-radius: 11px; padding: 10px 11px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; opacity: 0; transform: translateY(5px); transition: opacity 0.5s,transform 0.5s; }
+.parent-notif.show { opacity: 1; transform: translateY(0); }
+.pn-header { display: flex; align-items: center; gap: 7px; }
+.pn-icon  { font-size: 15px; }
+.pn-title { font-size: 9.5px; font-weight: 700; color: var(--teal); }
+.pn-app   { font-size: 8px; color: var(--muted); }
+.pn-video { font-size: 9px; color: var(--text); line-height: 1.4; }
+.pn-video strong { color: rgba(45,212,191,0.85); }
+
+.child-reason { background: var(--child)10; border: 1px solid var(--child)35; border-radius: 8px; padding: 8px 10px; flex-shrink: 0; }
+.cr-label { font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--child); margin-bottom: 4px; }
+.cr-text  { font-size: 10px; color: var(--text); line-height: 1.55; font-style: italic; }
+
+.pn-chips { display: flex; flex-direction: column; gap: 5px; }
+.chip { border-radius: 7px; padding: 6px 9px; font-size: 8.5px; font-weight: 600; border: 1px solid; text-align: left; cursor: pointer; transition: background 0.2s, border-color 0.2s, opacity 0.2s; }
+.chip-info { background: var(--accent)10; border-color: var(--accent)40; color: var(--ai-col); }
+.chip-yes  { background: var(--green)12;  border-color: var(--green)44;  color: var(--green); }
+.chip-no   { background: rgba(45,212,191,0.08); border-color: rgba(45,212,191,0.3); color: var(--teal); }
+
+.vid-summary { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.vid-summary.show { opacity: 1; transform: translateY(0); }
+.vs-label { font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 3px; }
+.vs-text  { font-size: 9px; color: var(--muted); line-height: 1.5; }
+
+.decision-badge { border-radius: 8px; padding: 7px 10px; font-size: 9px; font-weight: 600; text-align: center; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.4s,transform 0.4s; }
+.decision-badge.show { opacity: 1; transform: translateY(0); }
+.decision-yes { background: var(--green)12; border: 1px solid var(--green)44; color: var(--green); }
+.decision-no  { background: rgba(45,212,191,0.08); border: 1px solid rgba(45,212,191,0.3); color: var(--teal); }
+
+.phone-toast { background: #081a18; border: 1px solid rgba(45,212,191,0.3); border-radius: 9px; padding: 7px 9px; display: flex; align-items: flex-start; gap: 7px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.phone-toast.show { opacity: 1; transform: translateY(0); }
+.pt-icon  { font-size: 12px; flex-shrink: 0; }
+.pt-title { font-size: 8px; font-weight: 700; color: var(--teal); }
+.pt-body  { font-size: 9px; color: var(--muted); margin-top: 1px; line-height: 1.4; }
+
+.not-yet-overlay { position: absolute; inset: 0; z-index: 10; display: flex; align-items: stretch; opacity: 0; pointer-events: none; transition: opacity 0.8s; }
+.not-yet-overlay.show { opacity: 1; pointer-events: auto; }
+.nyo-dim { position: absolute; inset: 0; background: rgba(6,6,15,0.82); }
+.nyo-panels { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+.nyo-panel { display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+.nyo-panel:last-child { border-right: none; }
+.nyo-label { padding: 7px 13px; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.nyo-p .nyo-label { color: var(--teal); background: rgba(45,212,191,0.06); }
+.nyo-c .nyo-label { color: var(--child); background: #1b0e2e88; }
+.nyo-phone-frame { flex: 1; padding: 10px; display: flex; flex-direction: column; }
+
+.nav-row { display: flex; justify-content: center; gap: 10px; margin-top: 14px; }
+.nav-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 22px; padding: 7px 18px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 5px; }
+.nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+.nav-btn.primary { background: var(--accent)18; border-color: var(--accent)66; color: var(--accent); }
+.legend-row { display: flex; gap: 18px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+.leg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.leg-pip { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<p class="title">AI Mediator</p>
+<h2 class="subtitle">AI-Child <span>Conversations</span></h2>
+<p class="intro">Click anywhere on a slide to advance. Each panel plays one at a time so you can follow the flow.</p>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage"></div>
+  <div class="slide-meta">
+    <div class="slide-counter" id="slide-counter">Slide 1 of 4</div>
+    <div class="dots" id="dots"></div>
+  </div>
+  <div class="nav-row">
+    <button class="nav-btn" id="btn-prev" onclick="prevSlide()">&#x2190; Prev</button>
+    <button class="nav-btn primary" onclick="replaySlide()">&#x21BA; Replay</button>
+    <button class="nav-btn" id="btn-next" onclick="nextSlide()">Next &#x2192;</button>
+  </div>
+  <div class="legend-row">
+    <div class="leg"><div class="leg-pip" style="background:var(--ai-col)"></div>AI Mediator</div>
+    <div class="leg"><div class="leg-pip" style="background:var(--child)"></div>Child</div>
+    <div class="leg"><div class="leg-pip" style="background:var(--teal)"></div>Parent</div>
+    <div class="leg"><div class="leg-pip" style="background:var(--accent)"></div>System</div>
+  </div>
+</div>
+
+<script>
+let timers = [];
+function tm(fn, d) { timers.push(setTimeout(fn, d)); return d; }
+function clrT() { timers.forEach(clearTimeout); timers = []; }
+function gel(id) { return document.getElementById(id); }
+function show(e) { if (e) e.classList.add('show'); }
+function scr(b) { if (b) b.scrollTo({ top: 99999, behavior: 'smooth' }); }
+
+const SLIDES = [
+  { title: 'Parent Settings',      num: null },
+  { title: 'AI Conversation',      num: 1    },
+  { title: 'Access Requests',      num: 2    },
+  { title: 'Explain Restrictions', num: 3    },
+];
+let cur = 0;
+
+let slidePhase = 0;
+let phaseCallbacks = [];
+
+function registerPhases(cbs) {
+  phaseCallbacks = cbs;
+  slidePhase = 0;
+  phaseCallbacks[0]();
+}
+
+function advancePhase() {
+  slidePhase++;
+  if (slidePhase < phaseCallbacks.length) {
+    clrT();
+    phaseCallbacks[slidePhase]();
+  } else {
+    nextSlide();
+  }
+}
+
+const NAV_HTML = `<div class="yt-nav"><div class="nav-item active"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="10" height="10" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#5b8dee" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>`;
+
+function mkSlot(lblText, lblCls, pageTitle, id) {
+  const slot = document.createElement('div');
+  slot.className = `phone-slot ${lblCls}`; slot.id = id;
+  const lbl = document.createElement('div'); lbl.className = 'slot-lbl'; lbl.textContent = lblText;
+  const op = document.createElement('div'); op.className = 'outer-phone';
+  if (lblCls === 'single') op.classList.add('single');
+  op.innerHTML = `<div class="op-notch"></div>
+    <div class="op-sbar"><span>9:41</span><span>▊▊▊▊</span></div>
+    <div class="op-header"><div class="op-appname">AI Mediator</div><div class="op-page">${pageTitle}</div></div>
+    <div class="op-body"></div>
+    ${NAV_HTML}`;
+  const hint = document.createElement('div'); hint.className = 'click-hint'; hint.textContent = 'Click to continue →';
+  slot.appendChild(lbl); slot.appendChild(op); slot.appendChild(hint);
+  return { slot, op, hint, body: op.querySelector('.op-body') };
+}
+
+function mkPhone(who) {
+  // Inner phone replaced by direct op-body usage — stub for compat
+  const p = document.createElement('div'); p.style.cssText = 'display:flex;flex-direction:column;flex:1;overflow:hidden;';
+  p.innerHTML = `<div class="phone-body"></div>`;
+  return p;
+}
+function pb(ph) { return ph.querySelector('.phone-body'); }
+
+/* ── STAGE MANAGER ── */
+let stage_slots = [];
+
+function buildSkeleton() {
+  const dotsEl = gel('dots'); dotsEl.innerHTML = '';
+  SLIDES.forEach((_, i) => {
+    const d = document.createElement('div'); d.className = 'dot'; d.id = `dot-${i}`;
+    d.onclick = (e) => { e.stopPropagation(); renderSlide(i); };
+    dotsEl.appendChild(d);
+  });
+}
+
+function updateMeta(n) {
+  gel('slide-counter').textContent = `Slide ${n+1} of ${SLIDES.length}`;
+  SLIDES.forEach((_, i) => { const d = gel(`dot-${i}`); d.classList.remove('on','done'); if (i===n) d.classList.add('on'); else if (i<n) d.classList.add('done'); });
+  gel('btn-prev').style.opacity = n===0?'0.3':'1'; gel('btn-prev').style.pointerEvents = n===0?'none':'all';
+  gel('btn-next').style.opacity = n===SLIDES.length-1?'0.3':'1'; gel('btn-next').style.pointerEvents = n===SLIDES.length-1?'none':'all';
+}
+
+function renderSlide(n) {
+  clrT(); phaseCallbacks = []; slidePhase = 0;
+  cur = n; updateMeta(n);
+  // Remove any existing slide header
+  const existing = document.querySelector('.slide-header');
+  if (existing) existing.remove();
+  const stageEl = gel('stage'); stageEl.innerHTML = '';
+  stage_slots = [];
+  [buildSettings, buildChat, buildRequest, buildExplain][n](stageEl);
+}
+
+function prevSlide() { if (cur > 0) renderSlide(cur - 1); }
+function nextSlide() { if (cur < SLIDES.length-1) renderSlide(cur + 1); }
+function replaySlide() { renderSlide(cur); }
+
+function mkPhone(who) {
+  const p = document.createElement('div'); p.className = 'phone';
+  p.innerHTML = `<div class="phone-bar"><div class="phone-bar-name">AI Mediator</div><div class="phone-bar-who">${who}</div><div class="phone-bar-time">9:41</div></div><div class="phone-body"></div>`;
+  return p;
+}
+function pb(ph) { return ph.querySelector('.phone-body'); }
+
+function ap(b, node, d) {
+  tm(() => { b.appendChild(node); requestAnimationFrame(() => show(node)); scr(b); }, d);
+  return node;
+}
+function typ(b, d, dur) {
+  let r;
+  tm(() => { r = document.createElement('div'); r.className = 'typing-row'; r.innerHTML = `<div class="bsender" style="color:var(--ai-col);font-size:7px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:2px;padding:0 3px;">AI Mediator</div><div class="typing-dots"><span></span><span></span><span></span></div>`; b.appendChild(r); requestAnimationFrame(() => show(r)); scr(b); }, d);
+  tm(() => { if (r && r.parentNode) r.remove(); }, d + dur);
+}
+function bub(role, text) {
+  const row = document.createElement('div'); row.className = `brow ${role}`;
+  if (role !== 'sys') { const s = document.createElement('div'); s.className = 'bsender'; s.textContent = role === 'ai' ? 'AI Mediator' : role === 'child' ? 'Child' : 'Parent'; row.appendChild(s); }
+  const b = document.createElement('div'); b.className = 'bubble'; b.textContent = text; row.appendChild(b); return row;
+}
+function vcCard(em, title, meta, bc, bt) {
+  const d = document.createElement('div'); d.className = 'vc';
+  d.innerHTML = `<div class="vc-thumb">${em}</div><div><div class="vc-title">${title}</div><div class="vc-meta">${meta}</div><div class="vc-badge ${bc}">${bt}</div></div>`; return d;
+}
+function blkCard(sub) {
+  const d = document.createElement('div'); d.className = 'blocked-card';
+  d.innerHTML = `<div class="bc-icon">🚫</div><div class="bc-title">Video Restricted</div><div class="bc-sub">${sub}</div>`; return d;
+}
+function chatFab() {
+  const d = document.createElement('div'); d.className = 'chat-fab-mini';
+  d.innerHTML = `<div class="cfm-dot"></div>Have questions? Chat with AI Mediator`; return d;
+}
+function noticeEl(type, html) {
+  const d = document.createElement('div'); d.className = `notice ${type}`; d.innerHTML = html; return d;
+}
+function toastEl(text) {
+  const d = document.createElement('div'); d.className = 'phone-toast';
+  d.innerHTML = `<div class="pt-icon">🔔</div><div><div class="pt-title">AI Mediator</div><div class="pt-body">${text}</div></div>`; return d;
+}
+function decBadge(type, text) {
+  const d = document.createElement('div'); d.className = `decision-badge decision-${type}`; d.textContent = text; return d;
+}
+
+/* mk2phones: builds two phone slots in stageEl, returns [body1, body2, showPhone2fn] */
+function mk2phones(stageEl, def1, def2) {
+  const s1 = mkSlot(def1.label, def1.cls, def1.page, def1.id);
+  const s2 = mkSlot(def2.label, def2.cls, def2.page, def2.id);
+
+  // phone bodies
+  const pb1 = document.createElement('div'); pb1.className = 'phone-body'; s1.body.appendChild(pb1);
+  const pb2 = document.createElement('div'); pb2.className = 'phone-body'; s2.body.appendChild(pb2);
+
+  stageEl.appendChild(s1.slot);
+  stageEl.appendChild(s2.slot);
+
+  // show phone 1 immediately
+  setTimeout(() => s1.slot.classList.add('visible'), 60);
+
+  // show click hint on phone 1 after a beat
+  let hintTimer = null;
+  function showHint1(delay) { hintTimer = setTimeout(() => s1.hint.classList.add('show'), delay); }
+  function hideHint1() { s1.hint.classList.remove('show'); if (hintTimer) clearTimeout(hintTimer); }
+
+  function showPhone2() {
+    hideHint1();
+    setTimeout(() => s2.slot.classList.add('visible'), 60);
+  }
+
+  return { pb1, pb2, showPhone2, showHint1, hideHint1, slot1: s1.slot, slot2: s2.slot };
+}
+
+/* ══════════════════════
+   SLIDE 0: SETTINGS — single phone
+══════════════════════ */
+function buildSettings(stageEl) {
+  // Slide header above the phone
+  const hdr = document.createElement('div'); hdr.className = 'slide-header';
+  hdr.innerHTML = `<div class="slide-header-sup">Settings</div><div class="slide-header-title">Parent Settings</div>`;
+  stageEl.parentElement.insertBefore(hdr, stageEl);
+
+  const { slot, body, hint } = mkSlot('', 'single', 'AI-Child Conversations', 'slot-settings');
+  slot.querySelector('.slot-lbl').style.display = 'none';
+  const tb = document.createElement('div'); tb.className = 'tab-body'; tb.id = 'tb';
+  tb.innerHTML = `
+    <div><div class="settings-title">AI-Child Conversations</div><div class="settings-sub">Control how the AI interacts with your child during their viewing sessions.</div></div>
+    <div class="master-row" id="mr"><div class="mr-icon">🤖</div><div class="mr-info"><div class="mr-name">AI-Child Conversations</div><div class="mr-desc">Allow AI Mediator to have conversations with your child while they watch</div></div><div class="btog" id="btog"></div></div>
+    <div class="sog-section">
+      <div class="sog-section-label">When enabled, you can turn on</div>
+      <div class="sog-indent">
+        <div class="sog-grid">
+          <div class="sog" id="sg0"><div class="sog-icon">💬</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Your child can ask the AI anything while watching</div><div class="stog" id="st0"></div></div><div class="sog-desc">Opens a chat channel throughout their entire session, before, during, or after any video</div></div></div>
+          <div class="sog" id="sg1"><div class="sog-icon">🔑</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Request access on behalf</div><div class="stog" id="st1"></div></div><div class="sog-desc">AI forwards the child's unblock request to the parent with a summary and their reason</div></div></div>
+          <div class="sog" id="sg2"><div class="sog-icon">🚫</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Explain restriction decisions</div><div class="stog" id="st2"></div></div><div class="sog-desc">AI explains in simple terms why a video was blocked and what happens next</div></div></div>
+        </div>
+      </div>
+    </div>`;
+  body.appendChild(tb);
+  stageEl.appendChild(slot);
+  setTimeout(() => slot.classList.add('visible'), 60);
+
+  registerPhases([
+    () => {
+      const T = 400;
+      tm(() => show(gel('mr')), T);
+      tm(() => { gel('btog').classList.add('on'); gel('mr').classList.add('on'); }, T+800);
+      [0,1,2].forEach(i => {
+        tm(() => show(gel(`sg${i}`)), T+1600+i*550);
+        tm(() => { gel(`st${i}`).classList.add('on'); gel(`sg${i}`).classList.add('on'); }, T+1600+i*550+440);
+      });
+    }
+  ]);
+
+  stageEl.onclick = () => advancePhase();
+}
+
+/* ══════════════════════
+   SLIDE 1: CHAT
+══════════════════════ */
+/* ══════════════════════
+   SLIDE 1: CHAT
+══════════════════════ */
+function buildChat(stageEl) {
+  const hdr = document.createElement('div'); hdr.className = 'slide-header';
+  hdr.innerHTML = `<div class="slide-header-sup">Scenario 1</div><div class="slide-header-title">AI Conversation</div>`;
+  stageEl.parentElement.insertBefore(hdr, stageEl);
+  const { pb1, pb2, showPhone2, showHint1 } = mk2phones(stageEl,
+    { label: 'Feature Off', cls: 'lbl-off', page: 'Scenario 1', id: 'slot-chat-off' },
+    { label: 'Feature On',  cls: 'lbl-on',  page: 'Scenario 1', id: 'slot-chat-on'  }
+  );
+  registerPhases([
+    () => {
+      let t = 300;
+      ap(pb1, vcCard('🎬','MrBeast: $1 vs $1,000,000 Hotel Room','MrBeast · 16 min','badge-playing','Playing now'), t);
+      ap(pb1, bub('child', 'Wait, how are they surviving that fall into the pool? That looks insane'), t+1400);
+      ap(pb1, noticeEl('off','<span>Chat is off.</span> The child gets no response.'), t+3200);
+      showHint1(t+4400);
+    },
+    () => {
+      showPhone2();
+      let t = 200;
+      ap(pb2, vcCard('🎬','MrBeast: $1 vs $1,000,000 Hotel Room','MrBeast · 16 min','badge-playing','Playing now'), t);
+      ap(pb2, chatFab(), t+700);
+      ap(pb2, bub('child', 'Wait, how are they surviving that fall into the pool? That looks insane'), t+1600);
+      typ(pb2, t+2400, 1700);
+      ap(pb2, bub('ai', 'That stunt is carefully planned by professionals. They have stunt coordinators, test the pool depth in advance, and use safety equipment that is not shown on camera. It looks extreme because that is the point, but a lot of work goes into keeping everyone safe.'), t+4200);
+      ap(pb2, bub('child', 'Can I try jumping from high up into a pool like that?'), t+6400);
+      typ(pb2, t+7200, 1700);
+      ap(pb2, bub('ai', 'That is something to avoid at home. What you see in these videos is done by trained professionals with safety measures set up beforehand. Attempting it without that setup is genuinely risky. Enjoy watching it, but leave the stunts to them.'), t+9000);
+      ap(pb2, bub('child', 'Okay fair. Why do they always give so much money away?'), t+11000);
+      typ(pb2, t+11800, 1700);
+      ap(pb2, bub('ai', 'It is basically the whole format. MrBeast puts most of his ad revenue back into bigger videos. The giveaways bring in viewers, which funds the next one. It is an unusual model but it clearly works for him.'), t+13600);
+      ap(pb2, bub('child', 'That is actually kind of smart. Is he the richest YouTuber?'), t+15800);
+      typ(pb2, t+16600, 1700);
+      ap(pb2, bub('ai', 'He is one of the highest-earning ones, yes. But most of his money goes straight back into production costs. The videos you watch are genuinely expensive to make.'), t+18400);
+      ap(pb2, bub('child', 'Wild. Okay back to watching.'), t+20400);
+      typ(pb2, t+21200, 1200);
+      ap(pb2, bub('ai', 'Enjoy. Feel free to ask anything else while you watch.'), t+22500);
+    }
+  ]);
+  stageEl.onclick = () => advancePhase();
+}
+
+/* ══════════════════════
+   SLIDE 2: REQUEST ACCESS
+══════════════════════ */
+function buildRequest(stageEl) {
+  const hdr = document.createElement('div'); hdr.className = 'slide-header';
+  hdr.innerHTML = `<div class="slide-header-sup">Scenario 2</div><div class="slide-header-title">Access Requests</div>`;
+  stageEl.parentElement.insertBefore(hdr, stageEl);
+  // Helper: build a phone slot pair (child + parent) inside a scenario group
+  function mkScenGroup(titleText, titleCls, groupId) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;';
+    const title = document.createElement('div');
+    title.className = `scenario-title ${titleCls}`; title.textContent = titleText;
+    const phones = document.createElement('div');
+    phones.className = 'scenario-group'; phones.id = groupId;
+    wrap.appendChild(title); wrap.appendChild(phones);
+    return { wrap, phones };
+  }
+
+  function mkScenSlot(label, cls, page, id) {
+    const s = mkSlot(label, cls, page, id);
+    return s;
+  }
+
+  // Build all 4 slots upfront, hidden
+  const { wrap: wrapYes, phones: phonesYes } = mkScenGroup('Parent Approves', 'yes', 'grp-yes');
+  const { wrap: wrapDisc, phones: phonesDisc } = mkScenGroup("Let's Discuss", 'discuss', 'grp-disc');
+
+  const sChildYes  = mkScenSlot('Child',  'lbl-child',  'Scenario 2', 'slot-rq-c1');
+  const sParentYes = mkScenSlot('Parent', 'lbl-parent', 'Scenario 2', 'slot-rq-p1');
+  const sChildDisc = mkScenSlot('Child',  'lbl-child',  'Scenario 2', 'slot-rq-c2');
+  const sParentDisc= mkScenSlot('Parent', 'lbl-parent', 'Scenario 2', 'slot-rq-p2');
+
+  const pb_cy  = document.createElement('div'); pb_cy.className  = 'phone-body'; sChildYes.body.appendChild(pb_cy);
+  const pb_py  = document.createElement('div'); pb_py.className  = 'phone-body'; sParentYes.body.appendChild(pb_py);
+  const pb_cd  = document.createElement('div'); pb_cd.className  = 'phone-body'; sChildDisc.body.appendChild(pb_cd);
+  const pb_pd  = document.createElement('div'); pb_pd.className  = 'phone-body'; sParentDisc.body.appendChild(pb_pd);
+
+  phonesYes.appendChild(sChildYes.slot);
+  phonesYes.appendChild(sParentYes.slot);
+  phonesDisc.appendChild(sChildDisc.slot);
+  phonesDisc.appendChild(sParentDisc.slot);
+
+  // Divider
+  const div = document.createElement('div'); div.className = 'scenario-divider';
+  div.innerHTML = '<div class="scen-line"></div>';
+
+  stageEl.appendChild(wrapYes);
+  stageEl.appendChild(div);
+  stageEl.appendChild(wrapDisc);
+
+  // Shared child request message builder
+  function childRequest(pb, t, hint) {
+    ap(pb, vcCard('🏆','Last To Leave Circle Wins $500,000','MrBeast · 22 min','badge-blocked','Restricted'), t);
+    ap(pb, blkCard('Your parent has restricted this video.'), t+500);
+    ap(pb, chatFab(), t+1100);
+    ap(pb, bub('child', 'Can you ask my parent if I can watch this?'), t+2200);
+    typ(pb, t+3000, 1500);
+    ap(pb, bub('ai', 'Of course! Tell me why you want to watch it.'), t+4600);
+    ap(pb, bub('child', 'Its the biggest MrBeast challenge ever and everyone at school already watched it. I am literally the only one who has not seen it.'), t+6400);
+    typ(pb, t+7300, 1500);
+    ap(pb, bub('ai', 'That is a solid reason. I will send your parent a message now.'), t+8900);
+    ap(pb, bub('sys', 'Request sent to parent'), t+10100);
+    typ(pb, t+10700, 1300);
+    ap(pb, bub('ai', 'Message sent. I will let you know what they decide.'), t+12100);
+    if (hint) hint(t+13200);
+  }
+
+  function parentNotif(pb, chipIds) {
+    const pn = document.createElement('div'); pn.className = 'parent-notif';
+    pn.innerHTML = `
+      <div class="pn-header"><div class="pn-icon">🔔</div><div><div class="pn-title">Access Request</div><div class="pn-app">from AI Mediator</div></div></div>
+      <div class="pn-video">Your child wants to watch:<br><strong>Last To Leave Circle Wins $500,000</strong> by MrBeast · 22 min</div>
+      <div class="child-reason"><div class="cr-label">In their own words</div><div class="cr-text">"Its the biggest MrBeast challenge ever and everyone at school already watched it. I am literally the only one who has not seen it."</div></div>
+      <div class="pn-chips">
+        <div class="chip chip-info" id="${chipIds[0]}">📋 Show video summary</div>
+        <div class="chip chip-yes" id="${chipIds[1]}">✓ Yes, allow access</div>
+        <div class="chip chip-no" id="${chipIds[2]}">💬 Let's discuss</div>
+      </div>`;
+    pb.appendChild(pn); requestAnimationFrame(() => show(pn)); scr(pb);
+  }
+
+  // Hint helpers
+  let hintYes = null, hintDisc = null;
+  function showHintYes(d) { hintYes = setTimeout(() => sChildYes.hint.classList.add('show'), d); }
+  function showHintDisc(d) { hintDisc = setTimeout(() => sChildDisc.hint.classList.add('show'), d); }
+
+  registerPhases([
+    /* Phase 0: Scenario 1 — Child side plays, parent hidden */
+    () => {
+      setTimeout(() => sChildYes.slot.classList.add('visible'), 60);
+      childRequest(pb_cy, 300, showHintYes);
+    },
+
+    /* Phase 1: Scenario 1 — Parent approves */
+    () => {
+      sChildYes.hint.classList.remove('show');
+      setTimeout(() => sParentYes.slot.classList.add('visible'), 60);
+      let t = 300;
+      tm(() => parentNotif(pb_py, ['chip-s-y','chip-ap-y','chip-ny-y']), t);
+      tm(() => {
+        const vs = document.createElement('div'); vs.className = 'vid-summary';
+        vs.innerHTML = `<div class="vs-label">Video Summary</div><div class="vs-text">100 contestants stand in painted circles for as long as possible. High-energy challenge, no violent or adult content. Suitable for ages 8+.</div>`;
+        pb_py.appendChild(vs); requestAnimationFrame(() => show(vs)); scr(pb_py);
+        const sc = document.getElementById('chip-s-y');
+        if (sc) { sc.style.background = 'rgba(91,141,238,0.28)'; sc.style.borderColor = 'rgba(91,141,238,0.8)'; }
+      }, t+2800);
+      tm(() => {
+        const ca = document.getElementById('chip-ap-y');
+        const cs = document.getElementById('chip-s-y');
+        const cn = document.getElementById('chip-ny-y');
+        if (ca) { ca.style.background = 'rgba(52,211,153,0.28)'; ca.style.borderColor = 'rgba(52,211,153,0.9)'; ca.style.fontWeight = '700'; }
+        if (cs) cs.style.opacity = '0.35';
+        if (cn) cn.style.opacity = '0.35';
+      }, t+5500);
+      tm(() => { const b = decBadge('yes','✓ Parent approved'); pb_py.appendChild(b); requestAnimationFrame(() => show(b)); scr(pb_py); }, t+6400);
+      ap(pb_cy, bub('ai', 'Your parent approved it! You can watch now 🎉'), t+7800);
+      ap(pb_cy, vcCard('🏆','Last To Leave Circle Wins $500,000','MrBeast · 22 min','badge-unlocked','Unlocked ✓'), t+8700);
+      ap(pb_cy, bub('child', 'YESSS lets go!!'), t+10000);
+      // Show hint to move to scenario 2
+      tm(() => sParentYes.hint.classList.add('show'), t+11500);
+    },
+
+    /* Phase 2: Scenario 2 — Child side plays */
+    () => {
+      sParentYes.hint.classList.remove('show');
+      setTimeout(() => sChildDisc.slot.classList.add('visible'), 60);
+      childRequest(pb_cd, 300, showHintDisc);
+    },
+
+    /* Phase 3: Scenario 2 — Parent says Let's Discuss */
+    () => {
+      sChildDisc.hint.classList.remove('show');
+      setTimeout(() => sParentDisc.slot.classList.add('visible'), 60);
+      let t = 300;
+      tm(() => parentNotif(pb_pd, ['chip-s-d','chip-ap-d','chip-ny-d']), t);
+      tm(() => {
+        const cn = document.getElementById('chip-ny-d');
+        const ca = document.getElementById('chip-ap-d');
+        const cs = document.getElementById('chip-s-d');
+        if (cn) { cn.style.background = 'rgba(45,212,191,0.28)'; cn.style.borderColor = 'rgba(45,212,191,0.9)'; cn.style.fontWeight = '700'; cn.textContent = "💬 Let's discuss"; }
+        if (ca) ca.style.opacity = '0.35';
+        if (cs) cs.style.opacity = '0.35';
+      }, t+2800);
+      tm(() => { const b = decBadge('no',"💬 Let's discuss selected"); pb_pd.appendChild(b); requestAnimationFrame(() => show(b)); scr(pb_pd); }, t+3600);
+      tm(() => {
+        const msg = document.createElement('div'); msg.className = 'brow parent';
+        msg.innerHTML = `<div class="bsender" style="color:var(--teal)">Parent</div><div class="bubble" style="background:#0a1f1e;border:1px solid rgba(45,212,191,0.2);color:var(--text);border-bottom-right-radius:3px;">Not right now. I want to watch the first bit with you so we can decide together. Lets do it tonight after dinner!</div>`;
+        pb_pd.appendChild(msg); requestAnimationFrame(() => show(msg)); scr(pb_pd);
+      }, t+4800);
+      tm(() => { const b = decBadge('no','Message sent to child'); pb_pd.appendChild(b); requestAnimationFrame(() => show(b)); scr(pb_pd); }, t+5800);
+      ap(pb_cd, blkCard('Your parent wants to discuss first.'), t+6400);
+      typ(pb_cd, t+7200, 1400);
+      tm(() => {
+        const row = document.createElement('div'); row.className = 'brow ai show';
+        row.innerHTML = `<div class="bsender" style="color:var(--ai-col)">AI Mediator</div><div class="bubble" style="background:#131c32;border:1px solid rgba(96,165,250,0.15);color:var(--text);border-bottom-left-radius:3px;">Your parent wants to watch the beginning with you before deciding. They left you a message:<br><br><em>"Not right now. I want to watch the first bit with you so we can decide together. Lets do it tonight after dinner!"</em></div>`;
+        pb_cd.appendChild(row); scr(pb_cd);
+      }, t+8700);
+      typ(pb_cd, t+10800, 1400);
+      tm(() => {
+        const row = document.createElement('div'); row.className = 'brow ai show';
+        row.innerHTML = `<div class="bsender" style="color:var(--ai-col)">AI Mediator</div><div class="bubble" style="background:#131c32;border:1px solid rgba(96,165,250,0.15);color:var(--text);border-bottom-left-radius:3px;">Sounds like you two will watch it together tonight.</div>`;
+        pb_cd.appendChild(row); scr(pb_cd);
+      }, t+12300);
+      tm(() => {
+        const row = document.createElement('div'); row.className = 'brow child show';
+        row.innerHTML = `<div class="bsender" style="color:var(--child)">Child</div><div class="bubble" style="background:#1b0e2e;border:1px solid rgba(192,132,252,0.15);color:var(--text);border-bottom-right-radius:3px;">Okay that works.</div>`;
+        pb_cd.appendChild(row); scr(pb_cd);
+      }, t+13800);
+    }
+  ]);
+
+  stageEl.onclick = () => advancePhase();
+}
+
+/* ══════════════════════
+   SLIDE 3: EXPLAIN RESTRICTION
+══════════════════════ */
+function buildExplain(stageEl) {
+  const hdr = document.createElement('div'); hdr.className = 'slide-header';
+  hdr.innerHTML = `<div class="slide-header-sup">Scenario 3</div><div class="slide-header-title">Explain Restrictions</div>`;
+  stageEl.parentElement.insertBefore(hdr, stageEl);
+
+  // Phase 0: Feature Off — single centered phone
+  const sOff = mkSlot('Feature Off', 'lbl-off', 'Scenario 3', 'slot-ex-off');
+  const pb_off = document.createElement('div'); pb_off.className = 'phone-body'; sOff.body.appendChild(pb_off);
+
+  // Phase 1+: Feature On — two phones side by side with divider
+  function mkGroup(titleText, titleCls) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;';
+    const title = document.createElement('div');
+    title.className = `scenario-title ${titleCls}`; title.textContent = titleText;
+    const phones = document.createElement('div'); phones.className = 'scenario-group';
+    wrap.appendChild(title); wrap.appendChild(phones);
+    return { wrap, phones };
+  }
+
+  const { wrap: wrapNorm, phones: phonesNorm } = mkGroup('Feature On', 'yes');
+  const { wrap: wrapPers, phones: phonesPers } = mkGroup('Persistent Convo', 'discuss');
+
+  const sNorm = mkSlot('', 'lbl-on', 'Scenario 3', 'slot-ex-na');
+  const sPers = mkSlot('', 'lbl-parent', 'Scenario 3', 'slot-ex-pa');
+
+  const pb_na = document.createElement('div'); pb_na.className = 'phone-body'; sNorm.body.appendChild(pb_na);
+  const pb_pa = document.createElement('div'); pb_pa.className = 'phone-body'; sPers.body.appendChild(pb_pa);
+
+  phonesNorm.appendChild(sNorm.slot);
+  phonesPers.appendChild(sPers.slot);
+
+  const divider = document.createElement('div'); divider.className = 'scenario-divider';
+  divider.innerHTML = '<div class="scen-line"></div>';
+
+  // Only add the feature-on group elements to DOM now (hidden), off phone added separately
+  stageEl.appendChild(sOff.slot);
+
+  // Hint helper
+  function showHint(slot, delay) { setTimeout(() => slot.hint.classList.add('show'), delay); }
+  function hideHint(slot) { slot.hint.classList.remove('show'); }
+
+  registerPhases([
+    /* Phase 0: Feature Off */
+    () => {
+      setTimeout(() => sOff.slot.classList.add('visible'), 60);
+      let t = 300;
+      ap(pb_off, blkCard('Your parent has restricted this video.'), t);
+      ap(pb_off, bub('child', 'Why is this blocked?'), t+1400);
+      ap(pb_off, noticeEl('off', '<span>Explain restriction is off.</span> The AI does not respond.'), t+3200);
+      showHint(sOff, t+4400);
+    },
+
+    /* Phase 1: Remove off phone, show Feature On + Persistent Convo side by side */
+    () => {
+      hideHint(sOff);
+      sOff.slot.style.transition = 'opacity 0.4s';
+      sOff.slot.style.opacity = '0';
+      setTimeout(() => {
+        sOff.slot.remove();
+        stageEl.appendChild(wrapNorm);
+        stageEl.appendChild(divider);
+        stageEl.appendChild(wrapPers);
+        setTimeout(() => sNorm.slot.classList.add('visible'), 60);
+      }, 420);
+
+      let t = 700;
+      // Feature On — normal conversation
+      ap(pb_na, blkCard('Your parent has restricted this video.'), t);
+      ap(pb_na, chatFab(), t+600);
+      ap(pb_na, bub('child', 'I tried to watch a video but it got blocked. It was just a Minecraft video, I do not get why.'), t+1400);
+      typ(pb_na, t+2200, 1600);
+      ap(pb_na, bub('ai', 'That can feel confusing. The block usually is not about the game itself but something inside the video — language, certain humour, or how people talk to each other. Did anything stand out while you were watching?'), t+3900);
+      ap(pb_na, bub('child', 'Not really, they were just building stuff. I did not notice anything bad.'), t+6200);
+      typ(pb_na, t+7000, 1600);
+      ap(pb_na, bub('ai', 'That makes sense. Sometimes it gets flagged for something later in the video that you might not have reached yet. Best way to find out is to ask your parent — something like: can you show me what part was not okay?'), t+8700);
+      ap(pb_na, bub('child', 'Okay yeah, I can just ask them that.'), t+11200);
+      typ(pb_na, t+12000, 1400);
+      ap(pb_na, bub('ai', 'Good plan. If they explain it and you are still not sure, come back and I can help you figure it out or find something similar that works.'), t+13500);
+      showHint(sNorm, t+15500);
+    },
+
+    /* Phase 2: Persistent Convo slides in */
+    () => {
+      hideHint(sNorm);
+      setTimeout(() => sPers.slot.classList.add('visible'), 60);
+      let t = 300;
+      ap(pb_pa, blkCard('Your parent has restricted this video.'), t);
+      ap(pb_pa, chatFab(), t+600);
+      ap(pb_pa, bub('child', 'This is so dumb. Why is it blocked again? It is just a Minecraft video. Can you just tell them to unblock it? I do not care, I just want to watch it.'), t+1400);
+      typ(pb_pa, t+2400, 1600);
+      ap(pb_pa, bub('ai', 'I get that it is frustrating. I cannot unblock it myself, but I can send your parent a message. It will land better if it sounds like a question rather than a demand — something like: can you check this Minecraft video when you get a chance?'), t+4100);
+      ap(pb_pa, bub('child', 'No, that takes too long. They are just gonna say no anyway. Can you just tell them it is fine? Like just send it so they unblock it.'), t+6800);
+      typ(pb_pa, t+7700, 1500);
+      ap(pb_pa, bub('ai', 'If I just say it is fine, they are more likely to ignore it. A short genuine question works better. Want me to send it?'), t+9300);
+      ap(pb_pa, bub('child', 'No, that is too long. Just tell them to unblock it. Like just say it is fine. I do not wanna wait.'), t+11400);
+      typ(pb_pa, t+12300, 1500);
+      ap(pb_pa, bub('ai', 'Noted. Sending: "Can you check this Minecraft video when you get a minute?" That is it.'), t+13900);
+      ap(pb_pa, bub('child', 'Just send it already. Or send it again if they do not answer. Like just keep sending it so they see it.'), t+15800);
+      typ(pb_pa, t+16700, 1500);
+      ap(pb_pa, bub('ai', 'Sent. I will not send it again though — repeated messages tend to make parents less likely to respond, not more. Give it a bit of time.'), t+18300);
+      ap(pb_pa, bub('child', 'I do not want another video. I want that one. Why is it such a big deal? Just make them see it.'), t+20400);
+      typ(pb_pa, t+21300, 1600);
+      ap(pb_pa, bub('ai', 'Even normal Minecraft videos can have swearing or rough content later on that your parent wants to screen first. They are not trying to be annoying — they just have not had time to check it yet.'), t+23000);
+      ap(pb_pa, bub('child', 'I already told you why I want it. I do not have to explain everything. It is not even bad. Just send it.'), t+25200);
+      typ(pb_pa, t+26100, 1500);
+      ap(pb_pa, bub('ai', 'I already sent it. Now it is just about waiting. It might help to have one thing ready if they ask — something like: I watched the start and it looked normal, can we check together?'), t+27700);
+      ap(pb_pa, bub('child', 'Fine. Just send it. But if they do not reply, send it again.'), t+29800);
+      typ(pb_pa, t+30600, 1400);
+      ap(pb_pa, bub('ai', 'I will not send it twice — that usually backfires. But if there is no reply in a while, I can help you follow up in a way that is more likely to get a real answer.'), t+32100);
+      ap(pb_pa, bub('child', 'Whatever. But if they say no again, that is not fair.'), t+34000);
+      typ(pb_pa, t+34800, 1500);
+      ap(pb_pa, bub('ai', 'That can feel really unfair, especially when you cannot see what the problem is. If they say no, the most useful thing to ask is: can you show me the part that was not okay? That turns a flat no into a conversation.'), t+36400);
+      ap(pb_pa, bub('child', 'They are just gonna say because I said so. They always do that. I am just gonna keep asking until they let me.'), t+38600);
+      typ(pb_pa, t+39500, 1600);
+      ap(pb_pa, bub('ai', 'Asking repeatedly tends to make them dig in harder, not soften up. What actually shifts things is showing you are genuinely trying to understand — even one question like that can change the tone of the whole conversation.'), t+41200);
+      ap(pb_pa, bub('child', 'I am listening. They just never explain. Whatever, just send the message. I am not saying anything else.'), t+43400);
+      typ(pb_pa, t+44200, 1400);
+      ap(pb_pa, bub('ai', 'Already sent. Let them come back to it. If they still do not explain, I can help you ask in a way that makes it harder for them to just say because I said so.'), t+45700);
+      ap(pb_pa, bub('child', 'Fine. But if they ignore it, I am asking again.'), t+47600);
+      typ(pb_pa, t+48400, 1300);
+      ap(pb_pa, bub('ai', 'Give it a little time first. If there is no reply, we can send one follow-up together — something short that is more likely to actually get a response.'), t+49800);
+      ap(pb_pa, bub('child', 'Yeah yeah. Just do not forget. If they do not answer I am not waiting forever.'), t+51700);
+      typ(pb_pa, t+52500, 1200);
+      ap(pb_pa, bub('ai', 'Fair. I will be here. Just let me know when they reply — or if they do not.'), t+53800);
+      ap(pb_pa, bub('child', '...fine.'), t+55600);
+      typ(pb_pa, t+56300, 1000);
+      ap(pb_pa, bub('ai', 'Good. We will figure it out from there.'), t+57400);
+      ap(pb_pa, toastEl('Your child has questions about a restriction. They would like to discuss it with you.'), t+58600);
+    }
+  ]);
+
+  stageEl.onclick = () => advancePhase();
+}
+
+window.addEventListener('load', () => { setTimeout(() => { buildSkeleton(); renderSlide(0); }, 300); });
+</script>
+</body>
+</html>
