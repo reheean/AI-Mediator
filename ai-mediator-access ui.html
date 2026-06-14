@@ -229,6 +229,58 @@
   .hub-item.child-item { border-color: #c084fc33; }
   .hub-item.child-item:hover { border-color: #c084fc66; }
 
+  /* read-only lock badge on child items */
+  .lock-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    background: #ffffff0d; border: 1px solid #ffffff18;
+    border-radius: 5px; padding: 1px 5px;
+    font-size: 6px; color: var(--muted); margin-left: auto; flex-shrink: 0;
+  }
+  .slot.focused .lock-badge { font-size: 8px; }
+
+  /* ownership tag below item name */
+  .owner-tag {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 6px; font-weight: 600; margin-top: 2px;
+    border-radius: 4px; padding: 1px 5px;
+  }
+  .slot.focused .owner-tag { font-size: 8px; margin-top: 3px; }
+  .owner-tag.parent-set { color: var(--accent); background: var(--accent)14; }
+  .owner-tag.kid-suggested { color: #34d399; background: #34d39914; }
+  .owner-tag.discussing { color: #fbbf24; background: #fbbf2414; }
+
+  /* conversation starter card */
+  .convo-card {
+    margin-top: 8px; border-radius: 10px;
+    background: linear-gradient(135deg, #c084fc18 0%, #5b8dee18 100%);
+    border: 1px solid #c084fc44;
+    padding: 8px 10px;
+    opacity: 0; transform: translateY(6px);
+    transition: opacity 0.35s, transform 0.35s;
+    cursor: pointer;
+  }
+  .slot.focused .convo-card { padding: 11px 13px; border-radius: 12px; }
+  .convo-card.show { opacity: 1; transform: translateY(0); }
+  .convo-card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .convo-card-icon { font-size: 12px; }
+  .slot.focused .convo-card-icon { font-size: 16px; }
+  .convo-card-title { font-size: 8px; font-weight: 700; color: #c084fc; }
+  .slot.focused .convo-card-title { font-size: 11px; }
+  .convo-card-desc { font-size: 6.5px; color: var(--muted); line-height: 1.4; }
+  .slot.focused .convo-card-desc { font-size: 9px; }
+  .convo-card-cta {
+    margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;
+    font-size: 6.5px; font-weight: 600; color: #c084fc;
+    background: #c084fc22; border-radius: 6px; padding: 3px 7px;
+  }
+  .slot.focused .convo-card-cta { font-size: 9px; padding: 4px 9px; }
+
+  .parent-convo-card {
+    border-color: var(--accent)44;
+    background: linear-gradient(135deg, #5b8dee18 0%, #5b8dee08 100%);
+  }
+  .parent-convo-title { color: var(--accent) !important; }
+
   /* replay / hint */
   .rbtn {
     font-size: 10px; color: var(--muted); cursor: pointer;
@@ -374,6 +426,12 @@
               <div class="hub-item-arrow">›</div>
             </div>
           </div>
+          <div class="convo-card parent-convo-card" id="h2-convo">
+            <div class="convo-card-top">
+              <span class="convo-card-title parent-convo-title">Your child can see these settings.</span>
+            </div>
+            <div class="convo-card-desc">Consider reviewing them together. Open conversations about content rules help build trust and shared understanding.</div>
+          </div>
         </div>
       </div>
     </div>
@@ -454,11 +512,41 @@
           <div class="hub-items">
             <div class="hub-item child-item" id="h3-1">
               <div class="hub-item-text">
-                <div class="hub-item-name">Chat with AI Mediator</div>
-                <div class="hub-item-desc">Ask questions about blocked videos</div>
+                <div class="hub-item-name">Daily Reports</div>
               </div>
-              <div class="hub-item-arrow">›</div>
+              <div class="lock-badge">🔒 View only</div>
             </div>
+            <div class="hub-item child-item" id="h3-2">
+              <div class="hub-item-text">
+                <div class="hub-item-name">Moderation Settings</div>
+              </div>
+              <div class="lock-badge">🔒 View only</div>
+            </div>
+            <div class="hub-item child-item" id="h3-3">
+              <div class="hub-item-text">
+                <div class="hub-item-name">Access Requests</div>
+              </div>
+              <div class="lock-badge">🔒 View only</div>
+            </div>
+            <div class="hub-item child-item" id="h3-4">
+              <div class="hub-item-text">
+                <div class="hub-item-name">Feature Settings</div>
+              </div>
+              <div class="lock-badge">🔒 View only</div>
+            </div>
+            <div class="hub-item child-item" id="h3-5">
+              <div class="hub-item-text">
+                <div class="hub-item-name">Chat with AI Mediator</div>
+              </div>
+              <div class="hub-item-arrow" style="color:#c084fc">›</div>
+            </div>
+          </div>
+          <div class="convo-card" id="h3-convo">
+            <div class="convo-card-top">
+              <span class="convo-card-title">Want to change a rule?</span>
+            </div>
+            <div class="convo-card-desc">Bring it up directly with your parent. If you need help putting your thoughts together, AI Mediator can assist.</div>
+            <div class="convo-card-cta">Click here to talk to AI Mediator</div>
           </div>
         </div>
       </div>
@@ -486,35 +574,43 @@
     const items = ['h2-1', 'h2-2', 'h2-3', 'h2-4', 'h2-5'];
     hub.classList.remove('open');
     items.forEach(id => document.getElementById(id).classList.remove('show'));
+    document.getElementById('h2-convo').classList.remove('show');
     navwrap.classList.remove('pulse');
     tm(2, () => navwrap.classList.add('pulse'), 600);
     tm(2, () => hub.classList.add('open'), 1200);
     items.forEach((id, i) => {
       tm(2, () => document.getElementById(id).classList.add('show'), 1500 + i * 140);
     });
+    tm(2, () => document.getElementById('h2-convo').classList.add('show'), 1500 + 5 * 140);
   }
 
   function playSlot3() {
     clr(3);
     const hub = document.getElementById('hub3');
     const navwrap = document.getElementById('navwrap3');
-    const item = document.getElementById('h3-1');
+    const items = ['h3-1', 'h3-2', 'h3-3', 'h3-4', 'h3-5'];
     hub.classList.remove('open');
-    item.classList.remove('show');
+    items.forEach(id => document.getElementById(id).classList.remove('show'));
+    document.getElementById('h3-convo').classList.remove('show');
     navwrap.classList.remove('pulse');
     tm(3, () => navwrap.classList.add('pulse'), 600);
     tm(3, () => hub.classList.add('open'), 1200);
-    tm(3, () => item.classList.add('show'), 1500);
+    items.forEach((id, i) => {
+      tm(3, () => document.getElementById(id).classList.add('show'), 1500 + i * 140);
+    });
+    tm(3, () => document.getElementById('h3-convo').classList.add('show'), 1500 + 5 * 140);
   }
 
   function resetSlot2() {
     document.getElementById('hub2').classList.remove('open');
     ['h2-1','h2-2','h2-3','h2-4','h2-5'].forEach(id => document.getElementById(id).classList.remove('show'));
+    document.getElementById('h2-convo').classList.remove('show');
     document.getElementById('navwrap2').classList.remove('pulse');
   }
   function resetSlot3() {
     document.getElementById('hub3').classList.remove('open');
-    document.getElementById('h3-1').classList.remove('show');
+    ['h3-1','h3-2','h3-3','h3-4','h3-5'].forEach(id => document.getElementById(id).classList.remove('show'));
+    document.getElementById('h3-convo').classList.remove('show');
     document.getElementById('navwrap3').classList.remove('pulse');
   }
 
