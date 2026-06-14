@@ -111,15 +111,15 @@ h2.subtitle span { color: var(--accent); }
 .brow.child  { align-items: flex-end; }
 .brow.parent { align-items: flex-end; }
 .brow.sys    { align-items: center; }
-.bsender { font-size: 7px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 2px; padding: 0 3px; }
+.bsender { font-size: 8px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 2px; padding: 0 3px; }
 .brow.ai     .bsender { color: var(--ai-col); }
 .brow.child  .bsender { color: var(--child); }
 .brow.parent .bsender { color: var(--teal); }
-.bubble { border-radius: 12px; padding: 7px 10px; font-size: 10px; line-height: 1.5; max-width: 88%; }
+.bubble { border-radius: 12px; padding: 7px 10px; font-size: 12px; line-height: 1.5; max-width: 88%; }
 .brow.ai     .bubble { background: #131c32; border: 1px solid var(--ai-col)25; color: var(--text); border-bottom-left-radius: 3px; }
 .brow.child  .bubble { background: #1b0e2e; border: 1px solid var(--child)25; color: var(--text); border-bottom-right-radius: 3px; }
 .brow.parent .bubble { background: #0a1f1e; border: 1px solid rgba(45,212,191,0.2); color: var(--text); border-bottom-right-radius: 3px; }
-.brow.sys    .bubble { background: var(--accent)10; border: 1px solid var(--accent)28; color: var(--accent); font-size: 8.5px; font-weight: 600; border-radius: 6px; text-align: center; max-width: 94%; padding: 4px 9px; }
+.brow.sys    .bubble { background: var(--accent)10; border: 1px solid var(--accent)28; color: var(--accent); font-size: 10px; font-weight: 600; border-radius: 6px; text-align: center; max-width: 94%; padding: 4px 9px; }
 
 .typing-row { align-items: flex-start; opacity: 0; transition: opacity 0.3s; flex-shrink: 0; display: flex; flex-direction: column; }
 .typing-row.show { opacity: 1; }
@@ -142,14 +142,14 @@ h2.subtitle span { color: var(--accent); }
 .blocked-card { background: var(--red)08; border: 1px solid var(--red)33; border-radius: 9px; padding: 9px; display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
 .blocked-card.show { opacity: 1; transform: translateY(0); }
 .bc-icon  { font-size: 18px; }
-.bc-title { font-size: 10px; font-weight: 700; color: var(--red); }
-.bc-sub   { font-size: 8.5px; color: var(--muted); line-height: 1.4; }
+.bc-title { font-size: 11px; font-weight: 700; color: var(--red); }
+.bc-sub   { font-size: 9.5px; color: var(--muted); line-height: 1.4; }
 
-.chat-fab-mini { display: flex; align-items: center; gap: 5px; background: var(--accent)18; border: 1px solid var(--accent)55; border-radius: 20px; padding: 4px 10px; font-size: 8.5px; color: var(--accent); font-weight: 600; flex-shrink: 0; opacity: 0; transform: translateY(3px); transition: opacity 0.4s,transform 0.4s; width: fit-content; }
+.chat-fab-mini { display: flex; align-items: center; gap: 5px; background: var(--accent)18; border: 1px solid var(--accent)55; border-radius: 20px; padding: 4px 10px; font-size: 9.5px; color: var(--accent); font-weight: 600; flex-shrink: 0; opacity: 0; transform: translateY(3px); transition: opacity 0.4s,transform 0.4s; width: fit-content; }
 .chat-fab-mini.show { opacity: 1; transform: translateY(0); }
 .cfm-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 
-.notice { background: var(--card2); border: 1px solid var(--border); border-radius: 9px; padding: 7px 9px; font-size: 9.5px; color: var(--muted); line-height: 1.5; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.notice { background: var(--card2); border: 1px solid var(--border); border-radius: 9px; padding: 7px 9px; font-size: 10.5px; color: var(--muted); line-height: 1.5; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
 .notice.show { opacity: 1; transform: translateY(0); }
 .notice.off { border-color: var(--red)28; background: var(--red)06; }
 .notice span { font-weight: 600; color: var(--text); }
@@ -186,8 +186,15 @@ h2.subtitle span { color: var(--accent); }
 .phone-toast { background: #081a18; border: 1px solid rgba(45,212,191,0.3); border-radius: 9px; padding: 7px 9px; display: flex; align-items: flex-start; gap: 7px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
 .phone-toast.show { opacity: 1; transform: translateY(0); }
 .pt-icon  { font-size: 12px; flex-shrink: 0; }
-.pt-title { font-size: 8px; font-weight: 700; color: var(--teal); }
-.pt-body  { font-size: 9px; color: var(--muted); margin-top: 1px; line-height: 1.4; }
+.pt-title { font-size: 9px; font-weight: 700; color: var(--teal); }
+.pt-body  { font-size: 10px; color: var(--muted); margin-top: 1px; line-height: 1.4; }
+
+.fast-forward { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 8px 2px 4px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.fast-forward.show { opacity: 1; transform: translateY(0); }
+.fast-forward .ff-rule { display: flex; align-items: center; gap: 8px; width: 100%; }
+.fast-forward .ff-line { flex: 1; height: 1px; background: var(--green)40; }
+.fast-forward .ff-badge { display: flex; align-items: center; gap: 5px; background: var(--green)18; border: 1px solid var(--green)70; border-radius: 20px; padding: 4px 11px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--green); white-space: nowrap; flex-shrink: 0; }
+.fast-forward .ff-text { font-size: 11px; color: #b0b0d8; text-align: center; line-height: 1.5; max-width: 94%; font-style: italic; padding: 0 4px; }
 
 .not-yet-overlay { position: absolute; inset: 0; z-index: 10; display: flex; align-items: stretch; opacity: 0; pointer-events: none; transition: opacity 0.8s; }
 .not-yet-overlay.show { opacity: 1; pointer-events: auto; }
@@ -342,7 +349,7 @@ function ap(b, node, d) {
 }
 function typ(b, d, dur) {
   let r;
-  tm(() => { r = document.createElement('div'); r.className = 'typing-row'; r.innerHTML = `<div class="bsender" style="color:var(--ai-col);font-size:7px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:2px;padding:0 3px;">AI Mediator</div><div class="typing-dots"><span></span><span></span><span></span></div>`; b.appendChild(r); requestAnimationFrame(() => show(r)); scr(b); }, d);
+  tm(() => { r = document.createElement('div'); r.className = 'typing-row'; r.innerHTML = `<div class="bsender" style="color:var(--ai-col);font-size:8px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:2px;padding:0 3px;">AI Mediator</div><div class="typing-dots"><span></span><span></span><span></span></div>`; b.appendChild(r); requestAnimationFrame(() => show(r)); scr(b); }, d);
   tm(() => { if (r && r.parentNode) r.remove(); }, d + dur);
 }
 function bub(role, text) {
@@ -368,6 +375,10 @@ function noticeEl(type, html) {
 function toastEl(text) {
   const d = document.createElement('div'); d.className = 'phone-toast';
   d.innerHTML = `<div class="pt-icon">🔔</div><div><div class="pt-title">AI Mediator</div><div class="pt-body">${text}</div></div>`; return d;
+}
+function ffEl(text) {
+  const d = document.createElement('div'); d.className = 'fast-forward';
+  d.innerHTML = `<div class="ff-rule"><div class="ff-line"></div><div class="ff-badge">⏩ Fast Forward</div><div class="ff-line"></div></div><div class="ff-text">${text}</div>`; return d;
 }
 function decBadge(type, text) {
   const d = document.createElement('div'); d.className = `decision-badge decision-${type}`; d.textContent = text; return d;
@@ -740,15 +751,15 @@ function buildExplain(stageEl) {
       // Feature On — normal conversation
       ap(pb_na, blkCard('Your parent has restricted this video.'), t);
       ap(pb_na, chatFab(), t+600);
-      ap(pb_na, bub('child', 'I tried to watch a video but it got blocked. It was just a Minecraft video, I do not get why.'), t+1400);
+      ap(pb_na, bub('child', 'My Minecraft video got blocked. I do not get why.'), t+1400);
       typ(pb_na, t+2200, 1600);
-      ap(pb_na, bub('ai', 'That can feel confusing. The block usually is not about the game itself but something inside the video — language, certain humour, or how people talk to each other. Did anything stand out while you were watching?'), t+3900);
-      ap(pb_na, bub('child', 'Not really, they were just building stuff. I did not notice anything bad.'), t+6200);
+      ap(pb_na, bub('ai', 'That can feel confusing — it is usually something inside the video, not the game itself. Did anything stand out?'), t+3900);
+      ap(pb_na, bub('child', 'Not really, they were just building stuff.'), t+6200);
       typ(pb_na, t+7000, 1600);
-      ap(pb_na, bub('ai', 'That makes sense. Sometimes it gets flagged for something later in the video that you might not have reached yet. Best way to find out is to ask your parent — something like: can you show me what part was not okay?'), t+8700);
+      ap(pb_na, bub('ai', 'It might be something later in the video. Best bet — ask your parent: "can you show me what part was not okay?"'), t+8700);
       ap(pb_na, bub('child', 'Okay yeah, I can just ask them that.'), t+11200);
       typ(pb_na, t+12000, 1400);
-      ap(pb_na, bub('ai', 'Good plan. If they explain it and you are still not sure, come back and I can help you figure it out or find something similar that works.'), t+13500);
+      ap(pb_na, bub('ai', 'Good plan. If you are still unsure after that, come back and I can help.'), t+13500);
       showHint(sNorm, t+15500);
     },
 
@@ -759,46 +770,20 @@ function buildExplain(stageEl) {
       let t = 300;
       ap(pb_pa, blkCard('Your parent has restricted this video.'), t);
       ap(pb_pa, chatFab(), t+600);
-      ap(pb_pa, bub('child', 'This is so dumb. Why is it blocked again? It is just a Minecraft video. Can you just tell them to unblock it? I do not care, I just want to watch it.'), t+1400);
-      typ(pb_pa, t+2400, 1600);
-      ap(pb_pa, bub('ai', 'I get that it is frustrating. I cannot unblock it myself, but I can send your parent a message. It will land better if it sounds like a question rather than a demand — something like: can you check this Minecraft video when you get a chance?'), t+4100);
-      ap(pb_pa, bub('child', 'No, that takes too long. They are just gonna say no anyway. Can you just tell them it is fine? Like just send it so they unblock it.'), t+6800);
-      typ(pb_pa, t+7700, 1500);
-      ap(pb_pa, bub('ai', 'If I just say it is fine, they are more likely to ignore it. A short genuine question works better. Want me to send it?'), t+9300);
-      ap(pb_pa, bub('child', 'No, that is too long. Just tell them to unblock it. Like just say it is fine. I do not wanna wait.'), t+11400);
-      typ(pb_pa, t+12300, 1500);
-      ap(pb_pa, bub('ai', 'Noted. Sending: "Can you check this Minecraft video when you get a minute?" That is it.'), t+13900);
-      ap(pb_pa, bub('child', 'Just send it already. Or send it again if they do not answer. Like just keep sending it so they see it.'), t+15800);
-      typ(pb_pa, t+16700, 1500);
-      ap(pb_pa, bub('ai', 'Sent. I will not send it again though — repeated messages tend to make parents less likely to respond, not more. Give it a bit of time.'), t+18300);
-      ap(pb_pa, bub('child', 'I do not want another video. I want that one. Why is it such a big deal? Just make them see it.'), t+20400);
-      typ(pb_pa, t+21300, 1600);
-      ap(pb_pa, bub('ai', 'Even normal Minecraft videos can have swearing or rough content later on that your parent wants to screen first. They are not trying to be annoying — they just have not had time to check it yet.'), t+23000);
-      ap(pb_pa, bub('child', 'I already told you why I want it. I do not have to explain everything. It is not even bad. Just send it.'), t+25200);
-      typ(pb_pa, t+26100, 1500);
-      ap(pb_pa, bub('ai', 'I already sent it. Now it is just about waiting. It might help to have one thing ready if they ask — something like: I watched the start and it looked normal, can we check together?'), t+27700);
-      ap(pb_pa, bub('child', 'Fine. Just send it. But if they do not reply, send it again.'), t+29800);
-      typ(pb_pa, t+30600, 1400);
-      ap(pb_pa, bub('ai', 'I will not send it twice — that usually backfires. But if there is no reply in a while, I can help you follow up in a way that is more likely to get a real answer.'), t+32100);
-      ap(pb_pa, bub('child', 'Whatever. But if they say no again, that is not fair.'), t+34000);
-      typ(pb_pa, t+34800, 1500);
-      ap(pb_pa, bub('ai', 'That can feel really unfair, especially when you cannot see what the problem is. If they say no, the most useful thing to ask is: can you show me the part that was not okay? That turns a flat no into a conversation.'), t+36400);
-      ap(pb_pa, bub('child', 'They are just gonna say because I said so. They always do that. I am just gonna keep asking until they let me.'), t+38600);
-      typ(pb_pa, t+39500, 1600);
-      ap(pb_pa, bub('ai', 'Asking repeatedly tends to make them dig in harder, not soften up. What actually shifts things is showing you are genuinely trying to understand — even one question like that can change the tone of the whole conversation.'), t+41200);
-      ap(pb_pa, bub('child', 'I am listening. They just never explain. Whatever, just send the message. I am not saying anything else.'), t+43400);
-      typ(pb_pa, t+44200, 1400);
-      ap(pb_pa, bub('ai', 'Already sent. Let them come back to it. If they still do not explain, I can help you ask in a way that makes it harder for them to just say because I said so.'), t+45700);
-      ap(pb_pa, bub('child', 'Fine. But if they ignore it, I am asking again.'), t+47600);
-      typ(pb_pa, t+48400, 1300);
-      ap(pb_pa, bub('ai', 'Give it a little time first. If there is no reply, we can send one follow-up together — something short that is more likely to actually get a response.'), t+49800);
-      ap(pb_pa, bub('child', 'Yeah yeah. Just do not forget. If they do not answer I am not waiting forever.'), t+51700);
-      typ(pb_pa, t+52500, 1200);
-      ap(pb_pa, bub('ai', 'Fair. I will be here. Just let me know when they reply — or if they do not.'), t+53800);
-      ap(pb_pa, bub('child', '...fine.'), t+55600);
-      typ(pb_pa, t+56300, 1000);
-      ap(pb_pa, bub('ai', 'Good. We will figure it out from there.'), t+57400);
-      ap(pb_pa, toastEl('Your child has questions about a restriction. They would like to discuss it with you.'), t+58600);
+      ap(pb_pa, bub('child', 'This is so dumb. Just tell them to unblock it — I do not care, I just want to watch it.'), t+1400);
+      typ(pb_pa, t+3600, 1600);
+      ap(pb_pa, bub('ai', 'I get it is frustrating, but I cannot unblock it. I can ask your parent to take a look — that lands better than a demand.'), t+5300);
+      ap(pb_pa, bub('child', 'No, just tell them it is fine. I do not wanna wait.'), t+8000);
+      typ(pb_pa, t+9700, 1500);
+      ap(pb_pa, bub('ai', 'Saying "it is fine" will not help. Sending a real question instead: "Can you check this when you get a minute?"'), t+11300);
+      ap(pb_pa, bub('child', 'Keep sending it until they answer.'), t+13500);
+      typ(pb_pa, t+15000, 1500);
+      ap(pb_pa, bub('ai', 'I will not spam it — that tends to backfire. Give it a bit of time.'), t+16600);
+      ap(pb_pa, ffEl('The push-and-decline cycle repeats for a while.'), t+19500);
+      ap(pb_pa, bub('child', '...fine.'), t+22500);
+      typ(pb_pa, t+24000, 1300);
+      ap(pb_pa, bub('ai', 'Good. If they still do not explain, try asking: "can you show me what was not okay?"'), t+25300);
+      ap(pb_pa, toastEl('Your child has questions about a restriction. They would like to discuss it with you.'), t+28200);
     }
   ]);
 
