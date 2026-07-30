@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Mediator - Daily Reports</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #000000;
+    --surface: #1a1a22;
+    --card: #22222e;
+    --border: #2e2e3e;
+    --text: #f0f0f5;
+    --muted: #8888aa;
+    --accent: #5b8dee;
+    --red: #ff4d6d;
+    --red-soft: #ff4d6d22;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --gaming: #818cf8;
+    --slime: #34d399;
+    --cartoon: #fb923c;
+    --talk: #f59e0b;
+    --phone-w: 300px;
+    --phone-h: 580px;
+    --phone-w-sm: 190px;
+    --phone-h-sm: 370px;
+    --transition: 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-x: hidden;
+    padding: 24px 20px 32px;
+  }
+
+
+
+  h1.title {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  h2.subtitle {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 32px;
+    text-align: center;
+    letter-spacing: -0.5px;
+  }
+  h2.subtitle span {
+    color: var(--accent);
+  }
+
+  /* Stage */
+  .stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 1100px;
+    min-height: 520px;
+    position: relative;
+  }
+
+  /* Phone wrapper */
+  .phone-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+  }
+
+  .phone-slot .level-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: var(--transition);
+  }
+  .phone-slot.focused .level-label { color: var(--accent); }
+
+  /* Phone frame */
+  .phone {
+    width: var(--phone-w-sm);
+    height: var(--phone-h-sm);
+    background: #1c1c24;
+    border-radius: 36px;
+    border: 2px solid var(--border);
+    box-shadow: 0 8px 32px #00000060, inset 0 1px 0 #ffffff10;
+    overflow: hidden;
+    position: relative;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .phone-slot.focused .phone {
+    width: var(--phone-w);
+    height: var(--phone-h);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent)44, 0 24px 64px #00000090, inset 0 1px 0 #ffffff15;
+    cursor: default;
+  }
+  .phone-slot.side .phone {
+    opacity: 0.55;
+    filter: blur(0.5px);
+  }
+  .phone-slot.side:hover .phone { opacity: 0.75; }
+
+  /* Notch */
+  .notch {
+    width: 80px;
+    height: 22px;
+    background: #0f0f13;
+    border-radius: 0 0 14px 14px;
+    margin: 0 auto;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+  }
+  .phone-slot.focused .notch { width: 110px; height: 26px; }
+
+  /* Screen */
+  .screen {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 14px;
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: var(--transition);
+  }
+  .phone-slot.focused .status-bar { font-size: 11px; padding: 6px 18px; }
+
+  /* App header */
+  .app-header {
+    background: var(--surface);
+    padding: 8px 14px 10px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .phone-slot.focused .app-header { padding: 10px 18px 12px; }
+
+  .app-name {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+  .phone-slot.focused .app-name { font-size: 11px; }
+
+  .app-date {
+    font-size: 8px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .phone-slot.focused .app-date { font-size: 10px; }
+
+  /* Scroll content */
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    scrollbar-width: none;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+  .phone-slot.focused .scroll-content { padding: 12px 16px; gap: 10px; }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .card.visible { opacity: 1; transform: translateY(0); }
+  .phone-slot.focused .card { border-radius: 14px; padding: 12px 14px; }
+
+  .card.flag-card {
+    background: var(--surface);
+    border-color: var(--accent)44;
+  }
+
+  .card-label {
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .phone-slot.focused .card-label { font-size: 10px; }
+
+  /* Big time display */
+  .big-time {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .phone-slot.focused .big-time { font-size: 36px; }
+  .big-time span { font-size: 12px; font-weight: 400; color: var(--muted); }
+  .phone-slot.focused .big-time span { font-size: 16px; }
+
+  /* Tags */
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag {
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 8px;
+    font-weight: 600;
+  }
+  .phone-slot.focused .tag { padding: 4px 10px; font-size: 10px; }
+  .tag.gaming { background: var(--gaming)22; color: var(--gaming); border: 1px solid var(--gaming)44; }
+  .tag.slime { background: var(--slime)22; color: var(--slime); border: 1px solid var(--slime)44; }
+  .tag.cartoon { background: var(--cartoon)22; color: var(--cartoon); border: 1px solid var(--cartoon)44; }
+  .tag.talk { background: var(--talk)22; color: var(--talk); border: 1px solid var(--talk)44; }
+
+  /* Flag row */
+  .flag-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 8px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .phone-slot.focused .flag-row { font-size: 10px; gap: 8px; }
+  .flag-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .phone-slot.focused .flag-dot { width: 8px; height: 8px; }
+
+  /* Video list items (Level 2) */
+  .video-item {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .video-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .video-creator {
+    font-size: 7px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .phone-slot.focused .video-creator { font-size: 9px; }
+  .video-title {
+    font-size: 8px;
+    color: var(--text);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .phone-slot.focused .video-title { font-size: 10px; }
+  .video-desc {
+    font-size: 7px;
+    color: var(--muted);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+  .phone-slot.focused .video-desc { font-size: 9px; }
+
+  /* Flag card content */
+  .flag-title {
+    font-size: 8px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 3px;
+  }
+  .phone-slot.focused .flag-title { font-size: 10px; }
+  .flag-desc {
+    font-size: 7px;
+    color: #b9c6ea;
+    line-height: 1.4;
+  }
+  .phone-slot.focused .flag-desc { font-size: 9px; }
+
+  /* Charts (Level 3) */
+  .chart-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .chart-title {
+    font-size: 8px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .phone-slot.focused .chart-title { font-size: 10px; }
+
+  /* Read more button */
+  .read-more-btn {
+    background: var(--accent)22;
+    border: 1px solid var(--accent)55;
+    color: var(--accent);
+    border-radius: 10px;
+    padding: 7px 12px;
+    font-size: 9px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    transition: background 0.2s, transform 0.1s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .phone-slot.focused .read-more-btn { font-size: 11px; padding: 9px 14px; }
+  .read-more-btn:hover { background: var(--accent)33; }
+  .read-more-btn:active { transform: scale(0.98); }
+
+  /* Full report passage */
+  .report-passage {
+    font-size: 8px;
+    line-height: 1.6;
+    color: #ccccdd;
+    display: none;
+  }
+  .phone-slot.focused .report-passage { font-size: 10px; }
+  .report-passage.open { display: block; }
+  .report-passage p { margin-bottom: 8px; }
+  .report-passage p:last-child { margin-bottom: 0; }
+  .report-passage strong { color: var(--text); }
+  .report-passage .flag-inline { color: var(--accent); font-weight: 600; }
+
+  /* Replay buttons */
+  .replay-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .replay-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Global controls */
+  .global-controls {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .hint-text {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+  .hint-text span { color: var(--accent); font-weight: 600; }
+
+  .global-replay {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 24px;
+    padding: 8px 20px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.05em;
+  }
+  .global-replay:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Click indicator on unfocused phones */
+  .click-hint {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 7px;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .phone-slot.side:hover .click-hint { opacity: 1; }
+
+  /* Scroll hint arrow */
+  .scroll-hint {
+    font-size: 7px;
+    color: var(--accent);
+    text-align: center;
+    padding: 4px 0 2px;
+    animation: bounce 1.5s infinite;
+    flex-shrink: 0;
+  }
+  .phone-slot.focused .scroll-hint { font-size: 9px; }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(3px); }
+  }
+
+  /* Step indicator dots */
+  .step-dots {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-top: 4px;
+  }
+  .step-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .step-dot.done { background: var(--accent); }
+
+  /* Section divider */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+  }
+
+  /* Persistent summary header shown at top of every level */
+  .summary-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+  .phone-slot.focused .summary-header { padding: 10px 16px; gap: 7px; }
+
+  .summary-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .summary-time {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+  .phone-slot.focused .summary-time { font-size: 26px; }
+  .summary-time span { font-size: 9px; font-weight: 400; color: var(--muted); }
+  .phone-slot.focused .summary-time span { font-size: 12px; }
+
+  .summary-label {
+    font-size: 7px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .phone-slot.focused .summary-label { font-size: 9px; }
+
+  .summary-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .summary-flag {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 7px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent)15;
+    border: 1px solid var(--accent)44;
+    border-radius: 8px;
+    padding: 3px 8px;
+  }
+  .phone-slot.focused .summary-flag { font-size: 9px; }
+  .summary-flag-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .yt-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 7px;
+    color: #ff4444;
+    font-weight: 700;
+    background: #ff444415;
+    border: 1px solid #ff444430;
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .phone-slot.focused .yt-badge { font-size: 9px; }
+</style>
+</head>
+<body>
+
+<p class="title">AI Mediator</p>
+<h2 class="subtitle">Daily <span>Reports</span></h2>
+
+<div class="stage">
+
+  <!-- LEVEL 1 -->
+  <div class="phone-slot side" id="slot1" onclick="handleSlotClick(1)">
+    <div class="level-label">Simple</div>
+    <div class="phone" id="phone1">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="status-bar"><span>9:41</span><span>▊▊▊▊</span></div>
+        <div class="app-header">
+          <div class="app-name">AI Mediator</div>
+          <div class="app-date">Daily Report · Tue, 18 Feb 2025</div>
+        </div>
+        <div class="summary-header">
+          <div>
+            <div class="summary-label">Screen Time</div>
+            <div class="summary-time">1h 47<span>m</span></div>
+          </div>
+          <div>
+            <div class="summary-label">Topics Watched</div>
+            <div class="summary-tags">
+              <span class="tag gaming">🎮 Gaming</span>
+              <span class="tag slime">🫧 Slime</span>
+              <span class="tag cartoon">📺 Cartoons</span>
+              <span class="tag talk">🗨️ Talk Videos</span>
+            </div>
+          </div>
+          <div class="summary-flag">
+            <div class="summary-flag-dot"></div>
+            1 video hidden
+          </div>
+        </div>
+        <div class="scroll-content" id="content1">
+
+          <div class="card" id="l1-c2">
+            <div class="card-label">AI Summary</div>
+            <div class="video-desc" style="color:#ccccdd">Your child had an active viewing session today across 4 topics. One video didn't match your family's guidelines, so it was hidden.</div>
+          </div>
+
+          <div class="card" id="l1-c1">
+            <div class="card-label">Videos Watched · 8 total · 1h 47m</div>
+            <div class="section-divider" style="margin-bottom:6px"></div>
+            <div class="video-item">
+              <div class="video-creator">PixelKing</div>
+              <div class="video-title">Minecraft tutorials</div>
+              <div class="video-desc">3 videos · 42 min · Gaming tips and build walkthroughs</div>
+            </div>
+            <div class="video-item">
+              <div class="video-creator">SlimyFun</div>
+              <div class="video-title">Slime-making DIY</div>
+              <div class="video-desc">2 videos · 28 min · DIY recipes using glue and food coloring</div>
+            </div>
+            <div class="video-item">
+              <div class="video-creator">CartoonVault</div>
+              <div class="video-title">SpongeBob compilation</div>
+              <div class="video-desc">2 videos · 24 min · Animated comedy clips</div>
+            </div>
+          </div>
+
+          <div class="card flag-card" id="l1-c3">
+            <div class="flag-title">🔒 1 Video Hidden</div>
+            <div class="video-creator" style="margin-bottom:3px">StreamTalk</div>
+            <div class="flag-desc">This video didn't fit your family's viewing guidelines, so it was hidden from the list. 1 video, 13 min.</div>
+          </div>
+
+        </div>
+        <div class="step-dots" style="padding:6px 0">
+          <div class="step-dot" id="l1-d1"></div>
+          <div class="step-dot" id="l1-d2"></div>
+          <div class="step-dot" id="l1-d3"></div>
+        </div>
+      </div>
+    </div>
+    <div class="replay-btn" onclick="event.stopPropagation(); replaySlot(1)">↺ Replay</div>
+    <div class="click-hint">Tap to expand</div>
+  </div>
+
+  <!-- LEVEL 2 -->
+  <div class="phone-slot side" id="slot2" onclick="handleSlotClick(2)">
+    <div class="level-label">Moderate</div>
+    <div class="phone" id="phone2">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="status-bar"><span>9:41</span><span>▊▊▊▊</span></div>
+        <div class="app-header">
+          <div class="app-name">AI Mediator</div>
+          <div class="app-date">Daily Report · Tue, 18 Feb 2025</div>
+        </div>
+        <div class="summary-header">
+          <div>
+            <div class="summary-label">Screen Time</div>
+            <div class="summary-time">1h 47<span>m</span></div>
+          </div>
+          <div>
+            <div class="summary-label">Topics Watched</div>
+            <div class="summary-tags">
+              <span class="tag gaming">🎮 Gaming</span>
+              <span class="tag slime">🫧 Slime</span>
+              <span class="tag cartoon">📺 Cartoons</span>
+              <span class="tag talk">🗨️ Talk Videos</span>
+            </div>
+          </div>
+          <div class="summary-flag">
+            <div class="summary-flag-dot"></div>
+            1 video hidden
+          </div>
+        </div>
+        <div class="scroll-content" id="content2">
+
+          <div class="card" id="l2-c2">
+            <div class="card-label">AI Summary</div>
+            <div class="video-desc" style="color:#ccccdd">Your child's session was mostly positive. The bulk of their time (42 min) went to PixelKing's Minecraft tutorials, which they actively searched for. Content was instructional and age-appropriate. SlimyFun's slime videos (28 min) and CartoonVault's SpongeBob clips (24 min) raised no concerns. One video from StreamTalk didn't match your family's guidelines, so it was hidden from the list.</div>
+          </div>
+
+          <div class="card" id="l2-c1">
+            <div class="card-label">Videos Watched · 8 total · 1h 47m</div>
+            <div class="section-divider" style="margin-bottom:6px"></div>
+
+            <div class="video-item">
+              <div class="video-creator">PixelKing</div>
+              <div class="video-title">Minecraft tutorials</div>
+              <div class="video-desc">3 videos · 42 min · Gaming tips and build walkthroughs</div>
+            </div>
+
+            <div class="video-item">
+              <div class="video-creator">SlimyFun</div>
+              <div class="video-title">Slime-making DIY</div>
+              <div class="video-desc">2 videos · 28 min · DIY recipes using glue and food coloring</div>
+            </div>
+
+            <div class="video-item">
+              <div class="video-creator">CartoonVault</div>
+              <div class="video-title">SpongeBob compilation</div>
+              <div class="video-desc">2 videos · 24 min · Animated comedy clips</div>
+            </div>
+
+          </div>
+
+          <div class="card flag-card" id="l2-c3">
+            <div class="flag-title">🔒 1 Video Hidden</div>
+            <div class="video-creator" style="margin-bottom:3px">StreamTalk</div>
+            <div class="flag-desc">This video didn't fit your family's viewing guidelines, so it was hidden from the list. 1 video, 13 min.</div>
+          </div>
+
+        </div>
+        <div class="step-dots" style="padding:6px 0">
+          <div class="step-dot" id="l2-d1"></div>
+          <div class="step-dot" id="l2-d2"></div>
+          <div class="step-dot" id="l2-d3"></div>
+        </div>
+      </div>
+    </div>
+    <div class="replay-btn" onclick="event.stopPropagation(); replaySlot(2)">↺ Replay</div>
+    <div class="click-hint">Tap to expand</div>
+  </div>
+
+  <!-- LEVEL 3 -->
+  <div class="phone-slot side" id="slot3" onclick="handleSlotClick(3)">
+    <div class="level-label">Detailed</div>
+    <div class="phone" id="phone3">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="status-bar"><span>9:41</span><span>▊▊▊▊</span></div>
+        <div class="app-header">
+          <div class="app-name">AI Mediator</div>
+          <div class="app-date">Daily Report · Tue, 18 Feb 2025</div>
+        </div>
+        <div class="summary-header">
+          <div>
+            <div class="summary-label">Screen Time</div>
+            <div class="summary-time">1h 47<span>m</span></div>
+          </div>
+          <div>
+            <div class="summary-label">Topics Watched</div>
+            <div class="summary-tags">
+              <span class="tag gaming">🎮 Gaming</span>
+              <span class="tag slime">🫧 Slime</span>
+              <span class="tag cartoon">📺 Cartoons</span>
+              <span class="tag talk">🗨️ Talk Videos</span>
+            </div>
+          </div>
+          <div class="summary-flag">
+            <div class="summary-flag-dot"></div>
+            1 video hidden
+          </div>
+        </div>
+        <div class="scroll-content" id="content3">
+
+          <!-- AI Summary + Full Report -->
+          <div class="card" id="l3-c1">
+            <div class="card-label">AI Summary</div>
+            <div class="video-desc" style="color:#ccccdd; margin-bottom:8px">Today's session was largely age-appropriate. Your child intentionally sought out PixelKing's Minecraft tutorials (42 min), which were instructional and positive in tone. SlimyFun's DIY slime content (28 min) and CartoonVault's SpongeBob clips (24 min) showed no concerning material. One video from StreamTalk (13 min) didn't match your family's guidelines and was hidden from the list. Your child was shown a simple, friendly notice that the video wasn't available.</div>
+            <button class="read-more-btn" onclick="event.stopPropagation(); toggleReport()">Read Full Report ↓</button>
+            <div class="report-passage" id="report-passage">
+              <p><strong>Gaming (42 min, 3 videos, PixelKing)</strong><br>
+              Your child watched three Minecraft tutorial videos by PixelKing, a creator focused on building and survival strategies. The tone was instructional and positive throughout. No concerns were observed. These videos were actively searched for by your child.</p>
+
+              <p><strong>Slime-making (28 min, 2 videos, SlimyFun)</strong><br>
+              Two DIY slime-making videos were watched from the channel SlimyFun. Recipes involved common craft supplies such as glue and food coloring. The creator demonstrated each step clearly and used age-appropriate language.</p>
+
+              <p><strong>Cartoons (24 min, 2 videos, CartoonVault)</strong><br>
+              Two SpongeBob SquarePants compilation clips were watched from CartoonVault, a fan-upload channel. Content was lighthearted animated comedy. Nothing concerning was detected.</p>
+
+              <p class="flag-inline">🔒 Hidden — StreamTalk (13 min, 1 video)</p>
+              <p>This video included commentary about other online creators that didn't line up with the guidelines you've set for kindness and respectful content. It has been hidden from your child's list, and they received a simple, friendly notice that it wasn't available right now — nothing more was explained on-screen, so this is a good moment for a conversation on your terms. This matches the family rule you set: <em>No content encouraging harm toward others.</em> Reach out any time if you'd like more detail on what was in it.</p>
+            </div>
+          </div>
+
+          <!-- Videos Watched -->
+          <div class="card" id="l3-c2">
+            <div class="card-label">Videos Watched · 8 total · 1h 47m</div>
+            <div class="section-divider" style="margin-bottom:6px"></div>
+            <div class="video-item">
+              <div class="video-creator">PixelKing</div>
+              <div class="video-title">Minecraft tutorials</div>
+              <div class="video-desc">3 videos · 42 min · Gaming tips and build walkthroughs</div>
+            </div>
+            <div class="video-item">
+              <div class="video-creator">SlimyFun</div>
+              <div class="video-title">Slime-making DIY</div>
+              <div class="video-desc">2 videos · 28 min · DIY recipes using glue and food coloring</div>
+            </div>
+            <div class="video-item">
+              <div class="video-creator">CartoonVault</div>
+              <div class="video-title">SpongeBob compilation</div>
+              <div class="video-desc">2 videos · 24 min · Animated comedy clips</div>
+            </div>
+          </div>
+
+          <div class="card flag-card" id="l3-c3">
+            <div class="flag-title">🔒 1 Video Hidden</div>
+            <div class="video-creator" style="margin-bottom:3px">StreamTalk</div>
+            <div class="flag-desc">This video didn't fit your family's viewing guidelines, so it was hidden from the list. 1 video, 13 min.</div>
+          </div>
+
+        </div>
+        <div class="step-dots" style="padding:6px 0">
+          <div class="step-dot" id="l3-d1"></div>
+          <div class="step-dot" id="l3-d2"></div>
+          <div class="step-dot" id="l3-d3"></div>
+        </div>
+      </div>
+    </div>
+    <div class="replay-btn" onclick="event.stopPropagation(); replaySlot(3)">↺ Replay</div>
+    <div class="click-hint">Tap to expand</div>
+  </div>
+
+</div>
+
+<div class="global-controls">
+  <p class="hint-text">Click a report level to expand it.<br>Then <span>click the phone</span> to reveal information step by step.</p>
+  <button class="global-replay" onclick="replayAll()">↺ &nbsp;Replay All</button>
+</div>
+
+<script>
+  // Randomize panel order on load
+  (function shufflePanels() {
+    const stage = document.querySelector('.stage');
+    const slots = [
+      document.getElementById('slot1'),
+      document.getElementById('slot2'),
+      document.getElementById('slot3')
+    ];
+    // Fisher-Yates shuffle
+    for (let i = slots.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [slots[i], slots[j]] = [slots[j], slots[i]];
+    }
+    slots.forEach(slot => stage.appendChild(slot));
+  })();
+
+  // State
+  const state = {
+    focused: null, // 1, 2, or 3
+    steps: { 1: 0, 2: 0, 3: 0 },
+    reportOpen: false
+  };
+
+  const maxSteps = { 1: 3, 2: 3, 3: 3 };
+
+  function handleSlotClick(n) {
+    if (state.focused === n) {
+      // Already focused: advance step
+      advanceStep(n);
+    } else {
+      // Focus this slot
+      focusSlot(n);
+    }
+  }
+
+  function focusSlot(n) {
+    state.focused = n;
+    [1, 2, 3].forEach(i => {
+      const slot = document.getElementById('slot' + i);
+      slot.classList.remove('focused', 'side');
+      if (i === n) slot.classList.add('focused');
+      else slot.classList.add('side');
+    });
+    // If no steps shown yet for this slot, show first step
+    if (state.steps[n] === 0) {
+      advanceStep(n);
+    }
+  }
+
+  function advanceStep(n) {
+    if (state.steps[n] >= maxSteps[n]) return;
+    state.steps[n]++;
+    showStep(n, state.steps[n]);
+  }
+
+  function showStep(n, step) {
+    const dot = document.getElementById(`l${n}-d${step}`);
+    if (dot) dot.classList.add('done');
+
+    if (n === 1) {
+      if (step === 1) showCard('l1-c2');
+      if (step === 2) showCard('l1-c1');
+      if (step === 3) showCard('l1-c3');
+    }
+    if (n === 2) {
+      if (step === 1) showCard('l2-c2');
+      if (step === 2) showCard('l2-c1');
+      if (step === 3) showCard('l2-c3');
+    }
+    if (n === 3) {
+      if (step === 1) showCard('l3-c1');
+      if (step === 2) showCard('l3-c2');
+      if (step === 3) showCard('l3-c3');
+    }
+  }
+
+  function showCard(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      requestAnimationFrame(() => el.classList.add('visible'));
+    }
+  }
+
+  function hideCard(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('visible');
+  }
+
+  function toggleReport() {
+    const passage = document.getElementById('report-passage');
+    const btn = document.querySelector('.read-more-btn');
+    state.reportOpen = !state.reportOpen;
+    if (state.reportOpen) {
+      passage.classList.add('open');
+      btn.textContent = 'Hide Full Report ↑';
+      setTimeout(() => {
+        document.getElementById('content3').scrollTop = 9999;
+      }, 100);
+    } else {
+      passage.classList.remove('open');
+      btn.textContent = 'Read Full Report ↓';
+    }
+  }
+
+  function replaySlot(n) {
+    state.steps[n] = 0;
+    state.reportOpen = false;
+
+    // Hide all cards for that slot
+    const cardSets = {
+      1: ['l1-c1','l1-c2','l1-c3'],
+      2: ['l2-c1','l2-c2','l2-c3'],
+      3: ['l3-c1','l3-c2','l3-c3']
+    };
+    cardSets[n].forEach(id => hideCard(id));
+
+    // Reset dots
+    const maxD = maxSteps[n];
+    for (let i = 1; i <= maxD; i++) {
+      const dot = document.getElementById(`l${n}-d${i}`);
+      if (dot) dot.classList.remove('done');
+    }
+
+    // Reset report
+    if (n === 3) {
+      const passage = document.getElementById('report-passage');
+      const btn = document.querySelector('.read-more-btn');
+      if (passage) passage.classList.remove('open');
+      if (btn) btn.textContent = 'Read Full Report ↓';
+    }
+
+    // Reset scroll
+    const content = document.getElementById('content' + n);
+    if (content) content.scrollTop = 0;
+
+    // If currently focused, show first step
+    if (state.focused === n) {
+      advanceStep(n);
+    }
+  }
+
+  function replayAll() {
+    state.focused = null;
+    state.reportOpen = false;
+    state.steps = { 1: 0, 2: 0, 3: 0 };
+
+    [1, 2, 3].forEach(n => {
+      const slot = document.getElementById('slot' + n);
+      slot.classList.remove('focused');
+      slot.classList.add('side');
+
+      const cardSets = {
+        1: ['l1-c1','l1-c2','l1-c3'],
+        2: ['l2-c1','l2-c2','l2-c3'],
+        3: ['l3-c1','l3-c2','l3-c3']
+      };
+      cardSets[n].forEach(id => hideCard(id));
+
+      const maxD = maxSteps[n];
+      for (let i = 1; i <= maxD; i++) {
+        const dot = document.getElementById(`l${n}-d${i}`);
+        if (dot) dot.classList.remove('done');
+      }
+
+      const content = document.getElementById('content' + n);
+      if (content) content.scrollTop = 0;
+    });
+
+    const passage = document.getElementById('report-passage');
+    const btn = document.querySelector('.read-more-btn');
+    if (passage) passage.classList.remove('open');
+    if (btn) btn.textContent = 'Read Full Report ↓';
+  }
+</script>
+</body>
+</html>
