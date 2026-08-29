@@ -456,18 +456,6 @@
             <div class="blocked-row"><div class="bdot"></div>Blocked</div>
           </div>
 
-          <div class="cat-card" id="cc-s">
-            <div class="cat-top">
-              <div class="cat-icon">&#x1F6E1;&#xFE0F;</div>
-              <div class="cat-info">
-                <div class="cat-name">Adult Habits</div>
-                <div class="cat-desc">Content about grown-up habits, not for kids</div>
-              </div>
-              <div class="toggle" id="tog-s"></div>
-            </div>
-            <div class="blocked-row"><div class="bdot"></div>Blocked</div>
-          </div>
-
           <div class="cat-card" id="cc-x">
             <div class="cat-top">
               <div class="cat-icon">&#x1F512;</div>
@@ -871,15 +859,14 @@
     tm(() => show('cc-v'),    T * 0.5);
     tm(() => show('cc-p'),    T * 1.0);
     tm(() => show('cc-d'),    T * 1.5);
-    tm(() => show('cc-s'),    T * 2.0);
-    tm(() => show('cc-x'),    T * 2.5);
-    tm(() => show('cust-btn'),T * 3.1);
-    tm(() => { togOn('tog-v'); cardBlock('cc-v'); }, T * 3.9);
-    tm(() => { togOn('tog-p'); cardBlock('cc-p'); }, T * 4.8);
-    tm(() => pulse('cust-btn'), T * 5.5);
-    tm(() => goSlide2(), T * 6.3);
+    tm(() => show('cc-x'),    T * 2.0);
+    tm(() => show('cust-btn'),T * 2.6);
+    tm(() => { togOn('tog-v'); cardBlock('cc-v'); }, T * 3.4);
+    tm(() => { togOn('tog-p'); cardBlock('cc-p'); }, T * 4.3);
+    tm(() => pulse('cust-btn'), T * 5.0);
+    tm(() => goSlide2(), T * 5.8);
 
-    const base = T * 6.3 + 700;
+    const base = T * 5.8 + 700;
 
     // SLIDE 2
     tm(() => show('tip'), base);
@@ -959,14 +946,14 @@
     s1.style.display = 'flex'; s1.style.opacity = '1';
     s2.style.display = 'none';
 
-    ['cc-v','cc-p','cc-d','cc-s','cc-x'].forEach(id => {
+    ['cc-v','cc-p','cc-d','cc-x'].forEach(id => {
       const e = document.getElementById(id);
       if (e) e.classList.remove('show','blocked');
     });
     const cb = document.getElementById('cust-btn');
     if (cb) cb.classList.remove('show','pulse');
 
-    ['tog-v','tog-p','tog-d','tog-s','tog-x'].forEach(id => {
+    ['tog-v','tog-p','tog-d','tog-x'].forEach(id => {
       const e = document.getElementById(id);
       if (e) e.classList.remove('on','allowed');
     });
