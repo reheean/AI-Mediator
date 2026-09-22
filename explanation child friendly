@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Block Explanations</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #000; --card: #1e1e28; --border: #2e2e3e; --text: #f0f0f5;
+    --muted: #a0a0c8; --accent: #6d8bff; --green: #34d399; --red: #ff4d6d;
+    --yt-red: #ff0000; --tr: 0.55s cubic-bezier(0.4,0,0.2,1);
+    --phone-w: 460px; --phone-h: 840px; --phone-sm-w: 270px; --phone-sm-h: 500px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: #000; color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px 56px; overflow-x: hidden; }
+
+  /* ===== Page progress dots ===== */
+  .page-dots { display: flex; gap: 7px; justify-content: center; margin-top: 28px; }
+  .pdot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background 0.4s, transform 0.4s; }
+  .pdot.on { background: var(--accent); transform: scale(1.15); }
+
+  .slide { display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+  /* ===== Shared small label style (de-emphasized, not a header) ===== */
+  .lead-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-align: center; margin-bottom: 16px; max-width: 460px; line-height: 1.6; }
+
+  /* ===== Phone shell (shared) ===== */
+  .stage { display: flex; align-items: center; justify-content: center; gap: 18px; width: 100%; max-width: 1500px; min-height: 900px; position: relative; flex-wrap: wrap; }
+
+  .slot { display: flex; flex-direction: column; align-items: center; gap: 14px; transition: var(--tr); cursor: pointer; position: relative; flex-shrink: 0; }
+  .slot .lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); transition: var(--tr); text-align: center; }
+  .slot.focused .lbl { font-size: 11px; }
+
+  .phone { width: var(--phone-sm-w); height: var(--phone-sm-h); background: #111118; border-radius: 42px; border: 3px solid var(--border); box-shadow: 0 8px 32px #00000060; overflow: hidden; display: flex; flex-direction: column; transition: var(--tr); position: relative; }
+  .slot.focused .phone { width: var(--phone-w); height: var(--phone-h); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent)44, 0 30px 80px #00000099; cursor: default; }
+  .slot.side .phone { opacity: 0.45; filter: blur(0.5px); }
+  .slot.side:hover .phone { opacity: 0.68; }
+
+  .lead-phone.phone { width: var(--phone-w); height: var(--phone-h); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent)44, 0 30px 80px #00000099; margin-bottom: 20px; }
+
+  /* YouTube bottom nav */
+  .yt-nav { background: #0f0f0f; border-top: 1px solid #1c1c1c; display: flex; align-items: center; justify-content: space-around; padding: 6px 0 9px; flex-shrink: 0; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 7px; color: var(--muted); flex: 1; transition: color 0.3s; }
+  .slot.focused .nav-item, .lead-phone .nav-item { font-size: 10px; gap: 4px; }
+  .nav-item.active { color: #fff; }
+  .nav-item.ai-nav { color: var(--accent); }
+  .nav-icon-wrap { width: 22px; height: 22px; border-radius: 50%; background: var(--accent)22; border: 1px solid var(--accent)55; display: flex; align-items: center; justify-content: center; }
+  .slot.focused .nav-icon-wrap, .lead-phone .nav-icon-wrap { width: 30px; height: 30px; }
+
+  .notch { width: 110px; height: 30px; background: #000; border-radius: 0 0 18px 18px; margin: 0 auto; flex-shrink: 0; }
+  .slot.focused .notch, .lead-phone .notch { width: 150px; height: 34px; }
+  .screen { flex: 1; overflow: hidden; display: flex; flex-direction: column; background: #0d0d14; position: relative; }
+  .sbar { display: flex; justify-content: space-between; padding: 5px 18px; font-size: 15px; font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; }
+  .slot.focused .sbar, .lead-phone .sbar { font-size: 18px; padding: 7px 24px; }
+  .yth { background: #0f0f0f; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1c1c1c; flex-shrink: 0; }
+  .slot.focused .yth, .lead-phone .yth { padding: 10px 22px; }
+  .ytlogo { display: flex; align-items: center; gap: 5px; font-size: 18px; font-weight: 800; color: #fff; }
+  .slot.focused .ytlogo, .lead-phone .ytlogo { font-size: 25px; }
+  .ytico { background: var(--yt-red); border-radius: 5px; width: 23px; height: 16px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; }
+  .slot.focused .ytico, .lead-phone .ytico { width: 29px; height: 20px; font-size: 12px; }
+  .ytright { display: flex; gap: 14px; font-size: 18px; color: #aaa; }
+  .slot.focused .ytright, .lead-phone .ytright { font-size: 24px; }
+  .ytright span { transition: color 0.3s, transform 0.3s; }
+  .ytright span.tapped { color: var(--accent); transform: scale(1.15); }
+
+  /* ===== Search header (replaces .yth when searching) ===== */
+  .search-header { background: #0f0f0f; padding: 8px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #1c1c1c; flex-shrink: 0; opacity: 0; transition: opacity 0.35s; }
+  .lead-phone .search-header { padding: 10px 22px; }
+  .search-header.show { opacity: 1; }
+  .search-back { font-size: 20px; color: #aaa; }
+  .lead-phone .search-back { font-size: 24px; }
+  .search-box { flex: 1; display: flex; align-items: center; gap: 8px; background: #1c1c26; border: 1px solid #2e2e3e; border-radius: 22px; padding: 8px 16px; }
+  .lead-phone .search-box { padding: 10px 18px; border-radius: 26px; }
+  .search-ico { font-size: 15px; opacity: .8; }
+  .lead-phone .search-ico { font-size: 18px; }
+  .search-text { font-size: 14px; color: #fff; font-weight: 500; }
+  .lead-phone .search-text { font-size: 17px; }
+  .search-cursor { display:inline-block; width:2px; height:15px; background:var(--accent); margin-left:1px; vertical-align:middle; animation: blink 0.9s step-end infinite; opacity:0; }
+  .lead-phone .search-cursor { height: 18px; }
+  .search-cursor.on { opacity: 1; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ===== Feed / results content ===== */
+  .feed-stage { position: absolute; inset: 0; top: 0; display: flex; flex-direction: column; opacity: 0; transition: opacity 0.4s; pointer-events: none; }
+  .feed-stage.show { opacity: 1; pointer-events: auto; position: relative; }
+
+  .vid-list { flex: 1; overflow-y: auto; padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 22px; scrollbar-width: none; }
+  .vid-list::-webkit-scrollbar { display: none; }
+
+  .vrow { display: flex; flex-direction: column; gap: 10px; opacity: 0; transform: translateY(10px); transition: opacity 0.5s ease, transform 0.5s ease; }
+  .vrow.show { opacity: 1; transform: translateY(0); }
+
+  .vthumb { width: 100%; aspect-ratio: 16/9; border-radius: 12px; flex-shrink: 0; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .vthumb-a { background: #3a4550; }
+  .vthumb-b { background: #4a4234; }
+  .vthumb-c { background: #39473f; }
+  .vthumb-d { background: #4a3a42; }
+  .vthumb-e { background: #3f3a4a; }
+  .vthumb-f { background: #4a3530; }
+  .vthumb-g { background: #33404a; }
+  .vthumb-h { background: #42493a; }
+  .vthumb-i { background: #453a3a; }
+  .vthumb-target { background: linear-gradient(120deg,#8f6fd6,#4f9fd8 33%,#3fc79e 66%,#e88f4a); }
+
+  .vicon { width: 38%; height: 38%; opacity: .5; }
+  .vicon svg { width: 100%; height: 100%; stroke: #fff; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+  .vdur { position: absolute; bottom: 7px; right: 7px; background: rgba(0,0,0,.78); color: #fff; font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; font-family: 'DM Mono', monospace; }
+
+  .vlock { position: absolute; inset: 0; background: rgba(10,10,14,.68); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .vlock-ico { font-size: 22px; }
+  .vlock-lbl { font-size: 9px; font-weight: 700; color: #ffe0e0; text-transform: uppercase; letter-spacing: .06em; background: rgba(255,25,70,.32); border: 1px solid rgba(255,25,70,.7); border-radius: 6px; padding: 2px 7px; }
+
+  /* Highlight card treatment for the restricted result, so it visually pops without changing its own colors */
+  .vrow.srow.locked { border-radius: 14px; padding: 10px; margin: -10px; border: 1px solid rgba(255,77,109,0); background: rgba(255,77,109,0); transition: background 0.7s ease, border-color 0.7s ease; }
+  .vrow.srow.locked .vthumb { transition: box-shadow 0.7s ease; }
+  .vrow.srow.locked.highlight { background: rgba(255,25,70,.16); border-color: rgba(255,25,70,.75); }
+  .vrow.srow.locked.highlight .vthumb { box-shadow: 0 0 0 3px rgba(255,25,70,.85), 0 0 32px -2px rgba(255,25,70,.75); }
+
+  /* Search-results rows use the compact horizontal layout (thumb left, text right) */
+  .vrow.srow { flex-direction: row; align-items: flex-start; gap: 14px; }
+  .vrow.srow .vthumb { width: 150px; aspect-ratio: 16/9; flex-shrink: 0; }
+  .vrow.srow .vinfo2 { flex: 1; min-width: 0; margin-top: 2px; }
+
+  .vinfo2 { display: flex; gap: 10px; align-items: flex-start; }
+  .vavatar-init { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; letter-spacing: .02em; }
+  .vtext { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .vtitle2 { font-size: 15px; font-weight: 600; color: #fff; line-height: 1.35; }
+  .vrow.locked .vtitle2 { color: #cfcfe0; }
+  .vmeta2 { font-size: 12px; color: var(--muted); }
+
+  .continue-wrap { display: flex; justify-content: center; margin-top: 24px; opacity: 0; transform: translateY(6px); transition: opacity 0.5s, transform 0.5s; }
+  .continue-wrap.show { opacity: 1; transform: translateY(0); }
+  .continue-btn { background: var(--accent)18; border: 1px solid var(--accent)55; color: var(--accent); border-radius: 24px; padding: 12px 26px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: box-shadow 0.4s; }
+  .continue-btn.pulse { box-shadow: 0 0 0 5px var(--accent)22, 0 0 0 11px var(--accent)10; }
+
+  /* ===== Video player panels (slide 2) ===== */
+  .vplayer { width: 100%; aspect-ratio: 4/3; background: #000; position: relative; flex-shrink: 0; overflow: hidden; }
+  .scene { position: absolute; inset: 0; overflow: hidden; }
+  .sbg { position: absolute; inset: 0; background: linear-gradient(120deg,#8f6fd6,#4f9fd8 33%,#3fc79e 66%,#e88f4a); }
+  .person { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); }
+  .person.a { left: 38%; }
+  .person.b { left: 62%; }
+  .pbody { width: 44px; height: 70px; background: linear-gradient(180deg,#2d6a9f,#1a3a5c); border-radius: 8px 8px 0 0; position: relative; animation: bob 1.2s ease-in-out infinite; }
+  .person.b .pbody { background: linear-gradient(180deg,#c2542d,#7a2f14); animation-delay: 0.15s; }
+  .slot.focused .pbody { width: 62px; height: 96px; }
+  @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-2px)} }
+  .phead { width: 30px; height: 30px; background: #e8c99a; border-radius: 50%; position: absolute; top: -32px; left: 50%; transform: translateX(-50%); }
+  .person.b .phead { background: #d9b088; animation-delay: 0.15s; }
+  .slot.focused .phead { width: 42px; height: 42px; top: -44px; }
+
+  .thumb { position: absolute; inset: 0; background: linear-gradient(160deg,#0d1b2a,#1b2838); display: flex; align-items: center; justify-content: center; z-index: 20; transition: opacity 0.3s; }
+  .thumb.gone { opacity: 0; pointer-events: none; }
+  .playbtn { width: 42px; height: 42px; background: rgba(0,0,0,.75); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; }
+  .slot.focused .playbtn { width: 60px; height: 60px; font-size: 26px; }
+
+  .ytctrl { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent,rgba(0,0,0,.9)); padding: 12px 10px 6px; z-index: 10; }
+  .slot.focused .ytctrl { padding: 15px 13px 8px; }
+  .ptrack { width: 100%; height: 4px; background: rgba(255,255,255,.22); border-radius: 2px; margin-bottom: 6px; }
+  .slot.focused .ptrack { height: 5px; }
+  .pfill { height: 100%; background: var(--yt-red); border-radius: 2px; width: 0%; transition: width 0.08s linear; position: relative; }
+  .pfill::after { content: ''; position: absolute; right: -4px; top: 50%; transform: translateY(-50%); width: 9px; height: 9px; background: #fff; border-radius: 50%; }
+  .slot.focused .pfill::after { width: 12px; height: 12px; right: -6px; }
+  .crow { display: flex; align-items: center; justify-content: space-between; }
+  .cleft { display: flex; align-items: center; gap: 8px; }
+  .cbtn { font-size: 14px; color: #fff; }
+  .slot.focused .cbtn { font-size: 18px; }
+  .tdisp { font-size: 11px; color: rgba(255,255,255,.82); font-family: 'DM Mono', monospace; }
+  .slot.focused .tdisp { font-size: 13px; }
+
+  .block-overlay { position: absolute; inset: 0; background: rgba(8,8,10,.92); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 7px; z-index: 30; padding: 16px 16px 20px; overflow-y: auto; scrollbar-width: none; opacity: 0; transition: opacity 0.4s; }
+  .block-overlay.centered { justify-content: center; }
+  .block-overlay::-webkit-scrollbar { display: none; }
+  .block-overlay.on { opacity: 1; }
+  .block-ico { font-size: 26px; }
+  .slot.focused .block-ico { font-size: 34px; }
+  .block-title { font-size: 15px; font-weight: 700; color: #fff; text-align: center; }
+  .slot.focused .block-title { font-size: 20px; }
+  .block-badge { background: rgba(255,77,109,.15); border: 1px solid var(--red)44; border-radius: 8px; padding: 4px 11px; font-size: 11px; color: var(--red); font-weight: 600; margin-top: 2px; }
+  .slot.focused .block-badge { font-size: 14px; padding: 5px 14px; }
+
+  .ai-explain { background: rgba(109,139,255,.1); border: 1px solid var(--accent)44; border-radius: 10px; padding: 10px 13px; font-size: 12px; color: var(--text); line-height: 1.55; text-align: left; width: 100%; opacity: 0; transform: translateY(6px); transition: opacity 0.5s, transform 0.5s; margin-top: 5px; }
+  .slot.focused .ai-explain { font-size: 15px; padding: 13px 16px; border-radius: 12px; }
+  .ai-explain.on { opacity: 1; transform: translateY(0); }
+  .ai-explain-label { font-size: 10px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+  .slot.focused .ai-explain-label { font-size: 12px; }
+  .ai-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: apulse 2s infinite; }
+  @keyframes apulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  .chat-prompt { display: flex; align-items: center; gap: 6px; background: rgba(109,139,255,.12); border: 1px solid var(--accent)55; border-radius: 22px; padding: 6px 13px; font-size: 10px; color: var(--accent); font-weight: 600; width: 100%; opacity: 0; transform: translateY(4px); transition: opacity 0.5s 0.2s, transform 0.5s 0.2s; cursor: pointer; margin-top: 3px; line-height: 1.5; }
+  .slot.focused .chat-prompt { font-size: 13px; padding: 7px 15px; border-radius: 26px; }
+  .chat-prompt.on { opacity: 1; transform: translateY(0); }
+  .chat-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  .parent-line { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.1); }
+  .parent-line-label { font-size: 10px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+  .slot.focused .parent-line-label { font-size: 12px; }
+  .quote-text { color: var(--muted); font-style: italic; }
+
+  .vinfo { padding: 12px 16px; background: #0f0f0f; flex: 1; overflow: hidden; }
+  .slot.focused .vinfo { padding: 15px 22px; }
+  .vtitle { font-size: 15px; font-weight: 600; color: #fff; line-height: 1.4; margin-bottom: 6px; }
+  .slot.focused .vtitle { font-size: 19px; }
+  .vmeta { font-size: 12px; color: #999; display: flex; gap: 7px; margin-bottom: 8px; }
+  .slot.focused .vmeta { font-size: 15px; }
+  .chrow { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-top: 1px solid #1c1c1c; border-bottom: 1px solid #1c1c1c; margin-bottom: 7px; }
+  .chav { width: 29px; height: 29px; border-radius: 50%; background: linear-gradient(135deg,#8b93ff,#6d8bff); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .slot.focused .chav { width: 40px; height: 40px; font-size: 14px; }
+  .chnm { font-size: 13px; font-weight: 600; color: #fff; flex: 1; }
+  .slot.focused .chnm { font-size: 17px; }
+  .subbtn { background: #fff; color: #000; border-radius: 16px; padding: 5px 11px; font-size: 11px; font-weight: 700; }
+  .slot.focused .subbtn { font-size: 15px; padding: 6px 14px; }
+  .actrow { display: flex; gap: 8px; }
+  .actbtn { background: #1c1c1c; border-radius: 16px; padding: 5px 11px; font-size: 11px; color: #fff; }
+  .slot.focused .actbtn { font-size: 15px; padding: 6px 14px; }
+
+
+  .rbtn { background: var(--card); border: 1px solid var(--border); color: var(--muted); border-radius: 22px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 6px; }
+  .rbtn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ===== SLIDE 1: home feed → search → results (with a locked video) ===== -->
+<div class="slide" id="slide1">
+  <div class="phone lead-phone">
+    <div class="notch"></div>
+    <div class="screen">
+      <div class="sbar"><span>9:41</span><span>▊▊▊▊</span></div>
+
+      <div class="yth" id="home-header">
+        <div class="ytlogo"><div class="ytico">▶</div>YouTube</div>
+        <div class="ytright"><span id="search-icon">🔍</span><span>👤</span></div>
+      </div>
+      <div class="search-header" id="search-header">
+        <span class="search-back">←</span>
+        <div class="search-box"><span class="search-ico">🔍</span><span class="search-text" id="search-typed"></span><span class="search-cursor" id="search-cursor"></span></div>
+      </div>
+
+      <div class="feed-stage show" id="home-stage">
+        <div class="vid-list" id="home-list">
+          <div class="vrow show" id="h1"><div class="vthumb vthumb-a"><div class="vicon"><svg viewBox="0 0 24 24"><path d="M4 9v6M2 10v4M20 9v6M22 10v4M7 12h10"/><rect x="4.5" y="7.5" width="3" height="9" rx="1"/><rect x="16.5" y="7.5" width="3" height="9" rx="1"/></svg></div><div class="vdur">9:58</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#3a4550">FZ</div><div class="vtext"><div class="vtitle2">10-Minute Home Workout</div><div class="vmeta2">Frimzee · 2.1M views · 1 month ago</div></div></div></div>
+          <div class="vrow show" id="h2"><div class="vthumb vthumb-b"><div class="vicon"><svg viewBox="0 0 24 24"><path d="M3 11h18l-1.6 6.3A2 2 0 0 1 17.5 19h-11a2 2 0 0 1-1.9-1.7z"/><path d="M9 3c0 1.3 1.3 1.3 1.3 2.6M13 3c0 1.3 1.3 1.3 1.3 2.6"/></svg></div><div class="vdur">6:24</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#4a4234">NQ</div><div class="vtext"><div class="vtitle2">Easy Pasta Recipe</div><div class="vmeta2">Nolquin · 940K views · 3 weeks ago</div></div></div></div>
+          <div class="vrow show" id="h3"><div class="vthumb vthumb-c"><div class="vicon"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="8" r="1.6"/><circle cx="12" cy="6" r="1.6"/><circle cx="16.5" cy="8" r="1.6"/><path d="M12 11.5c-3.2 0-5.5 2-5.5 4.7S8.9 20 12 20s5.5-1 5.5-3.8-2.3-4.7-5.5-4.7z"/></svg></div><div class="vdur">11:03</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#39473f">BX</div><div class="vtext"><div class="vtitle2">Learn To Draw Animals</div><div class="vmeta2">Bexolo · 512K views · 2 months ago</div></div></div></div>
+          <div class="vrow show" id="h4"><div class="vthumb vthumb-d"><div class="vicon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><ellipse cx="12" cy="12" rx="10" ry="3.2"/></svg></div><div class="vdur">7:41</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#4a3a42">YZ</div><div class="vtext"><div class="vtitle2">Space Facts You Didn't Know</div><div class="vmeta2">Yumzee · 1.4M views · 6 days ago</div></div></div></div>
+        </div>
+      </div>
+
+      <div class="feed-stage" id="results-stage">
+        <div class="vid-list" id="results-list">
+          <div class="vrow srow" id="r1"><div class="vthumb vthumb-e"><div class="vicon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.6 4.6l2 2M17.4 17.4l2 2M19.4 4.6l-2 2M6.6 17.4l-2 2"/></svg></div><div class="vdur">13:20</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#3f3a4a">ZV</div><div class="vtext"><div class="vtitle2">A Day In My Life</div><div class="vmeta2">Zorvun · 780K views · 4 days ago</div></div></div></div>
+          <div class="vrow srow" id="r2"><div class="vthumb vthumb-f"><div class="vicon"><svg viewBox="0 0 24 24"><path d="M4 8h13v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M17 9.5h1.5a2 2 0 0 1 0 4H17"/><path d="M7.5 3c0 1.3 1.3 1.3 1.3 2.6M11.5 3c0 1.3 1.3 1.3 1.3 2.6"/></svg></div><div class="vdur">5:47</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#4a3530">QB</div><div class="vtext"><div class="vtitle2">Morning Routine 2024</div><div class="vmeta2">Quiblatt · 1.1M views · 2 weeks ago</div></div></div></div>
+          <div class="vrow srow locked" id="r-target">
+            <div class="vthumb vthumb-target"><div class="vlock"><div class="vlock-ico" style="color:#ffb3b3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:block"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="vlock-lbl">Restricted</div></div></div>
+            <div class="vinfo2"><div class="vavatar-init" style="background:linear-gradient(135deg,#8b93ff,#6d8bff)">OT</div><div class="vtext"><div class="vtitle2">Just Another Day 🎬</div><div class="vmeta2">Obbletrook · 1.2M views · 3 days ago</div></div></div>
+          </div>
+          <div class="vrow srow" id="r3"><div class="vthumb vthumb-g"><div class="vicon"><svg viewBox="0 0 24 24"><circle cx="15" cy="12" r="6"/><path d="M5 3v6a1.5 1.5 0 0 0 3 0V3M6.5 9V21M9 3v6c0 1.2-1.2 1.8-2.5 1.8"/></svg></div><div class="vdur">8:12</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#33404a">TB</div><div class="vtext"><div class="vtitle2">What I Eat In A Day</div><div class="vmeta2">Thorbil · 305K views · 1 week ago</div></div></div></div>
+          <div class="vrow srow" id="r4"><div class="vthumb vthumb-h"><div class="vicon"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l1.8-3h4.4l1.8 3"/><circle cx="12" cy="13.5" r="3.4"/></svg></div><div class="vdur">4:56</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#42493a">WK</div><div class="vtext"><div class="vtitle2">Weekend Recap</div><div class="vmeta2">Wrenzik · 88K views · 5 days ago</div></div></div></div>
+          <div class="vrow srow" id="r5"><div class="vthumb vthumb-i"><div class="vicon"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M12 15v6M9 21h6"/></svg></div><div class="vdur">6:03</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#453a3a">DX</div><div class="vtext"><div class="vtitle2">Getting Ready With Me</div><div class="vmeta2">Drovlex · 640K views · 2 days ago</div></div></div></div>
+        </div>
+      </div>
+
+      <div class="yt-nav"><div class="nav-item active"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="12" height="12" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#6d8bff" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
+    </div>
+  </div>
+
+  <div class="continue-wrap" id="continue-wrap"><button class="continue-btn" id="continue-btn" onclick="goSlide2()">Next →</button></div>
+</div>
+
+<!-- ===== SLIDE 2: three outcomes ===== -->
+<div class="slide" id="slide2" style="display:none">
+  <div class="stage">
+
+    <!-- PHONE 1: No Explanation -->
+    <div class="slot side" id="sl1" onclick="handleClick(1)">
+      <div class="lbl">No Explanation</div>
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="sbar"><span>9:41</span><span>▊▊▊▊</span></div>
+          <div class="yth"><div class="ytlogo"><div class="ytico">▶</div>YouTube</div><div class="ytright"><span>🔍</span><span>👤</span></div></div>
+          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+            <div class="vplayer">
+              <div class="scene"><div class="sbg"></div><div class="person a"><div class="pbody"><div class="phead"></div></div></div><div class="person b"><div class="pbody"><div class="phead"></div></div></div></div>
+              <div class="thumb" id="p1-thumb"><div class="playbtn">▶</div></div>
+              <div class="block-overlay centered" id="p1-block">
+                <div class="block-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:block"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+                <div class="block-title">Video Unavailable</div>
+                <div class="block-badge">Restricted</div>
+              </div>
+              <div class="ytctrl"><div class="ptrack"><div class="pfill" id="p1-fill"></div></div><div class="crow"><div class="cleft"><span class="cbtn">▶</span><span class="cbtn">🔊</span><span class="tdisp">0:00 / 4:12</span></div><span class="cbtn">⛶</span></div></div>
+            </div>
+            <div class="vinfo">
+              <div class="vtitle">Just Another Day 🎬</div>
+              <div class="vmeta"><span>1.2M views</span><span>·</span><span>3 days ago</span></div>
+              <div class="chrow"><div class="chav">OT</div><div class="chnm">Obbletrook</div><div class="subbtn">Subscribe</div></div>
+              <div class="actrow"><div class="actbtn">👍 48K</div><div class="actbtn">👎</div><div class="actbtn">↗ Share</div></div>
+            </div>
+          </div>
+          <div class="yt-nav"><div class="nav-item active"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="12" height="12" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#6d8bff" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
+        </div>
+      </div>
+      <div class="rbtn" onclick="event.stopPropagation();replaySlot(1)">↺ Replay</div>
+    </div>
+
+    <!-- PHONE 2: AI Explanation -->
+    <div class="slot side" id="sl2" onclick="handleClick(2)">
+      <div class="lbl">Explanation</div>
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="sbar"><span>9:41</span><span>▊▊▊▊</span></div>
+          <div class="yth"><div class="ytlogo"><div class="ytico">▶</div>YouTube</div><div class="ytright"><span>🔍</span><span>👤</span></div></div>
+          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+            <div class="vplayer">
+              <div class="scene"><div class="sbg"></div><div class="person a"><div class="pbody"><div class="phead"></div></div></div><div class="person b"><div class="pbody"><div class="phead"></div></div></div></div>
+              <div class="thumb" id="p2-thumb"><div class="playbtn">▶</div></div>
+              <div class="block-overlay" id="p2-block">
+                <div class="block-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:block"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+                <div class="block-title">Video Restricted</div>
+                <div class="block-badge">⚠ Restricted</div>
+                <div class="ai-explain" id="p2-explain">
+                  <div class="ai-explain-label"><div class="ai-pulse"></div>Explanation</div>
+                  <span id="p2-text"></span>
+                </div>
+                <div class="chat-prompt" id="p2-chat">
+                  <div class="chat-dot"></div>
+                  Have questions? Tap to chat
+                </div>
+              </div>
+              <div class="ytctrl"><div class="ptrack"><div class="pfill" id="p2-fill"></div></div><div class="crow"><div class="cleft"><span class="cbtn">▶</span><span class="cbtn">🔊</span><span class="tdisp">0:00 / 4:12</span></div><span class="cbtn">⛶</span></div></div>
+            </div>
+            <div class="vinfo">
+              <div class="vtitle">Just Another Day 🎬</div>
+              <div class="vmeta"><span>1.2M views</span><span>·</span><span>3 days ago</span></div>
+              <div class="chrow"><div class="chav">OT</div><div class="chnm">Obbletrook</div><div class="subbtn">Subscribe</div></div>
+              <div class="actrow"><div class="actbtn">👍 48K</div><div class="actbtn">👎</div><div class="actbtn">↗ Share</div></div>
+            </div>
+          </div>
+          <div class="yt-nav"><div class="nav-item active"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="12" height="12" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#6d8bff" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
+        </div>
+      </div>
+      <div class="rbtn" onclick="event.stopPropagation();replaySlot(2)">↺ Replay</div>
+    </div>
+
+    <!-- PHONE 3: Parent Note -->
+    <div class="slot side" id="sl3" onclick="handleClick(3)">
+      <div class="lbl">Parent's Message</div>
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="sbar"><span>9:41</span><span>▊▊▊▊</span></div>
+          <div class="yth"><div class="ytlogo"><div class="ytico">▶</div>YouTube</div><div class="ytright"><span>🔍</span><span>👤</span></div></div>
+          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative">
+            <div class="vplayer">
+              <div class="scene"><div class="sbg"></div><div class="person a"><div class="pbody"><div class="phead"></div></div></div><div class="person b"><div class="pbody"><div class="phead"></div></div></div></div>
+              <div class="thumb" id="p3-thumb"><div class="playbtn">▶</div></div>
+              <div class="block-overlay" id="p3-block">
+                <div class="block-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:block"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+                <div class="block-title">Video Restricted</div>
+                <div class="block-badge">⚠ Restricted</div>
+                <div class="ai-explain" id="p3-ai">
+                  <div class="ai-explain-label"><div class="ai-pulse"></div>Explanation</div>
+                  <span id="p3-text"></span>
+                  <div class="parent-line">
+                    <div class="parent-line-label">Your parent left a message</div>
+                    <span class="quote-text" id="p3-quote-text"></span>
+                  </div>
+                </div>
+                <div class="chat-prompt" id="p3-chat">
+                  <div class="chat-dot"></div>
+                  Have questions? Tap to chat
+                </div>
+              </div>
+              <div class="ytctrl"><div class="ptrack"><div class="pfill" id="p3-fill"></div></div><div class="crow"><div class="cleft"><span class="cbtn">▶</span><span class="cbtn">🔊</span><span class="tdisp">0:00 / 4:12</span></div><span class="cbtn">⛶</span></div></div>
+            </div>
+            <div class="vinfo">
+              <div class="vtitle">Just Another Day 🎬</div>
+              <div class="vmeta"><span>1.2M views</span><span>·</span><span>3 days ago</span></div>
+              <div class="chrow"><div class="chav">OT</div><div class="chnm">Obbletrook</div><div class="subbtn">Subscribe</div></div>
+              <div class="actrow"><div class="actbtn">👍 48K</div><div class="actbtn">👎</div><div class="actbtn">↗ Share</div></div>
+            </div>
+          </div>
+          <div class="yt-nav"><div class="nav-item active"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="12" height="12" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#6d8bff" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
+        </div>
+      </div>
+      <div class="rbtn" onclick="event.stopPropagation();replaySlot(3)">↺ Replay</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="page-dots"><span class="pdot on" id="pd1"></span><span class="pdot" id="pd2"></span></div>
+
+<script>
+  const PARENT_NOTE = "I want you safe online. This isn't right for you yet, but we can talk about it.";
+  const AI_TEXT = "This video was blocked because it shows people getting hurt or fighting. It can be upsetting for your age.";
+  const P3_INTRO = "This video was blocked for violent content.";
+  const state = { focused: null, tms: {} };
+  function tm(n,fn,d){if(!state.tms[n])state.tms[n]=[];state.tms[n].push(setTimeout(fn,d));}
+  function clr(n){if(state.tms[n]){state.tms[n].forEach(clearTimeout);state.tms[n]=[];}}
+
+  function playP1(){clr(1);const thumb=document.getElementById('p1-thumb'),block=document.getElementById('p1-block');thumb.classList.remove('gone');block.classList.remove('on');document.getElementById('p1-fill').style.width='0%';tm(1,()=>thumb.classList.add('gone'),1400);tm(1,()=>block.classList.add('on'),1800);}
+
+  function playP2(){clr(2);const thumb=document.getElementById('p2-thumb'),block=document.getElementById('p2-block'),explain=document.getElementById('p2-explain'),textEl=document.getElementById('p2-text'),chat=document.getElementById('p2-chat');thumb.classList.remove('gone');block.classList.remove('on');explain.classList.remove('on');chat.classList.remove('on');textEl.textContent='';document.getElementById('p2-fill').style.width='0%';tm(2,()=>thumb.classList.add('gone'),1400);tm(2,()=>block.classList.add('on'),1800);tm(2,()=>{explain.classList.add('on');textEl.textContent=AI_TEXT;},2600);tm(2,()=>chat.classList.add('on'),3000);}
+
+  function playP3(){clr(3);const thumb=document.getElementById('p3-thumb'),block=document.getElementById('p3-block'),ai=document.getElementById('p3-ai'),textEl=document.getElementById('p3-text'),quoteText=document.getElementById('p3-quote-text'),chat=document.getElementById('p3-chat');
+  thumb.classList.remove('gone');block.classList.remove('on');ai.classList.remove('on');chat.classList.remove('on');textEl.textContent='';quoteText.textContent='';document.getElementById('p3-fill').style.width='0%';
+  tm(3,()=>thumb.classList.add('gone'),1400);tm(3,()=>block.classList.add('on'),1800);tm(3,()=>{ai.classList.add('on');textEl.textContent=P3_INTRO;quoteText.textContent=`"${PARENT_NOTE}"`;},2600);tm(3,()=>chat.classList.add('on'),3000);}
+
+  function typeText(el,text,speed,slot){let i=0;function next(){if(i<=text.length){el.textContent=text.slice(0,i);i++;const tid=setTimeout(next,speed);if(!state.tms[slot])state.tms[slot]=[];state.tms[slot].push(tid);}}next();}
+
+  function handleClick(n){if(state.focused===n)return;clr(1);clr(2);clr(3);state.focused=n;[1,2,3].forEach(i=>{const s=document.getElementById('sl'+i);s.classList.remove('focused','side');s.classList.add(i===n?'focused':'side');});setTimeout(()=>{if(n===1)playP1();if(n===2)playP2();if(n===3)playP3();},640);}
+
+  function rP1(){document.getElementById('p1-thumb').classList.remove('gone');document.getElementById('p1-block').classList.remove('on');document.getElementById('p1-fill').style.width='0%';}
+  function rP2(){document.getElementById('p2-thumb').classList.remove('gone');document.getElementById('p2-block').classList.remove('on');document.getElementById('p2-explain').classList.remove('on');document.getElementById('p2-text').textContent='';document.getElementById('p2-chat').classList.remove('on');document.getElementById('p2-fill').style.width='0%';}
+  function rP3(){document.getElementById('p3-thumb').classList.remove('gone');document.getElementById('p3-block').classList.remove('on');document.getElementById('p3-ai').classList.remove('on');document.getElementById('p3-text').textContent='';document.getElementById('p3-quote-text').textContent='';document.getElementById('p3-chat').classList.remove('on');document.getElementById('p3-fill').style.width='0%';}
+  function replaySlot(n){clr(n);if(n===1){rP1();if(state.focused===1)playP1();}if(n===2){rP2();if(state.focused===2)playP2();}if(n===3){rP3();if(state.focused===3)playP3();}}
+
+  // ===== Slide navigation =====
+  function goSlide2(){
+    const s1 = document.getElementById('slide1');
+    const s2 = document.getElementById('slide2');
+    document.getElementById('pd1').classList.remove('on');
+    document.getElementById('pd2').classList.add('on');
+    s1.style.transition = 'opacity 0.4s';
+    s1.style.opacity = '0';
+    setTimeout(()=>{
+      s1.style.display = 'none';
+      s2.style.display = 'flex';
+      s2.style.opacity = '0';
+      requestAnimationFrame(()=>{ s2.style.transition = 'opacity 0.4s'; s2.style.opacity = '1'; });
+    }, 400);
+  }
+
+  // ===== Slide 1 animation: home feed -> search typing -> results filling in =====
+  (function leadDemo(){
+    const QUERY = 'daily vlogs';
+    const searchIcon = document.getElementById('search-icon');
+    const homeHeader = document.getElementById('home-header');
+    const searchHeader = document.getElementById('search-header');
+    const homeStage = document.getElementById('home-stage');
+    const resultsStage = document.getElementById('results-stage');
+    const typedEl = document.getElementById('search-typed');
+    const cursorEl = document.getElementById('search-cursor');
+    const resultIds = ['r1','r2','r-target','r3','r4','r5'];
+    const continueWrap = document.getElementById('continue-wrap');
+    const continueBtn = document.getElementById('continue-btn');
+
+    setTimeout(()=>{
+      searchIcon.classList.add('tapped');
+      setTimeout(()=>{
+        homeHeader.style.display = 'none';
+        searchHeader.classList.add('show');
+        cursorEl.classList.add('on');
+        typeQuery();
+      }, 650);
+    }, 3200);
+
+    function typeQuery(){
+      let i = 0;
+      function next(){
+        if (i <= QUERY.length){
+          typedEl.textContent = QUERY.slice(0, i);
+          i++;
+          setTimeout(next, 130);
+        } else {
+          setTimeout(()=>{
+            cursorEl.classList.remove('on');
+            homeStage.classList.remove('show');
+            resultsStage.classList.add('show');
+            revealRows(0);
+          }, 1100);
+        }
+      }
+      next();
+    }
+
+    function revealRows(idx){
+      if (idx >= resultIds.length){
+        setTimeout(()=>{
+          document.getElementById('r-target').classList.add('highlight');
+        }, 900);
+        setTimeout(()=>{
+          continueWrap.classList.add('show');
+          setTimeout(()=>continueBtn.classList.add('pulse'), 700);
+        }, 1900);
+        return;
+      }
+      document.getElementById(resultIds[idx]).classList.add('show');
+      setTimeout(()=>revealRows(idx+1), 480);
+    }
+  })();
+</script>
+</body>
+</html>
