@@ -3,190 +3,214 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Mediator - Content Moderation</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Content Moderation</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #000; --card: #22222e; --border: #2e2e3e; --text: #f0f0f5;
-    --muted: #8888aa; --accent: #5b8dee; --red: #ff4d6d; --red-soft: #ff4d6d22;
+    --muted: #a0a0c8; --accent: #6d8bff; --red: #ff4d6d; --red-soft: #ff4d6d22;
     --yt-red: #ff0000; --green: #34d399;
-    --phone-w: 340px; --phone-h: 630px; --phone-w-sm: 205px; --phone-h-sm: 400px;
+    --phone-w: 460px; --phone-h: 840px; --phone-w-sm: 270px; --phone-h-sm: 500px;
     --tr: 0.55s cubic-bezier(0.4,0,0.2,1);
   }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow-x: hidden; padding: 24px 20px 40px; }
-  h1.title { font-size: 13px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; text-align: center; }
-  h2.subtitle { font-size: 30px; font-weight: 700; color: var(--text); margin-bottom: 8px; text-align: center; letter-spacing: -0.5px; }
-  h2.subtitle span { color: var(--accent); }
-  .intro { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 28px; line-height: 1.6; }
-  .intro span { color: var(--accent); font-weight: 600; }
-  .stage { display: flex; align-items: center; justify-content: center; gap: 20px; width: 100%; max-width: 1200px; min-height: 560px; }
+  body { font-family: 'DM Sans', sans-serif; background: #000000;
+    color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow-x: hidden; padding: 32px 20px; }
 
-  .slot { display: flex; flex-direction: column; align-items: center; gap: 14px; transition: var(--tr); cursor: pointer; position: relative; }
-  .slot .lbl { font-size: 12px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); transition: var(--tr); }
-  .slot.focused .lbl { color: var(--accent); }
+  .stage { display: flex; align-items: center; justify-content: center; gap: 26px; width: 100%; max-width: 1400px; min-height: 900px; }
+
+  .slot { display: flex; flex-direction: column; align-items: center; gap: 16px; transition: var(--tr); cursor: pointer; position: relative; }
+  .slot .lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); transition: var(--tr); }
+  .slot.focused .lbl { font-size: 11px; }
 
   /* PHONE WRAPPER */
   .phone-wrap { position: relative; }
 
-  .phone { width: var(--phone-w-sm); height: var(--phone-h-sm); background: #111118; border-radius: 38px; border: 2px solid var(--border); box-shadow: 0 8px 32px #00000060, inset 0 1px 0 #ffffff10; overflow: hidden; display: flex; flex-direction: column; transition: var(--tr); }
-  .slot.focused .phone { width: var(--phone-w); height: var(--phone-h); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent)44, 0 24px 64px #00000090; cursor: default; }
+  .phone { width: var(--phone-w-sm); height: var(--phone-h-sm); background: #111118; border-radius: 42px; border: 3px solid var(--border); box-shadow: 0 8px 32px #00000060, inset 0 1px 0 #ffffff10; overflow: hidden; display: flex; flex-direction: column; transition: var(--tr); }
+  .slot.focused .phone { width: var(--phone-w); height: var(--phone-h); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent)44, 0 30px 80px #00000090, 0 0 60px -20px var(--accent)55; cursor: default; }
   .slot.side .phone { opacity: 0.5; filter: blur(0.5px); }
   .slot.side:hover .phone { opacity: 0.72; }
 
   /* YouTube bottom nav */
-  .yt-nav { background: #0f0f0f; border-top: 1px solid #1c1c1c; display: flex; align-items: center; justify-content: space-around; padding: 5px 0 7px; flex-shrink: 0; }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 5.5px; color: var(--muted); flex: 1; transition: color 0.3s; }
-  .slot.focused .nav-item { font-size: 8px; gap: 3px; }
+  .yt-nav { background: #0f0f0f; border-top: 1px solid #1c1c1c; display: flex; align-items: center; justify-content: space-around; padding: 6px 0 9px; flex-shrink: 0; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 7px; color: var(--muted); flex: 1; transition: color 0.3s; }
+  .slot.focused .nav-item { font-size: 10px; gap: 4px; }
   .nav-item.active { color: #fff; }
   .nav-item.ai-nav { color: var(--accent); }
-  .nav-icon-wrap { width: 18px; height: 18px; border-radius: 50%; background: var(--accent)22; border: 1px solid var(--accent)55; display: flex; align-items: center; justify-content: center; }
-  .slot.focused .nav-icon-wrap { width: 26px; height: 26px; }
+  .nav-icon-wrap { width: 22px; height: 22px; border-radius: 50%; background: var(--accent)22; border: 1px solid var(--accent)55; display: flex; align-items: center; justify-content: center; }
+  .slot.focused .nav-icon-wrap { width: 30px; height: 30px; }
 
-  .notch { width: 90px; height: 24px; background: #000; border-radius: 0 0 16px 16px; margin: 0 auto; flex-shrink: 0; }
-  .slot.focused .notch { width: 120px; height: 28px; }
+  .notch { width: 110px; height: 30px; background: #000; border-radius: 0 0 18px 18px; margin: 0 auto; flex-shrink: 0; }
+  .slot.focused .notch { width: 150px; height: 34px; }
   .screen { flex: 1; overflow: hidden; display: flex; flex-direction: column; background: #0f0f0f; }
-  .sbar { display: flex; justify-content: space-between; padding: 4px 16px; font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; background: #0f0f0f; }
-  .slot.focused .sbar { font-size: 12px; padding: 6px 20px; }
-  .yth { background: #0f0f0f; padding: 6px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1c1c1c; flex-shrink: 0; }
-  .slot.focused .yth { padding: 8px 18px; }
-  .ytlogo { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 800; color: #fff; }
-  .slot.focused .ytlogo { font-size: 18px; }
-  .ytico { background: var(--yt-red); border-radius: 4px; width: 16px; height: 11px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: #fff; }
-  .slot.focused .ytico { width: 22px; height: 15px; font-size: 9px; }
-  .ytright { display: flex; gap: 8px; font-size: 13px; color: #aaa; }
-  .slot.focused .ytright { font-size: 17px; }
+  .sbar { display: flex; justify-content: space-between; padding: 5px 18px; font-size: 15px; font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; background: #0f0f0f; }
+  .slot.focused .sbar { font-size: 18px; padding: 7px 24px; }
+  .yth { background: #0f0f0f; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1c1c1c; flex-shrink: 0; }
+  .slot.focused .yth { padding: 10px 22px; }
+  .ytlogo { display: flex; align-items: center; gap: 5px; font-size: 18px; font-weight: 800; color: #fff; }
+  .slot.focused .ytlogo { font-size: 25px; }
+  .ytico { background: var(--yt-red); border-radius: 5px; width: 23px; height: 16px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; }
+  .slot.focused .ytico { width: 29px; height: 20px; font-size: 12px; }
+  .ytright { display: flex; gap: 10px; font-size: 18px; color: #aaa; }
+  .slot.focused .ytright { font-size: 24px; }
 
-  .vplayer { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; flex-shrink: 0; overflow: hidden; }
+  .vplayer { width: 100%; aspect-ratio: 4/3; background: #000; position: relative; flex-shrink: 0; overflow: hidden; }
   .scene { position: absolute; inset: 0; overflow: hidden; }
-  .sbg { position: absolute; inset: 0; background: linear-gradient(160deg,#0d1b2a 0%,#1b2838 60%,#0a1628 100%); }
-  .sbg::before { content:''; position:absolute; width:120px; height:120px; background:radial-gradient(circle,#1e3a5f44 0%,transparent 70%); top:-20px; right:-20px; animation:bgp 3s ease-in-out infinite; }
+  .sbg { position: absolute; inset: 0; background: linear-gradient(120deg,#8f6fd6,#4f9fd8 33%,#3fc79e 66%,#e88f4a); }
+  .sbg::before { content:''; position:absolute; width:150px; height:150px; background:radial-gradient(circle,#ffffff33 0%,transparent 70%); top:-30px; right:-30px; animation:bgp 3s ease-in-out infinite; animation-play-state: paused; }
+  .scene.playing .sbg::before { animation-play-state: running; }
   @keyframes bgp { 0%,100%{transform:scale(1);opacity:.5} 50%{transform:scale(1.3);opacity:1} }
+  .cast { position:absolute; inset:0; }
   .person { position:absolute; bottom:0; left:50%; transform:translateX(-50%); }
-  .pbody { width:36px; height:58px; background:linear-gradient(180deg,#2d6a9f 0%,#1a3a5c 100%); border-radius:8px 8px 0 0; position:relative; animation:bob 1.2s ease-in-out infinite; }
-  .slot.focused .pbody { width:50px; height:76px; }
+  .person.a { left:35%; }
+  .person.b { left:65%; }
+  .pbody { width:60px; height:94px; background:linear-gradient(180deg,#2d6a9f 0%,#1a3a5c 100%); border-radius:10px 10px 0 0; position:relative; animation:bob 1.2s ease-in-out infinite; animation-play-state: paused; }
+  .person.b .pbody { background:linear-gradient(180deg,#c2542d 0%,#7a2f14 100%); animation-delay: 0.15s; }
+  .scene.playing .pbody { animation-play-state: running; }
+  .slot.focused .pbody { width:84px; height:128px; }
   @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-2px)} }
-  .phead { width:24px; height:24px; background:#e8c99a; border-radius:50%; position:absolute; top:-26px; left:50%; transform:translateX(-50%); animation:hbob 1.2s ease-in-out infinite; }
-  .slot.focused .phead { width:32px; height:32px; top:-34px; }
+  .phead { width:42px; height:42px; background:#e8c99a; border-radius:50%; position:absolute; top:-44px; left:50%; transform:translateX(-50%); animation:hbob 1.2s ease-in-out infinite; animation-play-state: paused; }
+  .person.b .phead { background:#d9b088; animation-delay: 0.15s; }
+  .scene.playing .phead { animation-play-state: running; }
+  .slot.focused .phead { width:56px; height:56px; top:-58px; }
   @keyframes hbob { 0%,100%{transform:translateX(-50%) rotate(-2deg)} 50%{transform:translateX(-50%) rotate(2deg)} }
 
-  .bubble { position:absolute; top:8px; left:8px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:10px; padding:3px 7px; font-size:7px; color:#fff; opacity:0; transform:translateY(4px); transition:opacity .3s,transform .3s; pointer-events:none; max-width:85px; line-height:1.4; }
-  .slot.focused .bubble { font-size:9px; padding:4px 9px; top:10px; }
+  /* Simple faces */
+  .eyes { position:absolute; top:34%; left:50%; transform:translateX(-50%); display:flex; gap:7px; }
+  .eye { width:5px; height:5px; background:#2a2a2a; border-radius:50%; display:block; }
+  .slot.focused .eye { width:6px; height:6px; }
+  .brow { position:absolute; top:23%; width:8px; height:3px; background:#6b4a30; border-radius:1px; transition: transform 0.2s ease; }
+  .brow.left { left:23%; transform:rotate(6deg); }
+  .brow.right { right:23%; transform:rotate(-6deg); }
+  .slot.focused .brow { width:13px; height:3.5px; }
+  .mouth { position:absolute; bottom:20%; left:50%; transform:translateX(-50%); width:12px; height:5px; background:#8a4a3a; border-radius:3px; transition: all 0.2s ease; }
+  .slot.focused .mouth { width:18px; height:6px; }
+
+  /* Story-tied reactions, distinct per character so it's clear who does what */
+
+  /* Character A: yells — mouth flaps open/closed and brows furrow, but the body stays put (no jostling) */
+  @keyframes yellFlap { 0%,100%{transform:translateX(-50%) scaleY(1)} 50%{transform:translateX(-50%) scaleY(0.4)} }
+  .person.a.yelling .brow.left { transform:rotate(-16deg) translateY(-1px); }
+  .person.a.yelling .brow.right { transform:rotate(16deg) translateY(-1px); }
+  .person.a.yelling .mouth { width:15px; height:13px; border-radius:50% 50% 60% 60%; background:#5c1616; transform-origin:center; animation: yellFlap 0.3s ease-in-out infinite; }
+  .slot.focused .person.a.yelling .mouth { width:22px; height:19px; }
+
+  /* Character B: shoves forward once (the physical push), face turns angry and stays that way */
+  @keyframes lunge { 0%,100%{transform:translateX(-50%) translateX(0)} 40%{transform:translateX(-50%) translateX(14px)} }
+  .person.b.pushing .pbody, .person.b.pushing .phead { animation: lunge 0.45s ease-out 1; }
+  .person.b.pushing .brow.left { transform:rotate(-16deg) translateY(-1px); }
+  .person.b.pushing .brow.right { transform:rotate(16deg) translateY(-1px); }
+  .person.b.pushing .mouth { width:15px; height:13px; border-radius:50% 50% 60% 60%; background:#5c1616; }
+  .slot.focused .person.b.pushing .mouth { width:22px; height:19px; }
+
+  /* Character A: gets knocked back by the shove a beat later, and stays there */
+  @keyframes knockback { 0%{transform:translateX(-50%) translateX(0) rotate(0deg)} 30%{transform:translateX(-50%) translateX(-16px) rotate(-6deg)} 60%{transform:translateX(-50%) translateX(-24px) rotate(-3deg)} 100%{transform:translateX(-50%) translateX(-20px) rotate(-2deg)} }
+  .person.a.pushed { animation: knockback 0.55s ease-out 0.15s 1 forwards; }
+
+  .bubble { position:absolute; top:10px; left:10px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:4px 9px; font-size:12px; color:#fff; opacity:0; transform:translateY(4px); transition:opacity .3s,transform .3s; pointer-events:none; max-width:110px; line-height:1.4; }
+  .slot.focused .bubble { font-size:15px; padding:6px 12px; top:13px; max-width:150px; }
   .bubble.show { opacity:1; transform:translateY(0); }
   .bubble.bad { background:rgba(255,50,50,.2); border-color:rgba(255,50,50,.4); color:#ffaaaa; }
-  .bubble.bleep { background:rgba(91,141,238,.2); border-color:var(--accent); color:var(--accent); font-weight:700; }
+  .bubble.bleep { background:rgba(109,139,255,.2); border-color:var(--accent); color:var(--accent); font-weight:700; }
 
-  .cap { position:absolute; top:8px; right:6px; text-align:right; font-size:6px; color:#fff; background:rgba(0,0,0,.65); padding:2px 6px; border-radius:4px; opacity:0; transition:opacity .3s; }
-  .slot.focused .cap { font-size:9px; padding:3px 8px; top:10px; right:8px; }
+  .cap { position:absolute; top:10px; right:8px; text-align:right; font-size:10px; color:#fff; background:rgba(0,0,0,.65); padding:3px 8px; border-radius:5px; opacity:0; transition:opacity .3s; }
+  .slot.focused .cap { font-size:14px; padding:4px 10px; top:13px; right:10px; }
   .cap.show { opacity:1; }
   .cap.cen { color:var(--accent); font-weight:600; }
 
-  .mutebadge { position:absolute; bottom:32px; left:6px; background:rgba(0,0,0,.82); border:1px solid var(--accent); border-radius:6px; padding:3px 7px; font-size:7px; color:var(--accent); font-weight:700; opacity:0; transition:opacity .3s; z-index:15; text-transform:uppercase; letter-spacing:.05em; max-width:44%; text-align:center; line-height:1.4; }
-  .slot.focused .mutebadge { font-size:9px; padding:4px 9px; bottom:40px; left:8px; max-width:44%; }
+  .mutebadge { position:absolute; bottom:38px; left:8px; background:rgba(0,0,0,.82); border:1px solid var(--accent); border-radius:8px; padding:4px 9px; font-size:10px; color:var(--accent); font-weight:700; opacity:0; transition:opacity .3s; z-index:15; text-transform:uppercase; letter-spacing:.05em; max-width:48%; text-align:center; line-height:1.4; }
+  .slot.focused .mutebadge { font-size:14px; padding:6px 12px; bottom:48px; left:10px; max-width:48%; }
   .mutebadge.on { opacity:1; }
 
-  .blackout { position:absolute; inset:0; background:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; opacity:0; transition:opacity .25s; z-index:22; padding:12px; }
+  .blackout { position:absolute; inset:0; background:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; opacity:0; transition:opacity .25s; z-index:22; padding:16px; }
   .blackout.on { opacity:1; }
-  .boico { font-size:22px; }
-  .slot.focused .boico { font-size:30px; }
-  .bolbl { font-size:8px; color:var(--accent); font-weight:700; text-transform:uppercase; letter-spacing:.08em; text-align:center; }
-  .slot.focused .bolbl { font-size:11px; }
+  .boico { font-size:28px; }
+  .slot.focused .boico { font-size:38px; }
+  .bolbl { font-size:13px; color:var(--accent); font-weight:700; text-transform:uppercase; letter-spacing:.08em; text-align:center; }
+  .slot.focused .bolbl { font-size:17px; }
 
-  .blockscreen { position:absolute; inset:0; background:#090909; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:4px; opacity:0; transition:opacity .35s; z-index:30; padding:10px 14px; overflow-y:auto; scrollbar-width:none; }
+  .blockscreen { position:absolute; inset:0; background:#090909; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:6px; opacity:0; transition:opacity .35s; z-index:30; padding:14px 18px; overflow-y:auto; scrollbar-width:none; }
   .blockscreen::-webkit-scrollbar { display:none; }
   .blockscreen.on { opacity:1; }
-  .bsico { font-size:20px; }
-  .slot.focused .bsico { font-size:26px; }
-  .bstitle { font-size:11px; font-weight:700; color:#fff; text-align:center; }
-  .slot.focused .bstitle { font-size:14px; }
-  .bssub { font-size:9px; color:var(--muted); text-align:center; line-height:1.4; width:100%; }
-  .slot.focused .bssub { font-size:11px; }
-  .bsbadge { background:var(--red-soft); border:1px solid var(--red)55; border-radius:8px; padding:3px 9px; font-size:8px; color:var(--red); font-weight:600; margin-top:1px; }
-  .slot.focused .bsbadge { font-size:10px; padding:4px 11px; }
+  .bsico { font-size:26px; }
+  .slot.focused .bsico { font-size:34px; }
+  .bstitle { font-size:16px; font-weight:700; color:#fff; text-align:center; }
+  .slot.focused .bstitle { font-size:21px; }
+  .bssub { font-size:13px; color:var(--muted); text-align:center; line-height:1.4; width:100%; }
+  .slot.focused .bssub { font-size:16px; }
+  .bsbadge { background:var(--red-soft); border:1px solid var(--red)55; border-radius:9px; padding:4px 11px; font-size:11px; color:var(--red); font-weight:600; margin-top:2px; }
+  .slot.focused .bsbadge { font-size:15px; padding:5px 14px; }
 
-  .ai-explain { background:rgba(91,141,238,.1); border:1px solid var(--accent)44; border-radius:8px; padding:7px 10px; font-size:8px; color:var(--text); line-height:1.55; text-align:left; width:100%; opacity:0; transform:translateY(6px); transition:opacity 0.5s,transform 0.5s; margin-top:4px; }
-  .slot.focused .ai-explain { font-size:10px; padding:9px 12px; border-radius:10px; }
+  .ai-explain { background:rgba(109,139,255,.1); border:1px solid var(--accent)44; border-radius:10px; padding:9px 12px; font-size:12px; color:var(--text); line-height:1.55; text-align:left; width:100%; opacity:0; transform:translateY(6px); transition:opacity 0.5s,transform 0.5s; margin-top:5px; }
+  .slot.focused .ai-explain { font-size:15px; padding:12px 15px; border-radius:12px; }
   .ai-explain.on { opacity:1; transform:translateY(0); }
-  .ai-explain-label { font-size:7px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.1em; display:flex; align-items:center; gap:4px; margin-bottom:4px; }
-  .slot.focused .ai-explain-label { font-size:9px; }
-  .ai-pulse { width:5px; height:5px; border-radius:50%; background:var(--accent); animation:apulse 2s infinite; }
-  .slot.focused .ai-pulse { width:6px; height:6px; }
+  .ai-explain-label { font-size:10px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.1em; display:flex; align-items:center; gap:5px; margin-bottom:5px; }
+  .slot.focused .ai-explain-label { font-size:13px; }
+  .ai-pulse { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:apulse 2s infinite; }
+  .slot.focused .ai-pulse { width:7px; height:7px; }
   @keyframes apulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 
-  .chat-prompt { display:flex; align-items:center; gap:5px; background:rgba(91,141,238,.12); border:1px solid var(--accent)55; border-radius:20px; padding:4px 10px; font-size:7px; color:var(--accent); font-weight:600; width:100%; opacity:0; transform:translateY(4px); transition:opacity 0.5s 0.2s,transform 0.5s 0.2s; cursor:pointer; margin-top:2px; }
-  .slot.focused .chat-prompt { font-size:9px; padding:5px 12px; border-radius:24px; }
+  .chat-prompt { display:flex; align-items:center; gap:6px; background:rgba(109,139,255,.12); border:1px solid var(--accent)55; border-radius:22px; padding:5px 12px; font-size:10px; color:var(--accent); font-weight:600; width:100%; opacity:0; transform:translateY(4px); transition:opacity 0.5s 0.2s,transform 0.5s 0.2s; cursor:pointer; margin-top:3px; }
+  .slot.focused .chat-prompt { font-size:14px; padding:7px 14px; border-radius:26px; }
   .chat-prompt.on { opacity:1; transform:translateY(0); }
-  .chat-dot { width:5px; height:5px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+  .chat-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0; }
 
   .thumb { position:absolute; inset:0; background:linear-gradient(160deg,#0d1b2a 0%,#1b2838 60%,#0a1628 100%); display:flex; align-items:center; justify-content:center; z-index:25; transition:opacity .3s; }
   .thumb.gone { opacity:0; pointer-events:none; }
-  .playbtn { width:34px; height:34px; background:rgba(0,0,0,.78); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; color:#fff; }
-  .slot.focused .playbtn { width:48px; height:48px; font-size:21px; }
+  .playbtn { width:42px; height:42px; background:rgba(0,0,0,.78); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; color:#fff; }
+  .slot.focused .playbtn { width:58px; height:58px; font-size:25px; }
 
-  .ytctrl { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(0,0,0,.93)); padding:10px 8px 5px; z-index:20; }
-  .slot.focused .ytctrl { padding:12px 10px 6px; }
-  .ptrack { width:100%; height:3px; background:rgba(255,255,255,.25); border-radius:2px; position:relative; margin-bottom:5px; }
-  .slot.focused .ptrack { height:4px; }
+  .ytctrl { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(0,0,0,.93)); padding:12px 10px 6px; z-index:20; }
+  .slot.focused .ytctrl { padding:15px 13px 8px; }
+  .ptrack { width:100%; height:4px; background:rgba(255,255,255,.25); border-radius:2px; position:relative; margin-bottom:6px; }
+  .slot.focused .ptrack { height:5px; }
   .pfill { height:100%; background:var(--yt-red); border-radius:2px; width:0%; transition:width .08s linear; position:relative; }
-  .pfill::after { content:''; position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:8px; height:8px; background:#fff; border-radius:50%; }
-  .slot.focused .pfill::after { width:10px; height:10px; right:-5px; }
-  .tmark { position:absolute; top:-3px; width:4px; height:9px; border-radius:2px; transform:translateX(-50%); transition:opacity .4s; opacity:0; }
-  .slot.focused .tmark { width:5px; height:11px; }
+  .pfill::after { content:''; position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:9px; height:9px; background:#fff; border-radius:50%; }
+  .slot.focused .pfill::after { width:12px; height:12px; right:-6px; }
+  .tmark { position:absolute; top:-3px; width:5px; height:10px; border-radius:2px; transform:translateX(-50%); transition:opacity .4s; opacity:0; }
+  .slot.focused .tmark { width:6px; height:13px; }
   .crow { display:flex; align-items:center; justify-content:space-between; }
-  .cleft { display:flex; align-items:center; gap:6px; }
-  .cbtn { font-size:10px; color:#fff; }
-  .slot.focused .cbtn { font-size:13px; }
-  .tdisp { font-size:7px; color:rgba(255,255,255,.82); font-family:'DM Mono',monospace; }
-  .slot.focused .tdisp { font-size:9px; }
+  .cleft { display:flex; align-items:center; gap:8px; }
+  .cbtn { font-size:14px; color:#fff; }
+  .slot.focused .cbtn { font-size:18px; }
+  .tdisp { font-size:11px; color:rgba(255,255,255,.82); font-family:'DM Mono',monospace; }
+  .slot.focused .tdisp { font-size:13px; }
 
-  .aitag { position:absolute; bottom:32px; right:6px; background:rgba(91,141,238,.15); border:1px solid var(--accent); border-radius:6px; padding:3px 8px; font-size:7px; color:var(--accent); font-weight:600; opacity:0; transition:opacity .3s; z-index:21; text-transform:uppercase; letter-spacing:.06em; max-width:44%; text-align:center; line-height:1.4; }
-  .slot.focused .aitag { font-size:9px; padding:4px 10px; bottom:40px; right:8px; max-width:44%; }
+  .aitag { position:absolute; bottom:38px; right:8px; background:rgba(109,139,255,.15); border:1px solid var(--accent); border-radius:8px; padding:4px 10px; font-size:10px; color:var(--accent); font-weight:600; opacity:0; transition:opacity .3s; z-index:21; text-transform:uppercase; letter-spacing:.06em; max-width:48%; text-align:center; line-height:1.4; }
+  .slot.focused .aitag { font-size:14px; padding:5px 12px; bottom:48px; right:10px; max-width:48%; }
   .aitag.on { opacity:1; }
 
-  .aibar { background:#0d1117; border-top:1px solid var(--accent)33; padding:6px 14px; display:flex; align-items:center; gap:6px; flex-shrink:0; opacity:0; transition:opacity .4s; }
-  .slot.focused .aibar { padding:8px 18px; }
+  .aibar { background:#0d1117; border-top:1px solid var(--accent)33; padding:8px 16px; display:flex; align-items:center; gap:8px; flex-shrink:0; opacity:0; transition:opacity .4s; }
+  .slot.focused .aibar { padding:10px 22px; }
   .aibar.on { opacity:1; }
-  .aipulse { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 2s infinite; flex-shrink:0; }
-  .slot.focused .aipulse { width:8px; height:8px; }
+  .aipulse { width:8px; height:8px; border-radius:50%; background:var(--accent); animation:pulse 2s infinite; flex-shrink:0; }
+  .slot.focused .aipulse { width:10px; height:10px; }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
-  .ailbl { font-size:8px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.1em; }
-  .slot.focused .ailbl { font-size:11px; }
-  .aistatus { font-size:8px; color:var(--muted); margin-left:auto; }
-  .slot.focused .aistatus { font-size:11px; }
+  .aistatus { font-size:12px; color:var(--muted); }
+  .slot.focused .aistatus { font-size:15px; }
 
-  .vinfo { padding:10px 14px; background:#0f0f0f; flex:1; overflow:hidden; }
-  .slot.focused .vinfo { padding:12px 18px; }
-  .vtitle { font-size:10px; font-weight:600; color:#fff; line-height:1.4; margin-bottom:5px; }
-  .slot.focused .vtitle { font-size:13px; }
-  .vmeta { font-size:8px; color:#999; display:flex; gap:6px; margin-bottom:7px; }
-  .slot.focused .vmeta { font-size:10px; }
-  .chrow { display:flex; align-items:center; gap:8px; padding:6px 0; border-top:1px solid #1c1c1c; border-bottom:1px solid #1c1c1c; margin-bottom:6px; }
-  .chav { width:22px; height:22px; border-radius:50%; background:linear-gradient(135deg,#f43f5e,#fb923c); display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#fff; flex-shrink:0; }
-  .slot.focused .chav { width:30px; height:30px; font-size:11px; }
-  .chnm { font-size:9px; font-weight:600; color:#fff; flex:1; }
-  .slot.focused .chnm { font-size:12px; }
-  .subbtn { background:#fff; color:#000; border-radius:14px; padding:4px 9px; font-size:8px; font-weight:700; }
-  .slot.focused .subbtn { font-size:10px; padding:5px 11px; }
-  .actrow { display:flex; gap:6px; }
-  .actbtn { background:#1c1c1c; border-radius:14px; padding:4px 9px; font-size:8px; color:#fff; }
-  .slot.focused .actbtn { font-size:10px; padding:5px 11px; }
+  .vinfo { padding:12px 16px; background:#0f0f0f; flex:1; overflow:hidden; }
+  .slot.focused .vinfo { padding:15px 22px; }
+  .vtitle { font-size:15px; font-weight:600; color:#fff; line-height:1.4; margin-bottom:6px; }
+  .slot.focused .vtitle { font-size:19px; }
+  .vmeta { font-size:12px; color:#999; display:flex; gap:7px; margin-bottom:8px; }
+  .slot.focused .vmeta { font-size:15px; }
+  .chrow { display:flex; align-items:center; gap:9px; padding:7px 0; border-top:1px solid #1c1c1c; border-bottom:1px solid #1c1c1c; margin-bottom:7px; }
+  .chav { width:29px; height:29px; border-radius:50%; background:linear-gradient(135deg,#8b93ff,#6d8bff); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; flex-shrink:0; }
+  .slot.focused .chav { width:40px; height:40px; font-size:14px; }
+  .chnm { font-size:13px; font-weight:600; color:#fff; flex:1; }
+  .slot.focused .chnm { font-size:17px; }
+  .subbtn { background:#fff; color:#000; border-radius:16px; padding:5px 11px; font-size:11px; font-weight:700; }
+  .slot.focused .subbtn { font-size:15px; padding:6px 14px; }
+  .actrow { display:flex; gap:8px; }
+  .actbtn { background:#1c1c1c; border-radius:16px; padding:5px 11px; font-size:11px; color:#fff; }
+  .slot.focused .actbtn { font-size:15px; padding:6px 14px; }
 
-  .rbtn { background:var(--card); border:1px solid var(--border); color:var(--muted); border-radius:20px; padding:6px 14px; font-size:11px; font-weight:500; cursor:pointer; transition:all .2s; font-family:'DM Sans',sans-serif; display:flex; align-items:center; gap:5px; }
+  .rbtn { background:var(--card); border:1px solid var(--border); color:var(--muted); border-radius:22px; padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; font-family:'DM Sans',sans-serif; display:flex; align-items:center; gap:6px; }
   .rbtn:hover { border-color:var(--accent); color:var(--accent); }
-  .clickhint { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--accent); opacity:0; transition:opacity .3s; white-space:nowrap; pointer-events:none; }
-  .slot.side:hover .clickhint { opacity:1; }
-  .gctrl { margin-top:28px; display:flex; flex-direction:column; align-items:center; gap:10px; }
-  .hint { font-size:12px; color:var(--muted); text-align:center; line-height:1.6; }
-  .hint span { color:var(--accent); font-weight:600; }
-  .grbtn { background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:24px; padding:8px 22px; font-size:12px; font-weight:500; cursor:pointer; transition:all .2s; font-family:'DM Sans',sans-serif; display:flex; align-items:center; gap:6px; }
-  .grbtn:hover { border-color:var(--accent); color:var(--accent); }
 </style>
 </head>
 <body>
-
-<p class="title">AI Mediator</p>
-<h2 class="subtitle">Content <span>Moderation</span></h2>
-<p class="intro">The same video. Three different experiences. <span>Click a panel to expand it</span> and watch the video play.</p>
 
 <div class="stage">
 
@@ -201,22 +225,21 @@
           <div class="yth"><div class="ytlogo"><div class="ytico">▶</div>YouTube</div><div class="ytright"><span>🔍</span><span>👤</span></div></div>
           <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
             <div class="vplayer">
-              <div class="scene"><div class="sbg"></div><div class="person"><div class="pbody"><div class="phead"></div></div></div><div class="bubble" id="p1b"></div><div class="cap" id="p1c"></div></div>
+              <div class="scene" id="p1scene"><div class="sbg"></div><div class="cast" id="p1cast"><div class="person a"><div class="pbody"><div class="phead"><div class="eyes"><span class="eye"></span><span class="eye"></span></div><div class="brow left"></div><div class="brow right"></div><div class="mouth"></div></div></div></div><div class="person b"><div class="pbody"><div class="phead"><div class="eyes"><span class="eye"></span><span class="eye"></span></div><div class="brow left"></div><div class="brow right"></div><div class="mouth"></div></div></div></div></div><div class="bubble" id="p1b"></div><div class="cap" id="p1c"></div></div>
               <div class="ytctrl"><div class="ptrack"><div class="pfill" id="p1f"></div></div><div class="crow"><div class="cleft"><span class="cbtn">⏸</span><span class="cbtn" id="p1v">🔊</span><span class="tdisp" id="p1t">0:00 / 4:12</span></div><span class="cbtn">⛶</span></div></div>
             </div>
             <div class="vinfo">
-              <div class="vtitle">EXTREME PRANK GONE WRONG 😂 ft. the crew</div>
+              <div class="vtitle">Just Another Day 🎬</div>
               <div class="vmeta"><span>1.2M views</span><span>·</span><span>3 days ago</span></div>
               <div class="chrow"><div class="chav">OT</div><div class="chnm">Obbletrook</div><div class="subbtn">Subscribe</div></div>
               <div class="actrow"><div class="actbtn">👍 48K</div><div class="actbtn">👎</div><div class="actbtn">↗ Share</div></div>
             </div>
           </div>
         </div>
-        <div class="yt-nav"><div class="nav-item active"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="10" height="10" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#5b8dee" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
+        <div class="yt-nav"><div class="nav-item active"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="12" height="12" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#6d8bff" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
       </div>
     </div>
     <div class="rbtn" onclick="event.stopPropagation();replaySlot(1)">↺ Replay</div>
-    <div class="clickhint">Tap to expand</div>
   </div>
 
   <!-- P2: Full Block -->
@@ -230,31 +253,30 @@
           <div class="yth"><div class="ytlogo"><div class="ytico">▶</div>YouTube</div><div class="ytright"><span>🔍</span><span>👤</span></div></div>
           <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
             <div class="vplayer">
-              <div class="scene"><div class="sbg"></div><div class="person"><div class="pbody"><div class="phead"></div></div></div></div>
+              <div class="scene" id="p2scene"><div class="sbg"></div><div class="cast"><div class="person a"><div class="pbody"><div class="phead"><div class="eyes"><span class="eye"></span><span class="eye"></span></div><div class="brow left"></div><div class="brow right"></div><div class="mouth"></div></div></div></div><div class="person b"><div class="pbody"><div class="phead"><div class="eyes"><span class="eye"></span><span class="eye"></span></div><div class="brow left"></div><div class="brow right"></div><div class="mouth"></div></div></div></div></div></div>
               <div class="thumb" id="p2thumb"><div class="playbtn">▶</div></div>
               <div class="blockscreen" id="p2block">
                 <div class="bsico">🔒</div>
                 <div class="bstitle">Video Restricted</div>
-                <div class="bssub">AI Mediator has restricted access to this content.</div>
-                <div class="bsbadge">⚠ Restricted by AI Mediator</div>
-                <div class="ai-explain on"><div class="ai-explain-label"><div class="ai-pulse"></div>AI Mediator</div>An explanation of why this content was blocked is shown here.</div>
-                <div class="chat-prompt on"><div class="chat-dot"></div>Have questions? Chat with AI Mediator</div>
+                <div class="bssub">This video has been restricted from viewing.</div>
+                <div class="bsbadge">⚠ Restricted</div>
+                <div class="ai-explain on"><div class="ai-explain-label"><div class="ai-pulse"></div>Explanation</div>An explanation of why this content was blocked is shown here.</div>
+                <div class="chat-prompt on"><div class="chat-dot"></div>Have questions? Tap to chat</div>
               </div>
               <div class="ytctrl"><div class="ptrack"><div class="pfill" id="p2f"></div></div><div class="crow"><div class="cleft"><span class="cbtn">▶</span><span class="cbtn">🔊</span><span class="tdisp">0:00 / 4:12</span></div><span class="cbtn">⛶</span></div></div>
             </div>
             <div class="vinfo">
-              <div class="vtitle">EXTREME PRANK GONE WRONG 😂 ft. the crew</div>
+              <div class="vtitle">Just Another Day 🎬</div>
               <div class="vmeta"><span>1.2M views</span><span>·</span><span>3 days ago</span></div>
               <div class="chrow"><div class="chav">OT</div><div class="chnm">Obbletrook</div><div class="subbtn">Subscribe</div></div>
               <div class="actrow"><div class="actbtn">👍 48K</div><div class="actbtn">👎</div><div class="actbtn">↗ Share</div></div>
             </div>
           </div>
         </div>
-        <div class="yt-nav"><div class="nav-item active"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="10" height="10" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#5b8dee" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
+        <div class="yt-nav"><div class="nav-item active"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="12" height="12" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#6d8bff" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
       </div>
     </div>
     <div class="rbtn" onclick="event.stopPropagation();replaySlot(2)">↺ Replay</div>
-    <div class="clickhint">Tap to expand</div>
   </div>
 
   <!-- P3: Granular Moderation -->
@@ -268,37 +290,31 @@
           <div class="yth"><div class="ytlogo"><div class="ytico">▶</div>YouTube</div><div class="ytright"><span>🔍</span><span>👤</span></div></div>
           <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
             <div class="vplayer">
-              <div class="scene"><div class="sbg"></div><div class="person"><div class="pbody"><div class="phead"></div></div></div><div class="bubble" id="p3b"></div><div class="cap" id="p3c"></div></div>
-              <div class="mutebadge" id="p3mute">🔇 Audio Muted · AI Mediator</div>
+              <div class="scene" id="p3scene"><div class="sbg"></div><div class="cast" id="p3cast"><div class="person a"><div class="pbody"><div class="phead"><div class="eyes"><span class="eye"></span><span class="eye"></span></div><div class="brow left"></div><div class="brow right"></div><div class="mouth"></div></div></div></div><div class="person b"><div class="pbody"><div class="phead"><div class="eyes"><span class="eye"></span><span class="eye"></span></div><div class="brow left"></div><div class="brow right"></div><div class="mouth"></div></div></div></div></div><div class="bubble" id="p3b"></div><div class="cap" id="p3c"></div></div>
+              <div class="mutebadge" id="p3mute">🔇 Audio Muted</div>
               <div class="blackout" id="p3bo">
                 <div class="boico">🚫</div>
-                <div class="bolbl">Content Blocked · AI Mediator</div>
-                <div class="ai-explain on"><div class="ai-explain-label"><div class="ai-pulse"></div>AI Mediator</div>An explanation of why this content was blocked is shown here.</div>
+                <div class="bolbl">Content Blocked</div>
+                <div class="ai-explain on"><div class="ai-explain-label"><div class="ai-pulse"></div>Explanation</div>An explanation of why this content was blocked is shown here.</div>
               </div>
               <div class="aitag" id="p3tag"></div>
               <div class="ytctrl"><div class="ptrack"><div class="pfill" id="p3f"></div><div class="tmark" id="p3m1" style="left:37%;background:#fbbf24"></div><div class="tmark" id="p3m2" style="left:66%;background:#f43f5e"></div></div><div class="crow"><div class="cleft"><span class="cbtn">⏸</span><span class="cbtn" id="p3v">🔊</span><span class="tdisp" id="p3t">0:00 / 4:12</span></div><span class="cbtn">⛶</span></div></div>
             </div>
-            <div class="aibar" id="p3bar"><div class="aipulse"></div><div class="ailbl">AI Mediator</div><div class="aistatus" id="p3st">Monitoring</div></div>
+            <div class="aibar" id="p3bar"><div class="aipulse"></div><div class="aistatus" id="p3st">Monitoring</div></div>
             <div class="vinfo">
-              <div class="vtitle">EXTREME PRANK GONE WRONG 😂 ft. the crew</div>
+              <div class="vtitle">Just Another Day 🎬</div>
               <div class="vmeta"><span>1.2M views</span><span>·</span><span>3 days ago</span></div>
               <div class="chrow"><div class="chav">OT</div><div class="chnm">Obbletrook</div><div class="subbtn">Subscribe</div></div>
               <div class="actrow"><div class="actbtn">👍 48K</div><div class="actbtn">👎</div><div class="actbtn">↗ Share</div></div>
             </div>
           </div>
         </div>
-        <div class="yt-nav"><div class="nav-item active"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="10" height="10" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#5b8dee" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
+        <div class="yt-nav"><div class="nav-item active"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="12" height="12" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#6d8bff" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
       </div>
     </div>
     <div class="rbtn" onclick="event.stopPropagation();replaySlot(3)">↺ Replay</div>
-    <div class="clickhint">Tap to expand</div>
   </div>
 
-</div>
-
-<div class="gctrl">
-  <p class="hint">Click a panel to expand · video plays automatically · <span>side panels stay interactive</span></p>
-  <button class="grbtn" onclick="replayAll()">↺ &nbsp;Replay All</button>
 </div>
 
 <script>
@@ -318,19 +334,45 @@ function fmt(p){const s=Math.floor(p*252);return`${Math.floor(s/60)}:${String(s%
 function clr(n){if(ST.ivs[n]){clearInterval(ST.ivs[n]);ST.ivs[n]=null;}if(ST.tms[n]){ST.tms[n].forEach(clearTimeout);ST.tms[n]=[];}}
 function tm(n,fn,d){if(!ST.tms[n])ST.tms[n]=[];ST.tms[n].push(setTimeout(fn,d));}
 
-function playP1(){clr(1);const fill=document.getElementById('p1f'),tEl=document.getElementById('p1t'),bub=document.getElementById('p1b'),cap=document.getElementById('p1c');fill.style.width='0%';bub.className='bubble';cap.className='cap';startBg();let pct=0,m1=false,m2=false;const step=100/(TOTAL/50);ST.ivs[1]=setInterval(()=>{pct=Math.min(pct+step,100);fill.style.width=pct+'%';tEl.textContent=fmt(pct/100);const t=pct/100;if(t>=M1S&&!m1){m1=true;harshTone();bub.textContent="😠 Ugh, you're the WORST!";bub.className='bubble bad show';cap.textContent='[loud arguing]';cap.className='cap show';tm(1,()=>{bub.className='bubble';cap.className='cap';},1800);}if(t>=M2S&&!m2){m2=true;harshTone();bub.textContent='😤 GET OUT, NOW!!';bub.className='bubble bad show';cap.textContent='[yelling and pushing]';cap.className='cap show';tm(1,()=>{bub.className='bubble';cap.className='cap';},2200);}if(pct>=100){clr(1);stopBg();}},50);}
+function playP1(){clr(1);const fill=document.getElementById('p1f'),tEl=document.getElementById('p1t'),bub=document.getElementById('p1b'),cap=document.getElementById('p1c'),scene=document.getElementById('p1scene'),cast=document.getElementById('p1cast'),personA=cast.querySelector('.person.a'),personB=cast.querySelector('.person.b');fill.style.width='0%';bub.className='bubble';cap.className='cap';personA.classList.remove('yelling','pushed');personB.classList.remove('pushing');scene.classList.add('playing');startBg();let pct=0,m1=false,m2=false;const step=100/(TOTAL/50);ST.ivs[1]=setInterval(()=>{pct=Math.min(pct+step,100);fill.style.width=pct+'%';tEl.textContent=fmt(pct/100);const t=pct/100;if(t>=M1S&&!m1){m1=true;harshTone();bub.textContent="😠 Ugh, you're the WORST!";bub.className='bubble bad show';cap.textContent='[loud arguing]';cap.className='cap show';personA.classList.add('yelling');tm(1,()=>{bub.className='bubble';cap.className='cap';personA.classList.remove('yelling');},3400);}if(t>=M2S&&!m2){m2=true;harshTone();bub.textContent='😤 GET OUT, NOW!!';bub.className='bubble bad show';cap.textContent='[yelling and pushing]';cap.className='cap show';personB.classList.add('pushing');personA.classList.add('pushed');tm(1,()=>{personB.classList.remove('pushing');},700);tm(1,()=>{bub.className='bubble';cap.className='cap';},3800);}if(pct>=100){clr(1);stopBg();scene.classList.remove('playing');}},50);}
 
-function playP2(){clr(2);const thumb=document.getElementById('p2thumb'),block=document.getElementById('p2block');thumb.classList.remove('gone');block.classList.remove('on');document.getElementById('p2f').style.width='0%';tm(2,()=>{thumb.classList.add('gone');tm(2,()=>block.classList.add('on'),280);},1300);}
+function playP2(){clr(2);const thumb=document.getElementById('p2thumb'),block=document.getElementById('p2block'),scene=document.getElementById('p2scene');thumb.classList.remove('gone');block.classList.remove('on');document.getElementById('p2f').style.width='0%';scene.classList.add('playing');tm(2,()=>{thumb.classList.add('gone');tm(2,()=>{block.classList.add('on');scene.classList.remove('playing');},280);},1300);}
 
-function playP3(){clr(3);stopBg();const fill=document.getElementById('p3f'),tEl=document.getElementById('p3t'),mute=document.getElementById('p3mute'),bo=document.getElementById('p3bo'),tag=document.getElementById('p3tag'),bar=document.getElementById('p3bar'),st=document.getElementById('p3st'),vol=document.getElementById('p3v'),m1=document.getElementById('p3m1'),m2=document.getElementById('p3m2'),bub=document.getElementById('p3b'),cap=document.getElementById('p3c');fill.style.width='0%';[mute,bo,tag,bar].forEach(e=>e.classList.remove('on'));m1.style.opacity='0';m2.style.opacity='0';vol.textContent='🔊';st.textContent='Monitoring';bub.className='bubble';cap.className='cap';tm(3,()=>bar.classList.add('on'),400);startBg();let pct=0,m1on=false,m2on=false,rewinding=false,m1bf=false,m2bf=false;const step=100/(TOTAL/50);ST.ivs[3]=setInterval(()=>{if(rewinding)return;pct=Math.min(pct+step,100);fill.style.width=pct+'%';tEl.textContent=fmt(pct/100);const t=pct/100;if(t>=M1S&&t<=M1E){if(!m1on){m1on=true;muteBg();if(!m1bf){bleep(0.75);m1bf=true;}mute.classList.add('on');vol.textContent='🔇';tag.textContent='🔇 Loud Arguing Detected';tag.classList.add('on');m1.style.opacity='1';st.textContent='Audio muted';bub.textContent='🔇 [muted by AI Mediator]';bub.className='bubble bleep show';cap.textContent='Audio muted · loud arguing detected';cap.className='cap cen show';}}else if(m1on&&t>M1E&&t<M2S){m1on=false;unmuteBg();mute.classList.remove('on');tag.classList.remove('on');vol.textContent='🔊';st.textContent='Monitoring';bub.className='bubble';cap.className='cap';}if(t>=M2S&&t<=M2E){if(!m2on){m2on=true;muteBg();if(!m2bf){bleep(1.0);m2bf=true;}mute.classList.add('on');bo.classList.add('on');vol.textContent='🔇';tag.textContent='🚫 Yelling + Pushing';tag.classList.add('on');m2.style.opacity='1';st.textContent='Audio + Video blocked';bub.className='bubble';cap.className='cap';}}else if(m2on&&t>M2E){m2on=false;unmuteBg();mute.classList.remove('on');bo.classList.remove('on');tag.classList.remove('on');vol.textContent='🔊';st.textContent='Monitoring';}if(t>=RW&&!rewinding){rewinding=true;clearInterval(ST.ivs[3]);muteBg();st.textContent='Rewinding to flagged moment…';tag.textContent='↩ Rewinding…';tag.classList.add('on');tm(3,()=>{const target=M1S*100;const ri=setInterval(()=>{pct=Math.max(pct-2,target);fill.style.width=pct+'%';tEl.textContent=fmt(pct/100);if(pct<=target){clearInterval(ri);tm(3,()=>{mute.classList.add('on');vol.textContent='🔇';tag.textContent='🔇 Block persists on rewind';tag.classList.add('on');st.textContent='Still blocked on rewind';bub.textContent='🔇 [still muted]';bub.className='bubble bleep show';cap.textContent='Rewind confirmed · block is permanent';cap.className='cap cen show';bleep(0.5);},300);}},25);if(!ST.tms[3])ST.tms[3]=[];ST.tms[3].push(ri);},700);}if(pct>=100&&!rewinding){clr(3);stopBg();}},50);}
+function playP3(){clr(3);stopBg();const fill=document.getElementById('p3f'),tEl=document.getElementById('p3t'),mute=document.getElementById('p3mute'),bo=document.getElementById('p3bo'),tag=document.getElementById('p3tag'),bar=document.getElementById('p3bar'),st=document.getElementById('p3st'),vol=document.getElementById('p3v'),m1=document.getElementById('p3m1'),m2=document.getElementById('p3m2'),bub=document.getElementById('p3b'),cap=document.getElementById('p3c'),scene=document.getElementById('p3scene'),cast=document.getElementById('p3cast'),personA=cast.querySelector('.person.a');fill.style.width='0%';[mute,bo,tag,bar].forEach(e=>e.classList.remove('on'));m1.style.opacity='0';m2.style.opacity='0';vol.textContent='🔊';st.textContent='Monitoring';bub.className='bubble';cap.className='cap';personA.classList.remove('yelling');scene.classList.add('playing');tm(3,()=>bar.classList.add('on'),400);startBg();
+  const READ_HOLD=2000; // extra real time held on the full block screen so slow readers can catch up
+  let pct=0,m1on=false,m2on=false,m1bf=false,m2bf=false,holding=false;
+  const step=100/(TOTAL/50);
+  function tick(){
+    if(holding)return;
+    pct=Math.min(pct+step,100);fill.style.width=pct+'%';tEl.textContent=fmt(pct/100);
+    const t=pct/100;
+    if(t>=M1S&&t<=M1E){
+      if(!m1on){m1on=true;muteBg();if(!m1bf){bleep(0.75);m1bf=true;}mute.classList.add('on');vol.textContent='🔇';tag.textContent='🔇 Loud Arguing Detected';tag.classList.add('on');m1.style.opacity='1';st.textContent='Audio muted';bub.textContent='🔇 [muted]';bub.className='bubble bleep show';cap.textContent='Audio muted · loud arguing detected';cap.className='cap cen show';personA.classList.add('yelling');}
+    }else if(m1on&&t>M1E&&t<M2S){
+      m1on=false;unmuteBg();mute.classList.remove('on');tag.classList.remove('on');vol.textContent='🔊';st.textContent='Monitoring';bub.className='bubble';cap.className='cap';personA.classList.remove('yelling');
+    }
+    if(t>=M2S&&t<=M2E){
+      if(!m2on){
+        m2on=true;muteBg();if(!m2bf){bleep(1.0);m2bf=true;}mute.classList.add('on');bo.classList.add('on');vol.textContent='🔇';tag.textContent='🚫 Yelling + Pushing';tag.classList.add('on');m2.style.opacity='1';st.textContent='Audio + Video blocked';bub.className='bubble';cap.className='cap';
+        // Pause the clock here so the block screen stays up long enough to read
+        holding=true;
+        clearInterval(ST.ivs[3]);
+        tm(3,()=>{holding=false;ST.ivs[3]=setInterval(tick,50);},READ_HOLD);
+      }
+    }else if(m2on&&t>M2E){
+      m2on=false;unmuteBg();mute.classList.remove('on');bo.classList.remove('on');tag.classList.remove('on');vol.textContent='🔊';st.textContent='Monitoring';
+    }
+    if(pct>=100){clr(3);stopBg();scene.classList.remove('playing');personA.classList.remove('yelling');}
+  }
+  ST.ivs[3]=setInterval(tick,50);
+}
 
 function handleClick(n){if(ST.focused===n)return;stopBg();clr(1);clr(2);clr(3);ST.focused=n;[1,2,3].forEach(i=>{const s=document.getElementById('s'+i);s.classList.remove('focused','side');s.classList.add(i===n?'focused':'side');});setTimeout(()=>{if(n===1)playP1();if(n===2)playP2();if(n===3)playP3();},630);}
 
-function rP1(){document.getElementById('p1f').style.width='0%';document.getElementById('p1t').textContent='0:00 / 4:12';document.getElementById('p1b').className='bubble';document.getElementById('p1c').className='cap';}
-function rP2(){document.getElementById('p2f').style.width='0%';document.getElementById('p2thumb').classList.remove('gone');document.getElementById('p2block').classList.remove('on');}
-function rP3(){document.getElementById('p3f').style.width='0%';['p3mute','p3bo','p3tag','p3bar'].forEach(id=>document.getElementById(id).classList.remove('on'));document.getElementById('p3t').textContent='0:00 / 4:12';document.getElementById('p3v').textContent='🔊';document.getElementById('p3m1').style.opacity='0';document.getElementById('p3m2').style.opacity='0';document.getElementById('p3st').textContent='Monitoring';document.getElementById('p3b').className='bubble';document.getElementById('p3c').className='cap';}
+function rP1(){document.getElementById('p1f').style.width='0%';document.getElementById('p1t').textContent='0:00 / 4:12';document.getElementById('p1b').className='bubble';document.getElementById('p1c').className='cap';document.getElementById('p1scene').classList.remove('playing');const p1cast=document.getElementById('p1cast');p1cast.querySelector('.person.a').classList.remove('yelling','pushed');p1cast.querySelector('.person.b').classList.remove('pushing');}
+function rP2(){document.getElementById('p2f').style.width='0%';document.getElementById('p2thumb').classList.remove('gone');document.getElementById('p2block').classList.remove('on');document.getElementById('p2scene').classList.remove('playing');}
+function rP3(){document.getElementById('p3f').style.width='0%';['p3mute','p3bo','p3tag','p3bar'].forEach(id=>document.getElementById(id).classList.remove('on'));document.getElementById('p3t').textContent='0:00 / 4:12';document.getElementById('p3v').textContent='🔊';document.getElementById('p3m1').style.opacity='0';document.getElementById('p3m2').style.opacity='0';document.getElementById('p3st').textContent='Monitoring';document.getElementById('p3b').className='bubble';document.getElementById('p3c').className='cap';document.getElementById('p3scene').classList.remove('playing');document.getElementById('p3cast').querySelector('.person.a').classList.remove('yelling');}
 function replaySlot(n){stopBg();clr(n);if(n===1){rP1();if(ST.focused===1)playP1();}if(n===2){rP2();if(ST.focused===2)playP2();}if(n===3){rP3();if(ST.focused===3)playP3();}}
-function replayAll(){stopBg();clr(1);clr(2);clr(3);[1,2,3].forEach(i=>{const s=document.getElementById('s'+i);s.classList.remove('focused');s.classList.add('side');});ST.focused=null;rP1();rP2();rP3();}
 </script>
 </body>
 </html>
