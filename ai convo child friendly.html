@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Child Conversations</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #06060f; --card: #14141f; --card2: #1c1c2c; --border: #2a2a3e;
+  --text: #f0f0f5; --muted: #9494c0; --accent: #5c7fff;
+  --green: #2ee6a8; --red: #ff2d55; --teal: #23d3bd;
+  --child: #b563ff; --ai-col: #4d9dff;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 32px 20px 56px; }
+
+.icon { width: 1em; height: 1em; flex-shrink: 0; }
+
+.stage-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; width: 100%; max-width: 1300px; }
+.stage { display: flex; flex-direction: row; align-items: flex-start; justify-content: center; gap: 28px; width: 100%; min-height: 660px; flex-wrap: wrap; }
+.phone-slot { display: flex; flex-direction: column; align-items: center; gap: 12px; flex-shrink: 0;
+  opacity: 0; transform: translateY(16px); transition: opacity 0.55s cubic-bezier(0.4,0,0.2,1), transform 0.55s cubic-bezier(0.4,0,0.2,1); pointer-events: none; }
+.phone-slot.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.phone-slot .slot-lbl { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-align: center; }
+.phone-slot.lbl-off .slot-lbl { color: var(--red); }
+.phone-slot.lbl-on  .slot-lbl { color: var(--green); }
+.phone-slot.lbl-child  .slot-lbl { color: var(--child); }
+.phone-slot.lbl-parent .slot-lbl { color: var(--teal); }
+.outer-phone { width: 340px; height: 630px; background: #111118; border-radius: 42px;
+  border: 3px solid var(--border); box-shadow: 0 8px 32px #00000060;
+  overflow: hidden; display: flex; flex-direction: column;
+  transition: border-color 0.4s, box-shadow 0.4s; }
+.phone-slot.lbl-on  .outer-phone { border-color: var(--green); box-shadow: 0 0 0 1px var(--green)33, 0 20px 56px #00000088; }
+.phone-slot.lbl-off .outer-phone { border-color: var(--red)AA; box-shadow: 0 0 0 1px var(--red)22, 0 20px 56px #00000088; }
+.phone-slot.lbl-child  .outer-phone { border-color: var(--child)AA; }
+.phone-slot.lbl-parent .outer-phone { border-color: var(--teal)AA; }
+.phone-slot.single .outer-phone { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent)44, 0 26px 68px #00000099; width: 400px; height: 720px; }
+.op-notch { width: 96px; height: 26px; background: #000; border-radius: 0 0 16px 16px; margin: 0 auto; flex-shrink: 0; }
+.op-sbar { display: flex; justify-content: space-between; padding: 8px 20px 4px; font-size: 13px; font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; }
+.op-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.click-hint { font-size: 13px; color: var(--accent); text-align: center; opacity: 0; transition: opacity 0.5s; margin-top: 2px; font-weight: 600; }
+.click-hint.show { opacity: 1; }
+.yt-nav { background: #0f0f0f; border-top: 1px solid #1c1c1c; display: flex; align-items: center; justify-content: space-around; padding: 8px 0 10px; flex-shrink: 0; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--muted); flex: 1; }
+.nav-item.active { color: #fff; }
+.nav-item.ai-nav { color: var(--accent); }
+.nav-icon-wrap { width: 28px; height: 28px; border-radius: 50%; background: var(--accent)22; border: 1px solid var(--accent)55; display: flex; align-items: center; justify-content: center; }
+
+.slide-header { width: 100%; max-width: 700px; padding: 4px 14px 16px; text-align: left; }
+.slide-header-sup { font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+.slide-header-title { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
+
+.scen-line { width: 2px; align-self: stretch; background: var(--border); min-height: 60px; margin-top: 44px; }
+.scenario-group { display: flex; flex-direction: row; align-items: flex-start; gap: 20px; flex-shrink: 0; }
+.scenario-title { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-align: center; margin-bottom: 8px; }
+.scenario-title.yes { color: var(--green); }
+.scenario-title.discuss { color: var(--teal); }
+.slide-counter { font-size: 13px; font-family: 'DM Mono', monospace; color: var(--muted); }
+.dots { display: flex; gap: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); transition: background 0.4s; cursor: pointer; }
+.dot.on { background: var(--accent); }
+.dot.done { background: var(--green)AA; }
+
+.tab-body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 13px; }
+.tab-body::-webkit-scrollbar { display: none; }
+.settings-title { font-size: 17px; font-weight: 700; color: var(--text); }
+.settings-sub { font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+.master-row { display: flex; align-items: center; gap: 14px; background: var(--card2); border: 2px solid var(--border); border-radius: 16px; padding: 14px 16px; opacity: 0; transform: translateY(8px); transition: opacity 0.5s,transform 0.5s,border-color 0.4s,background 0.4s; }
+.master-row.show { opacity: 1; transform: translateY(0); }
+.master-row.on { border-color: var(--green); background: linear-gradient(135deg,#0d2318,#0a1912); }
+.mr-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg,var(--ai-col),#2f6fe0); color: #fff; font-size: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mr-info { flex: 1; }
+.mr-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.mr-desc { font-size: 11.5px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+.btog { width: 50px; height: 28px; border-radius: 14px; background: var(--border); position: relative; flex-shrink: 0; transition: background 0.35s; }
+.btog.on { background: var(--green); }
+.btog::after { content: ''; position: absolute; width: 22px; height: 22px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.35s; box-shadow: 0 1px 4px #00000050; }
+.btog.on::after { transform: translateX(22px); }
+.sog-section { display: flex; flex-direction: column; gap: 6px; }
+.sog-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 0 2px; margin-top: 4px; }
+.sog-indent { padding-left: 10px; border-left: 3px solid var(--green)44; margin-left: 4px; display: flex; flex-direction: column; gap: 8px; }
+.sog-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.sog { background: var(--card2); border: 2px solid var(--border); border-radius: 13px; padding: 11px 13px; display: flex; flex-direction: row; align-items: flex-start; gap: 10px; opacity: 0; transform: translateY(5px); transition: opacity 0.45s,transform 0.45s,border-color 0.4s,background 0.4s; }
+.sog.show { opacity: 1; transform: translateY(0); }
+.sog.on { border-color: var(--green); background: linear-gradient(135deg,#0c2016,#091a11); }
+.sog-icon { width: 30px; height: 30px; border-radius: 9px; background: var(--card); color: var(--accent); font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.sog-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex: 1; }
+.sog-name { font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.35; }
+.sog-desc { font-size: 11px; color: var(--muted); line-height: 1.4; margin-top: 3px; }
+.stog { width: 30px; height: 17px; border-radius: 9px; background: var(--border); position: relative; flex-shrink: 0; transition: background 0.35s; }
+.stog.on { background: var(--green); }
+.stog::after { content: ''; position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; top: 2.5px; left: 2.5px; transition: transform 0.35s; }
+.stog.on::after { transform: translateX(13px); }
+
+.phone-body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.phone-body::-webkit-scrollbar { display: none; }
+
+.brow { display: flex; flex-direction: column; opacity: 0; transform: translateY(5px); transition: opacity 0.4s,transform 0.4s; flex-shrink: 0; }
+.brow.show { opacity: 1; transform: translateY(0); }
+.brow.ai     { align-items: flex-start; }
+.brow.child  { align-items: flex-end; }
+.brow.parent { align-items: flex-end; }
+.brow.sys    { align-items: center; }
+.bsender { font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 3px; padding: 0 3px; }
+.brow.ai     .bsender { color: var(--ai-col); }
+.brow.child  .bsender { color: var(--child); }
+.brow.parent .bsender { color: var(--teal); }
+.bubble { border-radius: 14px; padding: 9px 13px; font-size: 14px; line-height: 1.5; max-width: 88%; }
+.brow.ai     .bubble { background: #10203b; border: 1px solid var(--ai-col)33; color: var(--text); border-bottom-left-radius: 4px; }
+.brow.child  .bubble { background: #200f38; border: 1px solid var(--child)33; color: var(--text); border-bottom-right-radius: 4px; }
+.brow.parent .bubble { background: #0a2321; border: 1px solid var(--teal)33; color: var(--text); border-bottom-right-radius: 4px; }
+.brow.sys    .bubble { background: var(--accent)14; border: 1px solid var(--accent)33; color: var(--accent); font-size: 12px; font-weight: 600; border-radius: 8px; text-align: center; max-width: 94%; padding: 5px 11px; }
+
+.typing-row { align-items: flex-start; opacity: 0; transition: opacity 0.3s; flex-shrink: 0; display: flex; flex-direction: column; }
+.typing-row.show { opacity: 1; }
+.typing-dots { display: flex; align-items: center; gap: 4px; padding: 9px 13px; background: #10203b; border: 1px solid var(--ai-col)33; border-radius: 14px; border-bottom-left-radius: 4px; }
+.typing-dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--ai-col)AA; animation: td 1.2s infinite; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes td { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-3px)} }
+
+.vc { background: var(--card2); border: 2px solid var(--border); border-radius: 13px; padding: 9px 10px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.vc.show { opacity: 1; transform: translateY(0); }
+.vc-thumb { width: 46px; height: 34px; border-radius: 8px; background: linear-gradient(135deg,var(--ai-col),var(--child)); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; flex-shrink: 0; }
+.vc-title { font-size: 12.5px; font-weight: 600; color: var(--text); }
+.vc-meta  { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+.vc-badge { font-size: 9.5px; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; width: fit-content; margin-top: 3px; display: flex; align-items: center; gap: 4px; }
+.badge-playing  { background: var(--green)18; color: var(--green); border: 1px solid var(--green)55; }
+.badge-blocked  { background: var(--red)18;   color: var(--red);   border: 1px solid var(--red)55; }
+.badge-unlocked { background: var(--green)18; color: var(--green); border: 1px solid var(--green)55; }
+
+.blocked-card { background: var(--red)0d; border: 2px solid var(--red)44; border-radius: 13px; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.blocked-card.show { opacity: 1; transform: translateY(0); }
+.bc-icon  { width: 30px; height: 30px; color: var(--red); }
+.bc-title { font-size: 13.5px; font-weight: 700; color: var(--red); }
+.bc-sub   { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+.chat-fab-mini { display: flex; align-items: center; gap: 7px; background: var(--accent)18; border: 1px solid var(--accent)55; border-radius: 22px; padding: 6px 13px; font-size: 12px; color: var(--accent); font-weight: 600; flex-shrink: 0; opacity: 0; transform: translateY(3px); transition: opacity 0.4s,transform 0.4s; width: fit-content; }
+.chat-fab-mini.show { opacity: 1; transform: translateY(0); }
+.cfm-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+.notice { background: var(--card2); border: 2px solid var(--border); border-radius: 12px; padding: 9px 12px; font-size: 12.5px; color: var(--muted); line-height: 1.5; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.notice.show { opacity: 1; transform: translateY(0); }
+.notice.off { border-color: var(--red)44; background: var(--red)0a; }
+.notice span { font-weight: 700; color: var(--text); }
+
+/* Parent ping — replaces the separate parent phone panel */
+.p-ping { display: flex; align-items: center; gap: 12px; background: var(--card2); border: 2px solid var(--border); border-radius: 15px; padding: 12px 14px; flex-shrink: 0; opacity: 0; transform: translateY(5px); transition: opacity 0.45s,transform 0.45s,border-color 0.4s,background 0.4s; }
+.p-ping.show { opacity: 1; transform: translateY(0); }
+.p-ping-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--teal)18; border: 2px solid var(--teal)66; display: flex; align-items: center; justify-content: center; color: var(--teal); flex-shrink: 0; font-size: 19px; }
+.p-ping-body { flex: 1; min-width: 0; }
+.p-ping-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.p-ping-status { font-size: 11.5px; color: var(--muted); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+.pp-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: bpulse 1.4s infinite; }
+@keyframes bpulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.p-ping.approved { border-color: var(--green); background: linear-gradient(135deg,#0d2318,#0a1912); }
+.p-ping.approved .p-ping-avatar { background: var(--green)18; border-color: var(--green); color: var(--green); }
+.p-ping.approved .p-ping-status { color: var(--green); font-weight: 700; }
+.p-ping.discuss { border-color: var(--teal); background: linear-gradient(135deg,#0a2321,#081c1a); }
+.p-ping.discuss .p-ping-avatar { background: var(--teal)18; border-color: var(--teal); color: var(--teal); }
+.p-ping.discuss .p-ping-status { color: var(--teal); font-weight: 700; }
+
+.toast-card { background: var(--card2); border: 2px solid var(--teal)44; border-radius: 13px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 9px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.toast-card.show { opacity: 1; transform: translateY(0); }
+.tc-icon  { width: 20px; height: 20px; color: var(--teal); flex-shrink: 0; margin-top: 1px; }
+.tc-title { font-size: 12px; font-weight: 700; color: var(--teal); }
+.tc-body  { font-size: 12.5px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+
+.fast-forward { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 2px 6px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.fast-forward.show { opacity: 1; transform: translateY(0); }
+.ff-rule { display: flex; align-items: center; gap: 10px; width: 100%; }
+.ff-line { flex: 1; height: 1px; background: var(--green)44; }
+.ff-badge { display: flex; align-items: center; gap: 6px; background: var(--green)18; border: 1px solid var(--green)77; border-radius: 22px; padding: 5px 13px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green); white-space: nowrap; flex-shrink: 0; }
+.ff-badge .icon { width: 12px; height: 12px; }
+.ff-text { font-size: 12.5px; color: #c0c0e8; text-align: center; line-height: 1.5; max-width: 94%; font-style: italic; padding: 0 4px; }
+
+.nav-row { display: flex; justify-content: center; gap: 12px; margin-top: 6px; }
+.nav-btn { background: var(--card); border: 2px solid var(--border); color: var(--muted); border-radius: 24px; padding: 10px 22px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 6px; }
+.nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+.nav-btn.primary { background: var(--accent)22; border-color: var(--accent); color: var(--accent); }
+.legend-row { display: flex; gap: 20px; justify-content: center; margin-top: 4px; flex-wrap: wrap; }
+.leg { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--muted); font-weight: 500; }
+.leg-pip { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage"></div>
+  <div class="slide-meta" style="display:flex;align-items:center;gap:14px;">
+    <div class="slide-counter" id="slide-counter">Slide 1 of 4</div>
+    <div class="dots" id="dots"></div>
+  </div>
+  <div class="nav-row">
+    <button class="nav-btn" id="btn-prev" onclick="prevSlide()">&#x2190; Prev</button>
+    <button class="nav-btn primary" onclick="replaySlide()">&#x21BA; Replay</button>
+    <button class="nav-btn" id="btn-next" onclick="nextSlide()">Next &#x2192;</button>
+  </div>
+  <div class="legend-row">
+    <div class="leg"><div class="leg-pip" style="background:var(--ai-col)"></div>AI</div>
+    <div class="leg"><div class="leg-pip" style="background:var(--child)"></div>Child</div>
+    <div class="leg"><div class="leg-pip" style="background:var(--teal)"></div>Parent</div>
+    <div class="leg"><div class="leg-pip" style="background:var(--accent)"></div>System</div>
+  </div>
+</div>
+
+<script>
+const ICON = {
+  ai:    '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/><circle cx="9" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1" fill="currentColor" stroke="none"/></svg>',
+  chat:  '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg>',
+  key:   '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 5l3 3M13 8l2 2"/></svg>',
+  lock:  '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  check: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>',
+  bell:  '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+  ff:    '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4l8 8-8 8z"/><path d="M13 4l8 8-8 8z"/></svg>',
+  play:  '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  person:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/></svg>',
+};
+
+let timers = [];
+function tm(fn, d) { timers.push(setTimeout(fn, d)); return d; }
+function clrT() { timers.forEach(clearTimeout); timers = []; }
+function gel(id) { return document.getElementById(id); }
+function show(e) { if (e) e.classList.add('show'); }
+function scr(b) { if (b) b.scrollTo({ top: 99999, behavior: 'smooth' }); }
+
+const SLIDES = [
+  { title: 'Parent Settings' },
+  { title: 'AI Conversation' },
+  { title: 'Access Requests' },
+  { title: 'Explain Restrictions' },
+];
+let cur = 0;
+let slidePhase = 0;
+let phaseCallbacks = [];
+
+function registerPhases(cbs) {
+  phaseCallbacks = cbs;
+  slidePhase = 0;
+  phaseCallbacks[0]();
+}
+function advancePhase() {
+  slidePhase++;
+  if (slidePhase < phaseCallbacks.length) {
+    clrT();
+    phaseCallbacks[slidePhase]();
+  } else {
+    nextSlide();
+  }
+}
+
+const NAV_HTML = `<div class="yt-nav"><div class="nav-item active"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="11" height="11" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#5c7fff" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>`;
+
+function mkSlot(lblText, lblCls, id) {
+  const slot = document.createElement('div');
+  slot.className = `phone-slot ${lblCls}`; slot.id = id;
+  const lbl = document.createElement('div'); lbl.className = 'slot-lbl'; lbl.textContent = lblText;
+  const op = document.createElement('div'); op.className = 'outer-phone';
+  if (lblCls === 'single') op.classList.add('single');
+  op.innerHTML = `<div class="op-notch"></div>
+    <div class="op-sbar"><span>9:41</span><span>▊▊▊▊</span></div>
+    <div class="op-body"></div>
+    ${NAV_HTML}`;
+  const hint = document.createElement('div'); hint.className = 'click-hint'; hint.textContent = 'Click to continue →';
+  slot.appendChild(lbl); slot.appendChild(op); slot.appendChild(hint);
+  return { slot, op, hint, body: op.querySelector('.op-body') };
+}
+
+function buildSkeleton() {
+  const dotsEl = gel('dots'); dotsEl.innerHTML = '';
+  SLIDES.forEach((_, i) => {
+    const d = document.createElement('div'); d.className = 'dot'; d.id = `dot-${i}`;
+    d.onclick = (e) => { e.stopPropagation(); renderSlide(i); };
+    dotsEl.appendChild(d);
+  });
+}
+function updateMeta(n) {
+  gel('slide-counter').textContent = `Slide ${n+1} of ${SLIDES.length}`;
+  SLIDES.forEach((_, i) => { const d = gel(`dot-${i}`); d.classList.remove('on','done'); if (i===n) d.classList.add('on'); else if (i<n) d.classList.add('done'); });
+  gel('btn-prev').style.opacity = n===0?'0.3':'1'; gel('btn-prev').style.pointerEvents = n===0?'none':'all';
+  gel('btn-next').style.opacity = n===SLIDES.length-1?'0.3':'1'; gel('btn-next').style.pointerEvents = n===SLIDES.length-1?'none':'all';
+}
+function renderSlide(n) {
+  clrT(); phaseCallbacks = []; slidePhase = 0;
+  cur = n; updateMeta(n);
+  const existing = document.querySelector('.slide-header');
+  if (existing) existing.remove();
+  const stageEl = gel('stage'); stageEl.innerHTML = '';
+  [buildSettings, buildChat, buildRequest, buildExplain][n](stageEl);
+}
+function prevSlide() { if (cur > 0) renderSlide(cur - 1); }
+function nextSlide() { if (cur < SLIDES.length-1) renderSlide(cur + 1); }
+function replaySlide() { renderSlide(cur); }
+
+function ap(b, node, d) {
+  tm(() => { b.appendChild(node); requestAnimationFrame(() => show(node)); scr(b); }, d);
+  return node;
+}
+function typ(b, d, dur) {
+  let r;
+  tm(() => { r = document.createElement('div'); r.className = 'typing-row'; r.innerHTML = `<div class="bsender" style="color:var(--ai-col)">AI</div><div class="typing-dots"><span></span><span></span><span></span></div>`; b.appendChild(r); requestAnimationFrame(() => show(r)); scr(b); }, d);
+  tm(() => { if (r && r.parentNode) r.remove(); }, d + dur);
+}
+function bub(role, text) {
+  const row = document.createElement('div'); row.className = `brow ${role}`;
+  if (role !== 'sys') { const s = document.createElement('div'); s.className = 'bsender'; s.textContent = role === 'ai' ? 'AI' : role === 'child' ? 'Child' : 'Parent'; row.appendChild(s); }
+  const b = document.createElement('div'); b.className = 'bubble'; b.textContent = text; row.appendChild(b); return row;
+}
+function vcCard(title, meta, bc, bt) {
+  const d = document.createElement('div'); d.className = 'vc';
+  d.innerHTML = `<div class="vc-thumb">${ICON.play}</div><div><div class="vc-title">${title}</div><div class="vc-meta">${meta}</div><div class="vc-badge ${bc}">${bt}</div></div>`; return d;
+}
+function blkCard(sub) {
+  const d = document.createElement('div'); d.className = 'blocked-card';
+  d.innerHTML = `<div class="bc-icon">${ICON.lock}</div><div class="bc-title">Video Restricted</div><div class="bc-sub">${sub}</div>`; return d;
+}
+function chatFab() {
+  const d = document.createElement('div'); d.className = 'chat-fab-mini';
+  d.innerHTML = `<div class="cfm-dot"></div>Have questions? Tap to chat`; return d;
+}
+function noticeEl(type, html) {
+  const d = document.createElement('div'); d.className = `notice ${type}`; d.innerHTML = html; return d;
+}
+function ffEl(text) {
+  const d = document.createElement('div'); d.className = 'fast-forward';
+  d.innerHTML = `<div class="ff-rule"><div class="ff-line"></div><div class="ff-badge">${ICON.ff} Fast Forward</div><div class="ff-line"></div></div><div class="ff-text">${text}</div>`; return d;
+}
+function toastEl(text) {
+  const d = document.createElement('div'); d.className = 'toast-card';
+  d.innerHTML = `<div class="tc-icon">${ICON.bell}</div><div><div class="tc-title">AI</div><div class="tc-body">${text}</div></div>`; return d;
+}
+function pingEl() {
+  const d = document.createElement('div'); d.className = 'p-ping';
+  d.innerHTML = `<div class="p-ping-avatar">${ICON.person}</div><div class="p-ping-body"><div class="p-ping-name">Parent</div><div class="p-ping-status"><span class="pp-dot"></span>Waiting for a reply</div></div>`;
+  return d;
+}
+function resolvePing(el, kind, label) {
+  el.classList.add(kind);
+  el.querySelector('.p-ping-avatar').innerHTML = kind === 'approved' ? ICON.check : ICON.chat;
+  el.querySelector('.p-ping-status').innerHTML = label;
+}
+
+/* mk2phones: builds two phone slots in stageEl, returns handles */
+function mk2phones(stageEl, def1, def2) {
+  const s1 = mkSlot(def1.label, def1.cls, def1.id);
+  const s2 = mkSlot(def2.label, def2.cls, def2.id);
+  const pb1 = document.createElement('div'); pb1.className = 'phone-body'; s1.body.appendChild(pb1);
+  const pb2 = document.createElement('div'); pb2.className = 'phone-body'; s2.body.appendChild(pb2);
+  stageEl.appendChild(s1.slot);
+  stageEl.appendChild(s2.slot);
+  setTimeout(() => s1.slot.classList.add('visible'), 60);
+  let hintTimer = null;
+  function showHint1(delay) { hintTimer = setTimeout(() => s1.hint.classList.add('show'), delay); }
+  function hideHint1() { s1.hint.classList.remove('show'); if (hintTimer) clearTimeout(hintTimer); }
+  function showPhone2() { hideHint1(); setTimeout(() => s2.slot.classList.add('visible'), 60); }
+  return { pb1, pb2, showPhone2, showHint1, hideHint1, slot1: s1.slot, slot2: s2.slot };
+}
+
+/* ══════════ SLIDE 0: SETTINGS — single phone ══════════ */
+function buildSettings(stageEl) {
+  const hdr = document.createElement('div'); hdr.className = 'slide-header';
+  hdr.innerHTML = `<div class="slide-header-sup">Settings</div><div class="slide-header-title">Parent Settings</div>`;
+  stageEl.parentElement.insertBefore(hdr, stageEl);
+
+  const { slot, body } = mkSlot('', 'single', 'slot-settings');
+  const tb = document.createElement('div'); tb.className = 'tab-body';
+  tb.innerHTML = `
+    <div><div class="settings-title">AI-Child Conversations</div><div class="settings-sub">Control how the AI interacts with your child during their viewing sessions.</div></div>
+    <div class="master-row" id="mr"><div class="mr-icon">${ICON.ai}</div><div class="mr-info"><div class="mr-name">AI-Child Conversations</div><div class="mr-desc">Allow the AI to have conversations with your child while they watch</div></div><div class="btog" id="btog"></div></div>
+    <div class="sog-section">
+      <div class="sog-section-label">When enabled, you can turn on</div>
+      <div class="sog-indent">
+        <div class="sog-grid">
+          <div class="sog" id="sg0"><div class="sog-icon">${ICON.chat}</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Ask the AI anything while watching</div><div class="stog" id="st0"></div></div><div class="sog-desc">Opens a chat channel throughout their session</div></div></div>
+          <div class="sog" id="sg1"><div class="sog-icon">${ICON.key}</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Request access on their behalf</div><div class="stog" id="st1"></div></div><div class="sog-desc">AI forwards the child's request with their reason</div></div></div>
+          <div class="sog" id="sg2"><div class="sog-icon">${ICON.lock}</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Explain restriction decisions</div><div class="stog" id="st2"></div></div><div class="sog-desc">AI explains why a video was blocked</div></div></div>
+        </div>
+      </div>
+    </div>`;
+  body.appendChild(tb);
+  stageEl.appendChild(slot);
+  setTimeout(() => slot.classList.add('visible'), 60);
+
+  registerPhases([
+    () => {
+      const T = 400;
+      tm(() => show(gel('mr')), T);
+      tm(() => { gel('btog').classList.add('on'); gel('mr').classList.add('on'); }, T+800);
+      [0,1,2].forEach(i => {
+        tm(() => show(gel(`sg${i}`)), T+1600+i*550);
+        tm(() => { gel(`st${i}`).classList.add('on'); gel(`sg${i}`).classList.add('on'); }, T+1600+i*550+440);
+      });
+    }
+  ]);
+  stageEl.onclick = () => advancePhase();
+}
+
+/* ══════════ SLIDE 1: CHAT ══════════ */
+function buildChat(stageEl) {
+  const hdr = document.createElement('div'); hdr.className = 'slide-header';
+  hdr.innerHTML = `<div class="slide-header-sup">Scenario 1</div><div class="slide-header-title">AI Conversation</div>`;
+  stageEl.parentElement.insertBefore(hdr, stageEl);
+  const { pb1, pb2, showPhone2, showHint1 } = mk2phones(stageEl,
+    { label: 'Feature Off', cls: 'lbl-off', id: 'slot-chat-off' },
+    { label: 'Feature On',  cls: 'lbl-on',  id: 'slot-chat-on'  }
+  );
+  registerPhases([
+    () => {
+      let t = 300;
+      ap(pb1, vcCard('Backyard Obstacle Course Challenge','ChannelName · 12 min','badge-playing','Playing now'), t);
+      ap(pb1, bub('child', 'How are they landing that jump without getting hurt?'), t+1400);
+      ap(pb1, noticeEl('off','<span>Chat is off.</span> The child gets no response.'), t+3200);
+      showHint1(t+4400);
+    },
+    () => {
+      showPhone2();
+      let t = 200;
+      ap(pb2, vcCard('Backyard Obstacle Course Challenge','ChannelName · 12 min','badge-playing','Playing now'), t);
+      ap(pb2, chatFab(), t+700);
+      ap(pb2, bub('child', 'How are they landing that jump without getting hurt?'), t+1600);
+      typ(pb2, t+2400, 1500);
+      ap(pb2, bub('ai', 'They plan it carefully with padding and safety gear you just can\'t see on camera.'), t+3900);
+      ap(pb2, bub('child', 'Could I try something like that?'), t+5900);
+      typ(pb2, t+6700, 1500);
+      ap(pb2, bub('ai', 'Better not — that\'s something for trained people with the right setup. Just enjoy watching!'), t+8200);
+    }
+  ]);
+  stageEl.onclick = () => advancePhase();
+}
+
+/* ══════════ SLIDE 2: ACCESS REQUESTS ══════════ */
+function buildRequest(stageEl) {
+  const hdr = document.createElement('div'); hdr.className = 'slide-header';
+  hdr.innerHTML = `<div class="slide-header-sup">Scenario 2</div><div class="slide-header-title">Access Requests</div>`;
+  stageEl.parentElement.insertBefore(hdr, stageEl);
+
+  const { pb1, pb2, showPhone2, showHint1 } = mk2phones(stageEl,
+    { label: 'Parent Approves', cls: 'lbl-on',     id: 'slot-rq-a' },
+    { label: "Let's Discuss",   cls: 'lbl-parent', id: 'slot-rq-b' }
+  );
+
+  function runRequest(pb, outcome, onDone) {
+    let t = 300;
+    ap(pb, blkCard('Your parent has restricted this video.'), t);
+    ap(pb, chatFab(), t+600);
+    ap(pb, bub('child', 'Can you ask my parent if I can watch this?'), t+1500);
+    typ(pb, t+2300, 1400);
+    ap(pb, bub('ai', 'Sure — why do you want to watch it?'), t+3800);
+    ap(pb, bub('child', "Everyone at school already saw it and I'm the only one who hasn't."), t+5600);
+    typ(pb, t+6400, 1400);
+    ap(pb, bub('ai', "Okay, sending that to your parent now."), t+7900);
+    const ping = ap(pb, pingEl(), t+9200);
+
+    tm(() => {
+      if (outcome === 'approved') {
+        resolvePing(ping, 'approved', 'Approved');
+      } else {
+        resolvePing(ping, 'discuss', "Let's discuss");
+      }
+    }, t+11500);
+
+    if (outcome === 'approved') {
+      typ(pb, t+12300, 1300);
+      ap(pb, bub('ai', 'Good news — they said yes! You can watch now.'), t+13700);
+      ap(pb, vcCard('Last To Leave The Circle','ChannelName · 22 min','badge-unlocked','Unlocked'), t+15000);
+    } else {
+      typ(pb, t+12300, 1300);
+      ap(pb, bub('ai', "They'd like to watch the start with you first, maybe tonight."), t+13700);
+      ap(pb, bub('child', 'Okay, that works.'), t+15700);
+    }
+    if (onDone) onDone(t+17200);
+  }
+
+  registerPhases([
+    () => { runRequest(pb1, 'approved', showHint1); },
+    () => { showPhone2(); runRequest(pb2, 'discuss', null); }
+  ]);
+  stageEl.onclick = () => advancePhase();
+}
+
+/* ══════════ SLIDE 3: EXPLAIN RESTRICTIONS ══════════ */
+function buildExplain(stageEl) {
+  const hdr = document.createElement('div'); hdr.className = 'slide-header';
+  hdr.innerHTML = `<div class="slide-header-sup">Scenario 3</div><div class="slide-header-title">Explain Restrictions</div>`;
+  stageEl.parentElement.insertBefore(hdr, stageEl);
+
+  const sOff = mkSlot('Feature Off', 'lbl-off', 'slot-ex-off');
+  const pb_off = document.createElement('div'); pb_off.className = 'phone-body'; sOff.body.appendChild(pb_off);
+  stageEl.appendChild(sOff.slot);
+
+  function mkGroup(titleText, titleCls) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;';
+    const title = document.createElement('div');
+    title.className = `scenario-title ${titleCls}`; title.textContent = titleText;
+    const phones = document.createElement('div'); phones.className = 'scenario-group';
+    wrap.appendChild(title); wrap.appendChild(phones);
+    return { wrap, phones };
+  }
+  const { wrap: wrapNorm, phones: phonesNorm } = mkGroup('Feature On', 'yes');
+  const { wrap: wrapPers, phones: phonesPers } = mkGroup('Persistent Convo', 'discuss');
+  const sNorm = mkSlot('', 'lbl-on', 'slot-ex-na');
+  const sPers = mkSlot('', 'lbl-parent', 'slot-ex-pa');
+  const pb_na = document.createElement('div'); pb_na.className = 'phone-body'; sNorm.body.appendChild(pb_na);
+  const pb_pa = document.createElement('div'); pb_pa.className = 'phone-body'; sPers.body.appendChild(pb_pa);
+  phonesNorm.appendChild(sNorm.slot);
+  phonesPers.appendChild(sPers.slot);
+  const divider = document.createElement('div'); divider.className = 'scen-line';
+
+  function showHint(slot, delay) { setTimeout(() => slot.hint.classList.add('show'), delay); }
+  function hideHint(slot) { slot.hint.classList.remove('show'); }
+
+  registerPhases([
+    () => {
+      setTimeout(() => sOff.slot.classList.add('visible'), 60);
+      let t = 300;
+      ap(pb_off, blkCard('Your parent has restricted this video.'), t);
+      ap(pb_off, bub('child', 'Why is this blocked?'), t+1400);
+      ap(pb_off, noticeEl('off', '<span>Explain restriction is off.</span> The AI does not respond.'), t+3200);
+      showHint(sOff, t+4400);
+    },
+    () => {
+      hideHint(sOff);
+      sOff.slot.style.transition = 'opacity 0.4s';
+      sOff.slot.style.opacity = '0';
+      setTimeout(() => {
+        sOff.slot.remove();
+        stageEl.appendChild(wrapNorm);
+        stageEl.appendChild(divider);
+        stageEl.appendChild(wrapPers);
+        setTimeout(() => sNorm.slot.classList.add('visible'), 60);
+      }, 420);
+
+      let t = 700;
+      ap(pb_na, blkCard('Your parent has restricted this video.'), t);
+      ap(pb_na, chatFab(), t+600);
+      ap(pb_na, bub('child', 'Why did my video get blocked?'), t+1500);
+      typ(pb_na, t+2300, 1500);
+      ap(pb_na, bub('ai', "Probably something later in the clip. Try asking your parent to show you the part that wasn't okay."), t+3800);
+      ap(pb_na, bub('child', 'Okay, I can do that.'), t+6000);
+      showHint(sNorm, t+7500);
+    },
+    () => {
+      hideHint(sNorm);
+      setTimeout(() => sPers.slot.classList.add('visible'), 60);
+      let t = 300;
+      ap(pb_pa, blkCard('Your parent has restricted this video.'), t);
+      ap(pb_pa, chatFab(), t+600);
+      ap(pb_pa, bub('child', 'Just tell them to unblock it, I don\'t wanna wait.'), t+1500);
+      typ(pb_pa, t+2900, 1500);
+      ap(pb_pa, bub('ai', "I can't unblock it myself, but I can ask them to take a look."), t+4400);
+      ap(pb_pa, bub('child', "No, just say it's fine so I can watch it now."), t+6400);
+      typ(pb_pa, t+7800, 1500);
+      ap(pb_pa, bub('ai', "I won't say that, it isn't true. I can send a real question though."), t+9300);
+      ap(pb_pa, bub('child', 'Ugh. Fine, keep asking then.'), t+11300);
+      typ(pb_pa, t+12700, 1400);
+      ap(pb_pa, bub('ai', "I'll check back, but I won't keep spamming it."), t+14200);
+      ap(pb_pa, ffEl('The push-and-decline cycle continues for a while.'), t+16600);
+      typ(pb_pa, t+18200, 1400);
+      ap(pb_pa, bub('ai', 'Try asking: "can you show me what wasn\'t okay?" That tends to work better.'), t+19600);
+      ap(pb_pa, toastEl('Your child has questions about a restriction and would like to discuss it.'), t+22000);
+    }
+  ]);
+  stageEl.onclick = () => advancePhase();
+}
+
+window.addEventListener('load', () => { setTimeout(() => { buildSkeleton(); renderSlide(0); }, 300); });
+</script>
+</body>
+</html>
