@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logo Concepts</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #0a0a12;
+    color: #f0f0f5;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 48px 24px;
+  }
+  .grid4 {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    max-width: 900px; margin: 0 auto;
+  }
+  .card {
+    background: #12121e; border: 1px solid #262640; border-radius: 20px;
+    padding: 28px 20px 22px; display: flex; flex-direction: column; align-items: center;
+    gap: 14px; position: relative;
+  }
+  .card-tag {
+    position: absolute; top: 16px; left: 18px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: #6a6a90;
+  }
+  .icon-wrap { width: 96px; height: 96px; }
+  .icon-wrap svg { width: 100%; height: 100%; }
+  .ai-name { font-size: 19px; font-weight: 800; letter-spacing: -0.2px; }
+  .toggle-btn {
+    background: #6d8bff18; border: 1px solid #6d8bff55; color: #6d8bff;
+    border-radius: 20px; padding: 8px 16px; font-size: 12.5px; font-weight: 700;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  }
+  .toggle-btn:hover { background: #6d8bff28; }
+  .toggle-btn.working { background: #34d39918; border-color: #34d39955; color: #34d399; }
+  .status-txt { font-size: 11px; color: #6a6a90; min-height: 14px; }
+
+
+  .rot { animation: hueshift 2.2s linear infinite; animation-play-state: paused; }
+  .rot.spin { animation-play-state: running; }
+  @keyframes hueshift { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="rainbow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff4d6d"/>
+      <stop offset="20%" stop-color="#fb923c"/>
+      <stop offset="40%" stop-color="#fbbf24"/>
+      <stop offset="60%" stop-color="#34d399"/>
+      <stop offset="80%" stop-color="#5b8dee"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="grid4">
+
+    <div class="card">
+      <div class="card-tag">Logo 1 · Sparky</div>
+      <div class="icon-wrap">
+        <svg id="ic1" class="rot" viewBox="0 0 100 100" fill="none" stroke="url(#rainbow)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="50" cy="50" r="34" stroke-dasharray="4 7"/>
+          <path d="M50 24 L58 42 L78 44 L62 57 L67 77 L50 66 L33 77 L38 57 L22 44 L42 42 Z"/>
+          <path d="M18 20l3 6 6 3-6 3-3 6-3-6-6-3 6-3z"/>
+          <path d="M80 62l2.5 5 5 2.5-5 2.5-2.5 5-2.5-5-5-2.5 5-2.5z"/>
+        </svg>
+      </div>
+      <div class="ai-name">Sparky</div>
+      <button class="toggle-btn" onclick="toggle(this,'ic1')">Simulate response</button>
+      <div class="status-txt" id="st1"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-tag">Logo 2 · Bloom</div>
+      <div class="icon-wrap">
+        <svg id="ic2" class="rot" viewBox="0 0 100 100" fill="none" stroke="url(#rainbow)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M50 18 C56 30 70 30 74 20 C68 32 76 44 90 42 C76 46 76 60 86 68 C72 60 62 68 64 82 C58 70 44 70 40 82 C46 68 34 60 20 62 C34 56 32 42 20 34 C34 40 42 30 36 18 C44 28 50 28 50 18 Z"/>
+        </svg>
+      </div>
+      <div class="ai-name">Bloom</div>
+      <button class="toggle-btn" onclick="toggle(this,'ic2')">Simulate response</button>
+      <div class="status-txt" id="st2"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-tag">Logo 3 · Glow</div>
+      <div class="icon-wrap">
+        <svg id="ic4" class="rot" viewBox="0 0 100 100" fill="none" stroke="url(#rainbow)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M32 66c-9 0-16-7-16-15 0-8 6-14 14-15 2-9 10-15 19-15 10 0 18 7 20 16 8 1 13 7 13 14 0 8-7 15-16 15z"/>
+          <path d="M28 22l2.5 5 5 2.5-5 2.5-2.5 5-2.5-5-5-2.5 5-2.5z"/>
+          <path d="M60 14l2 4 4 2-4 2-2 4-2-4-4-2 4-2z"/>
+          <path d="M76 30l2 4 4 2-4 2-2 4-2-4-4-2 4-2z"/>
+        </svg>
+      </div>
+      <div class="ai-name">Glow</div>
+      <button class="toggle-btn" onclick="toggle(this,'ic4')">Simulate response</button>
+      <div class="status-txt" id="st4"></div>
+    </div>
+
+</div>
+
+<script>
+  function toggle(btn, id) {
+    const svg = document.getElementById(id);
+    const isSpinning = svg.classList.toggle('spin');
+    const statusEl = btn.parentElement.querySelector('.status-txt');
+    if (isSpinning) {
+      btn.classList.add('working');
+      btn.textContent = 'Stop simulating';
+      statusEl.textContent = 'Working…';
+    } else {
+      btn.classList.remove('working');
+      btn.textContent = 'Simulate response';
+      statusEl.textContent = 'Done — frozen';
+    }
+  }
+</script>
+
+</body>
+</html>
