@@ -73,12 +73,11 @@
   .vrow.srow .vthumb { width: 34%; aspect-ratio: 16/9; flex-shrink: 0; }
   .vrow.srow .vinfo2 { flex: 1; min-width: 0; margin-top: 2px; }
   .vinfo2 { display: flex; gap: 10px; align-items: flex-start; }
-  .vavatar-init { width: 3.4vh; height: 3.4vh; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.4vh; font-weight: 700; color: #fff; letter-spacing: .02em; }
   .vtext { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
   .vtitle2 { font-size: 1.9vh; font-weight: 600; color: var(--text); line-height: 1.35; }
   .vrow.locked .vtitle2 { color: var(--text-soft); }
   .vmeta2 { font-size: 1.55vh; color: var(--muted); }
-  .continue-wrap { position: fixed; bottom: 1.4vh; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 1.2vh; z-index: 30; }
+  .continue-wrap { position: fixed; bottom: 1.4vh; right: 2vh; display: flex; align-items: center; gap: 1.2vh; z-index: 30; }
   .slide1-rbtn { background: var(--card); border: 1px solid var(--border); color: var(--muted); border-radius: 22px; padding: 8px 18px; font-size: 1.7vh; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 6px; }
   .slide1-rbtn:hover { border-color: var(--accent); color: var(--accent); }
   .continue-btn { background: var(--accent)18; border: 1px solid var(--accent)55; color: var(--accent); border-radius: 24px; padding: 1.4% 3%; font-size: 1.9vh; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: box-shadow 0.4s, opacity 0.5s; opacity: 0; pointer-events: none; }
@@ -89,6 +88,7 @@
   .yt-nav { background: #101018; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around; padding: 1.4% 0 1.8%; flex-shrink: 0; }
   .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 1.7vh; color: var(--muted); flex: 1; }
   .nav-item.ai-nav { color: var(--accent); }
+  .nav-item.active { color: var(--text); }
   .nav-icon-wrap { width: 5.6vh; height: 5.6vh; display: flex; align-items: center; justify-content: center; }
   .nav-icon-wrap .bloom { width: 100%; height: 100%; }
 
@@ -150,7 +150,7 @@
   .cbtn2 { font-size: 2vh; color:#fff; }
   .tdisp2 { font-size: 1.7vh; color:rgba(255,255,255,.82); font-family:'DM Mono',monospace; }
 
-  .rbtn { position: fixed; bottom: 1.4vh; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--border); color: var(--muted); border-radius: 22px; padding: 8px 18px; font-size: 1.7vh; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 6px; z-index: 40; }
+  .rbtn { position: fixed; bottom: 1.4vh; right: 2vh; background: var(--card); border: 1px solid var(--border); color: var(--muted); border-radius: 22px; padding: 8px 18px; font-size: 1.7vh; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 6px; z-index: 40; }
   .rbtn:hover { border-color: var(--accent); color: var(--accent); }
 </style>
 </head>
@@ -177,38 +177,38 @@
 
       <div class="feed-stage show" id="home-stage">
         <div class="vid-list" id="home-list">
-          <div class="vrow show"><div class="vthumb vthumb-a"><div class="vicon"><svg viewBox="0 0 24 24"><path d="M4 9v6M2 10v4M20 9v6M22 10v4M7 12h10"/><rect x="4.5" y="7.5" width="3" height="9" rx="1"/><rect x="16.5" y="7.5" width="3" height="9" rx="1"/></svg></div><div class="vdur">9:58</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#3a4550">FZ</div><div class="vtext"><div class="vtitle2">10-Minute Home Workout</div><div class="vmeta2">Frimzee · 2.1M views · 1 month ago</div></div></div></div>
-          <div class="vrow show"><div class="vthumb vthumb-b"><div class="vicon"><svg viewBox="0 0 24 24"><path d="M3 11h18l-1.6 6.3A2 2 0 0 1 17.5 19h-11a2 2 0 0 1-1.9-1.7z"/><path d="M9 3c0 1.3 1.3 1.3 1.3 2.6M13 3c0 1.3 1.3 1.3 1.3 2.6"/></svg></div><div class="vdur">6:24</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#4a4234">NQ</div><div class="vtext"><div class="vtitle2">Easy Pasta Recipe</div><div class="vmeta2">Nolquin · 940K views · 3 weeks ago</div></div></div></div>
-          <div class="vrow show"><div class="vthumb vthumb-c"><div class="vicon"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="8" r="1.6"/><circle cx="12" cy="6" r="1.6"/><circle cx="16.5" cy="8" r="1.6"/><path d="M12 11.5c-3.2 0-5.5 2-5.5 4.7S8.9 20 12 20s5.5-1 5.5-3.8-2.3-4.7-5.5-4.7z"/></svg></div><div class="vdur">11:03</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#39473f">BX</div><div class="vtext"><div class="vtitle2">Learn To Draw Animals</div><div class="vmeta2">Bexolo · 512K views · 2 months ago</div></div></div></div>
+          <div class="vrow show"><div class="vthumb vthumb-a"><div class="vicon"><svg viewBox="0 0 24 24"><path d="M4 9v6M2 10v4M20 9v6M22 10v4M7 12h10"/><rect x="4.5" y="7.5" width="3" height="9" rx="1"/><rect x="16.5" y="7.5" width="3" height="9" rx="1"/></svg></div><div class="vdur">9:58</div></div><div class="vinfo2"><div class="vtext"><div class="vtitle2">10-Minute Home Workout</div><div class="vmeta2">Frimzee · 2.1M views · 1 month ago</div></div></div></div>
+          <div class="vrow show"><div class="vthumb vthumb-b"><div class="vicon"><svg viewBox="0 0 24 24"><path d="M3 11h18l-1.6 6.3A2 2 0 0 1 17.5 19h-11a2 2 0 0 1-1.9-1.7z"/><path d="M9 3c0 1.3 1.3 1.3 1.3 2.6M13 3c0 1.3 1.3 1.3 1.3 2.6"/></svg></div><div class="vdur">6:24</div></div><div class="vinfo2"><div class="vtext"><div class="vtitle2">Easy Pasta Recipe</div><div class="vmeta2">Nolquin · 940K views · 3 weeks ago</div></div></div></div>
+          <div class="vrow show"><div class="vthumb vthumb-c"><div class="vicon"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="8" r="1.6"/><circle cx="12" cy="6" r="1.6"/><circle cx="16.5" cy="8" r="1.6"/><path d="M12 11.5c-3.2 0-5.5 2-5.5 4.7S8.9 20 12 20s5.5-1 5.5-3.8-2.3-4.7-5.5-4.7z"/></svg></div><div class="vdur">11:03</div></div><div class="vinfo2"><div class="vtext"><div class="vtitle2">Learn To Draw Animals</div><div class="vmeta2">Bexolo · 512K views · 2 months ago</div></div></div></div>
         </div>
       </div>
 
       <div class="feed-stage" id="results-stage">
         <div class="vid-list" id="results-list">
-          <div class="vrow srow" id="r1"><div class="vthumb vthumb-e"><div class="vicon"><svg viewBox="0 0 24 24"><path d="M6.5 12h11M4 8.5h3v7H4zM17 8.5h3v7h-3z"/></svg></div><div class="vdur">14:10</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#3f3a4a">ZV</div><div class="vtext"><div class="vtitle2">Full Body Home Workout</div><div class="vmeta2">Zorvun Fitness · 780K views · 4 days ago</div></div></div></div>
-          <div class="vrow srow" id="r2"><div class="vthumb vthumb-f"><div class="vicon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/></svg></div><div class="vdur">8:02</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#4a3530">QB</div><div class="vtext"><div class="vtitle2">10-Min Warm Up Routine</div><div class="vmeta2">Quiblatt Coach · 1.1M views · 2 weeks ago</div></div></div></div>
+          <div class="vrow srow" id="r1"><div class="vthumb vthumb-e"><div class="vicon"><svg viewBox="0 0 24 24"><path d="M6.5 12h11M4 8.5h3v7H4zM17 8.5h3v7h-3z"/></svg></div><div class="vdur">14:10</div></div><div class="vinfo2"><div class="vtext"><div class="vtitle2">Full Body Home Workout</div><div class="vmeta2">Zorvun Fitness · 780K views · 4 days ago</div></div></div></div>
+          <div class="vrow srow" id="r2"><div class="vthumb vthumb-f"><div class="vicon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/></svg></div><div class="vdur">8:02</div></div><div class="vinfo2"><div class="vtext"><div class="vtitle2">10-Min Warm Up Routine</div><div class="vmeta2">Quiblatt Coach · 1.1M views · 2 weeks ago</div></div></div></div>
           <div class="vrow srow locked" id="r-target">
             <div class="vthumb vthumb-target"><div class="vlock"><svg class="vlock-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><div class="vlock-lbl">Restricted</div></div></div>
-            <div class="vinfo2"><div class="vavatar-init" style="background:linear-gradient(135deg,#8b93ff,#6d8bff)">OT</div><div class="vtext"><div class="vtitle2">Just Another Day 🎬</div><div class="vmeta2">Obbletrook · 1.2M views · 3 days ago</div></div></div>
+            <div class="vinfo2"><div class="vtext"><div class="vtitle2">Just Another Day 🎬</div><div class="vmeta2">Obbletrook · 1.2M views · 3 days ago</div></div></div>
           </div>
-          <div class="vrow srow" id="r3"><div class="vthumb vthumb-g"><div class="vicon"><svg viewBox="0 0 24 24"><circle cx="15" cy="12" r="6"/><path d="M5 3v6a1.5 1.5 0 0 0 3 0V3M6.5 9V21M9 3v6c0 1.2-1.2 1.8-2.5 1.8"/></svg></div><div class="vdur">9:12</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#33404a">TB</div><div class="vtext"><div class="vtitle2">Beginner Strength Circuit</div><div class="vmeta2">Thorbil Training · 305K views · 1 week ago</div></div></div></div>
-          <div class="vrow srow" id="r4"><div class="vthumb vthumb-h"><div class="vicon"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg></div><div class="vdur">6:40</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#42493a">WK</div><div class="vtext"><div class="vtitle2">Post-Workout Stretch Guide</div><div class="vmeta2">Wrenzik Wellness · 88K views · 5 days ago</div></div></div></div>
-          <div class="vrow srow" id="r5"><div class="vthumb vthumb-i"><div class="vicon"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="vdur">5:20</div></div><div class="vinfo2"><div class="vavatar-init" style="background:#453a3a">DX</div><div class="vtext"><div class="vtitle2">Workout Playlist Vibes</div><div class="vmeta2">Drovlex Beats · 640K views · 2 days ago</div></div></div></div>
+          <div class="vrow srow" id="r3"><div class="vthumb vthumb-g"><div class="vicon"><svg viewBox="0 0 24 24"><circle cx="15" cy="12" r="6"/><path d="M5 3v6a1.5 1.5 0 0 0 3 0V3M6.5 9V21M9 3v6c0 1.2-1.2 1.8-2.5 1.8"/></svg></div><div class="vdur">9:12</div></div><div class="vinfo2"><div class="vtext"><div class="vtitle2">Beginner Strength Circuit</div><div class="vmeta2">Thorbil Training · 305K views · 1 week ago</div></div></div></div>
+          <div class="vrow srow" id="r4"><div class="vthumb vthumb-h"><div class="vicon"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg></div><div class="vdur">6:40</div></div><div class="vinfo2"><div class="vtext"><div class="vtitle2">Post-Workout Stretch Guide</div><div class="vmeta2">Wrenzik Wellness · 88K views · 5 days ago</div></div></div></div>
+          <div class="vrow srow" id="r5"><div class="vthumb vthumb-i"><div class="vicon"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="vdur">5:20</div></div><div class="vinfo2"><div class="vtext"><div class="vtitle2">Workout Playlist Vibes</div><div class="vmeta2">Drovlex Beats · 640K views · 2 days ago</div></div></div></div>
         </div>
       </div>
 
       <div class="yt-nav">
-      <div class="nav-item"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="width:2.4vh;height:2.4vh"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div>
+      <div class="nav-item active"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="width:2.4vh;height:2.4vh"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div>
       <div class="nav-item"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:2.4vh;height:2.4vh"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div>
       <div class="nav-item"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:2.4vh;height:2.4vh"><circle cx="12" cy="12" r="10"/></svg>Sub</div>
       <div class="nav-item"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:2.4vh;height:2.4vh"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div>
-      <div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg class="bloom spin" viewBox="0 0 100 100"><path d="M50 18 C56 30 70 30 74 20 C68 32 76 44 90 42 C76 46 76 60 86 68 C72 60 62 68 64 82 C58 70 44 70 40 82 C46 68 34 60 20 62 C34 56 32 42 20 34 C34 40 42 30 36 18 C44 28 50 28 50 18 Z"/></svg></div></div>
+      <div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg class="bloom" viewBox="0 0 100 100"><path d="M50 18 C56 30 70 30 74 20 C68 32 76 44 90 42 C76 46 76 60 86 68 C72 60 62 68 64 82 C58 70 44 70 40 82 C46 68 34 60 20 62 C34 56 32 42 20 34 C34 40 42 30 36 18 C44 28 50 28 50 18 Z"/></svg></div></div>
     </div>
     </div>
   </div>
   <div class="continue-wrap" id="continue-wrap">
-    <button class="slide1-rbtn" onclick="replaySlide1()">↺ Replay</button>
-    <button class="continue-btn" id="continue-btn" onclick="goSlide2()">Next →</button>
+    <button class="slide1-rbtn" onclick="replaySlide1()">Replay</button>
+    <button class="continue-btn" id="continue-btn" onclick="goSlide2()">Next</button>
   </div>
 </div>
 
@@ -251,7 +251,7 @@
   </div>
 </div>
 
-<div class="rbtn" id="rbtn2" onclick="replayCurrentTab()" style="display:none">↺ Replay</div>
+<div class="rbtn" id="rbtn2" onclick="replayCurrentTab()" style="display:none">Replay</div>
 
 <script>
   const PARENT_NOTE = "I want you safe online. This isn't right for you yet, but we can talk about it.";
