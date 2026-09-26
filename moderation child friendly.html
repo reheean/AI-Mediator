@@ -139,8 +139,8 @@
       <!-- SLIDE 1 -->
       <div id="s1" style="display:flex;flex-direction:column;gap:1.6vh">
         <div class="slide-head">
-          <div class="slide-title">Choose what to block</div>
-          <div class="slide-sub">Turn on a category to block it for your child.</div>
+          <div class="slide-title">Choose what to restrict</div>
+          <div class="slide-sub">Turn on a category to restrict it for your child.</div>
         </div>
 
         <div class="cat-card" id="cc-v">
@@ -149,7 +149,7 @@
             <div class="cat-info"><div class="cat-name">Violence</div><div class="cat-desc">Fighting and injuries</div></div>
             <div class="toggle" id="tog-v"></div>
           </div>
-          <div class="blocked-row"><div class="bdot"></div>Blocked</div>
+          <div class="blocked-row"><div class="bdot"></div>Restricted</div>
         </div>
 
         <div class="cat-card" id="cc-p">
@@ -158,7 +158,7 @@
             <div class="cat-info"><div class="cat-name">Language</div><div class="cat-desc">Words that aren't for kids</div></div>
             <div class="toggle" id="tog-p"></div>
           </div>
-          <div class="blocked-row"><div class="bdot"></div>Blocked</div>
+          <div class="blocked-row"><div class="bdot"></div>Restricted</div>
         </div>
 
         <div class="cat-card" id="cc-d">
@@ -167,7 +167,7 @@
             <div class="cat-info"><div class="cat-name">Dangerous Challenges</div><div class="cat-desc">Risky stunts and dares</div></div>
             <div class="toggle" id="tog-d"></div>
           </div>
-          <div class="blocked-row"><div class="bdot"></div>Blocked</div>
+          <div class="blocked-row"><div class="bdot"></div>Restricted</div>
         </div>
 
         <div class="cust-btn" id="cust-btn" onclick="goSlide2()">Customize further</div>
@@ -184,7 +184,7 @@
           <div class="exp-head">
             <div class="exp-head-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 5-3 8.5-7 9-4-.5-7-4-7-9V6z"/></svg></div>
             <div class="exp-head-title">Violence</div>
-            <div class="exp-head-count" id="v-cnt">4 / 4 blocked</div>
+            <div class="exp-head-count" id="v-cnt">4 / 4 restricted</div>
           </div>
 
           <div class="sub" id="sv1">
@@ -240,7 +240,7 @@
   function subBlock(id)  { const e = document.getElementById(id); if (e) e.classList.add('blocked'); }
   function subAllow(id)  { const e = document.getElementById(id); if (e) { e.classList.remove('blocked'); e.classList.add('allowed'); } }
   function pulse(id) { const e = document.getElementById(id); if (e) e.classList.add('pulse'); }
-  function setCount(id, v, m) { const e = document.getElementById(id); if (e) e.textContent = `${v} / ${m} blocked`; }
+  function setCount(id, v, m) { const e = document.getElementById(id); if (e) e.textContent = `${v} / ${m} restricted`; }
 
   function goSlide2() {
     const s1 = document.getElementById('s1');
