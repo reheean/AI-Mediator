@@ -399,30 +399,24 @@ function buildSettings(stageEl) {
   stageEl.onclick = () => advancePhase();
 }
 
-/* ══════════ SLIDE 1: CHAT ══════════ */
+/* ══════════ SLIDE 1: CHAT — single phone, feature on only ══════════ */
 function buildChat(stageEl) {
-  const { pb1, pb2, showPhone2 } = mk2phones(stageEl,
-    { label: 'Feature Off', cls: 'lbl-off', id: 'slot-chat-off' },
-    { label: 'Feature On',  cls: 'lbl-on',  id: 'slot-chat-on'  }
-  );
+  const { slot, body } = mkSlot('', 'single', 'slot-chat-on');
+  const pb = document.createElement('div'); pb.className = 'phone-body'; body.appendChild(pb);
+  stageEl.appendChild(slot);
+  setTimeout(() => slot.classList.add('visible'), 60);
+
   registerPhases([
     () => {
       let t = 300;
-      ap(pb1, vcCard('Backyard Obstacle Course Challenge','ChannelName · 12 min','badge-playing','Playing now'), t);
-      ap(pb1, bub('child', 'How are they landing that jump without getting hurt?'), t+1400);
-      ap(pb1, noticeEl('off','<span>Chat is off.</span> The child gets no response.'), t+3200);
-    },
-    () => {
-      showPhone2();
-      let t = 200;
-      ap(pb2, vcCard('Backyard Obstacle Course Challenge','ChannelName · 12 min','badge-playing','Playing now'), t);
-      ap(pb2, chatFab(), t+700);
-      ap(pb2, bub('child', 'How are they landing that jump without getting hurt?'), t+1600);
-      typ(pb2, t+2400, 1500);
-      ap(pb2, bub('ai', 'They plan it carefully with padding and safety gear you just can\'t see on camera.'), t+3900);
-      ap(pb2, bub('child', 'Could I try something like that?'), t+5900);
-      typ(pb2, t+6700, 1500);
-      ap(pb2, bub('ai', 'Better not — that\'s something for trained people with the right setup. Just enjoy watching!'), t+8200);
+      ap(pb, vcCard('Backyard Obstacle Course Challenge','ChannelName · 12 min','badge-playing','Playing now'), t);
+      ap(pb, chatFab(), t+700);
+      ap(pb, bub('child', 'How are they landing that jump without getting hurt?'), t+1600);
+      typ(pb, t+2400, 1500);
+      ap(pb, bub('ai', 'They plan it carefully with padding and safety gear you just can\'t see on camera.'), t+3900);
+      ap(pb, bub('child', 'Could I try something like that?'), t+5900);
+      typ(pb, t+6700, 1500);
+      ap(pb, bub('ai', 'Better not — that\'s something for trained people with the right setup. Just enjoy watching!'), t+8200);
     }
   ]);
   stageEl.onclick = () => advancePhase();
@@ -470,12 +464,8 @@ function buildRequest(stageEl) {
   stageEl.onclick = () => advancePhase();
 }
 
-/* ══════════ SLIDE 3: EXPLAIN RESTRICTIONS ══════════ */
+/* ══════════ SLIDE 3: EXPLAIN RESTRICTIONS — two phones, feature-on only ══════════ */
 function buildExplain(stageEl) {
-  const sOff = mkSlot('Feature Off', 'lbl-off', 'slot-ex-off');
-  const pb_off = document.createElement('div'); pb_off.className = 'phone-body'; sOff.body.appendChild(pb_off);
-  stageEl.appendChild(sOff.slot);
-
   function mkGroup(titleText, titleCls) {
     const wrap = document.createElement('div');
     wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0;';
@@ -495,25 +485,13 @@ function buildExplain(stageEl) {
   phonesNorm.appendChild(sNorm.slot);
   phonesPers.appendChild(sPers.slot);
 
+  stageEl.appendChild(wrapNorm);
+  stageEl.appendChild(wrapPers);
+  setTimeout(() => sNorm.slot.classList.add('visible'), 60);
+
   registerPhases([
     () => {
-      setTimeout(() => sOff.slot.classList.add('visible'), 60);
       let t = 300;
-      ap(pb_off, restrictCard('Your parent has restricted this video.'), t);
-      ap(pb_off, bub('child', 'Why is this restricted?'), t+1400);
-      ap(pb_off, noticeEl('off', '<span>Explain restriction is off.</span> The AI does not respond.'), t+3200);
-    },
-    () => {
-      sOff.slot.style.transition = 'opacity 0.4s';
-      sOff.slot.style.opacity = '0';
-      setTimeout(() => {
-        sOff.slot.remove();
-        stageEl.appendChild(wrapNorm);
-        stageEl.appendChild(wrapPers);
-        setTimeout(() => sNorm.slot.classList.add('visible'), 60);
-      }, 420);
-
-      let t = 700;
       ap(pb_na, restrictCard('Your parent has restricted this video.'), t);
       ap(pb_na, chatFab(), t+600);
       ap(pb_na, bub('child', 'Why is this restricted?'), t+1500);
