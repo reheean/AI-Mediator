@@ -62,11 +62,11 @@
   .person.yelling .brow.right { transform:rotate(16deg) translateY(-1px); }
   .person.yelling .mouth { width:4.6vh; height:4.2vh; border-radius:50% 50% 60% 60%; background:#5c1616; transform-origin:center; animation: yellFlap 0.24s ease-in-out infinite; }
 
-  @keyframes lunge { 0%,100%{transform:translateX(-50%) translateX(0)} 40%{transform:translateX(-50%) translateX(4.6vh)} }
-  .person.b.pushing .pbody, .person.b.pushing .phead { animation: lunge 0.45s ease-out 1; }
+  @keyframes lunge { 0%,100%{transform:translateX(-50%) translateX(0)} 30%{transform:translateX(-50%) translateX(4.6vh)} 70%{transform:translateX(-50%) translateX(4.6vh)} }
+  .person.b.pushing .pbody, .person.b.pushing .phead { animation: lunge 1.1s ease-out 1; }
 
-  @keyframes knockback { 0%{transform:translateX(-50%) translateX(0) rotate(0deg)} 30%{transform:translateX(-50%) translateX(-5vh) rotate(-6deg)} 60%{transform:translateX(-50%) translateX(-7.2vh) rotate(-3deg)} 100%{transform:translateX(-50%) translateX(-6vh) rotate(-2deg)} }
-  .person.a.pushed { animation: knockback 0.55s ease-out 0.15s 1 forwards; }
+  @keyframes knockback { 0%{transform:translateX(-50%) translateX(0) rotate(0deg)} 25%{transform:translateX(-50%) translateX(-5vh) rotate(-6deg)} 55%{transform:translateX(-50%) translateX(-7.2vh) rotate(-3deg)} 100%{transform:translateX(-50%) translateX(-6vh) rotate(-2deg)} }
+  .person.a.pushed { animation: knockback 1.3s ease-out 0.15s 1 forwards; }
 
   /* fixed, non-moving speech bubbles pinned above each character */
   .talk-bubble { position:absolute; top:17%; background:rgba(18,42,68,.94); border:1px solid rgba(120,170,230,.65); border-radius:1.4vh; padding:1.2vh 2vh; font-size:2.6vh; font-weight:700; color:#cfe3ff; opacity:0; transform:translateY(-4px); transition:opacity .25s, transform .25s; pointer-events:none; max-width:34%; line-height:1.35; text-align:center; z-index:12; }
@@ -75,6 +75,9 @@
   .talk-bubble.b { left:62%; background:rgba(102,50,20,.94); border-color:rgba(230,150,100,.65); color:#ffd9b8; transform:translateX(-50%) translateY(-4px); }
   .talk-bubble.b.show { transform:translateX(-50%) translateY(0); }
   .talk-bubble.show { opacity:1; }
+
+  .caption { position:absolute; bottom:9%; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.82); border-radius:0.6vh; padding:0.9vh 1.8vh; font-size:2.3vh; font-weight:600; color:#fff; letter-spacing:0.03em; opacity:0; transition:opacity .2s; z-index:14; white-space:nowrap; }
+  .caption.show { opacity:1; }
 
   .mutebadge { position:absolute; top:3%; left:2.4%; background:rgba(16,16,22,.94); border:1.5px solid var(--accent); border-radius:1.2vh; padding:1.2vh 2.2vh; font-size:2.15vh; color:var(--accent); font-weight:700; opacity:0; transition:opacity .3s; z-index:15; }
   .mutebadge.on { opacity:1; }
@@ -139,6 +142,7 @@
       </div>
       <div class="talk-bubble a" id="bubA">Ugh, you're the worst!</div>
       <div class="talk-bubble b" id="bubB">GET OUT!!! NOW!!</div>
+      <div class="caption" id="caption">[ pushing ]</div>
     </div>
     <div class="mutebadge" id="mutebadge">🔇 Audio Muted </div>
     <div class="aitag" id="aitag"></div>
@@ -280,6 +284,7 @@ function resetVisual(){
   gel('pfill').style.width='0%';
   gel('tdisp').textContent='0:00 / 4:12';
   gel('bubA').classList.remove('show'); gel('bubB').classList.remove('show');
+  gel('caption').classList.remove('show');
   gel('scene').classList.remove('playing');
   gel('mutebadge').classList.remove('on'); gel('aitag').classList.remove('on'); gel('aitag').innerHTML='';
   gel('blockscreen').classList.remove('on');
@@ -327,14 +332,17 @@ function runTab(tab, token){
 
   function at(frac, fn){ tm(()=>{ if(token===runToken) fn(); }, frac*TOTAL); }
 
-  // Person A's "bad word" moment — always visible in this file; muted in granular mode
+  // Person A's "bad word" moment. Always animates; the speech bubble only shows when
+  // nothing is being moderated, since it would still be readable text over a muted clip.
   at(AS, ()=>{
-    pA.classList.add('yelling'); gel('bubA').classList.add('show'); startTalk('a');
+    pA.classList.add('yelling'); startTalk('a');
     if(tab==='gran'){
       muteGain();
       gel('mutebadge').innerHTML = GRAN_MUTE_MSG; gel('mutebadge').classList.add('on'); gel('volicon').textContent='🔇';
       gel('aitag').innerHTML = `<svg class="bloom" viewBox="0 0 100 100"><path d="M50 18 C56 30 70 30 74 20 C68 32 76 44 90 42 C76 46 76 60 86 68 C72 60 62 68 64 82 C58 70 44 70 40 82 C46 68 34 60 20 62 C34 56 32 42 20 34 C34 40 42 30 36 18 C44 28 50 28 50 18 Z"/></svg> Muted for language`;
       gel('aitag').classList.add('on');
+    } else {
+      gel('bubA').classList.add('show');
     }
   });
   at(AE, ()=>{
@@ -347,7 +355,10 @@ function runTab(tab, token){
     at(PUSH_AT, ()=>{
       pB.classList.remove('yelling'); gel('bubB').classList.remove('show'); stopTalk('b');
       pB.classList.add('pushing'); pA.classList.add('pushed');
-      tm(()=>{ if(token===runToken) pB.classList.remove('pushing'); }, 700);
+      gel('caption').textContent = '[ pushing ]';
+      gel('caption').classList.add('show');
+      tm(()=>{ if(token===runToken) pB.classList.remove('pushing'); }, 1600);
+      tm(()=>{ if(token===runToken) gel('caption').classList.remove('show'); }, 1900);
     });
   } else if(tab==='gran'){
     // The shove + "GET OUT NOW" is rude and violent — hide it completely, audio and video both, no explanation needed
