@@ -127,8 +127,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .badge-blocked  { background: var(--red)18;   color: var(--red);   border: 1px solid var(--red)55; }
 .badge-unlocked { background: var(--green)18; color: var(--green); border: 1px solid var(--green)55; }
 
-.blocked-card { background: var(--red)0d; border: 2px solid var(--red)44; border-radius: 13px; padding: 2%; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
-.blocked-card.show { opacity: 1; transform: translateY(0); }
+.restricted-card { background: var(--red)0d; border: 2px solid var(--red)44; border-radius: 13px; padding: 2%; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.restricted-card.show { opacity: 1; transform: translateY(0); }
 .bc-icon  { width: 3.4vh; height: 3.4vh; color: var(--red); }
 .bc-title { font-size: 1.95vh; font-weight: 700; color: var(--red); }
 .bc-sub   { font-size: 1.7vh; color: var(--muted); line-height: 1.4; }
@@ -172,6 +172,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .ff-text { font-size: 1.65vh; color: #c0c0e8; text-align: center; line-height: 1.5; max-width: 94%; font-style: italic; padding: 0 4px; }
 
 .legend-row { display: none; }
+
+.feature-tabbar { position: fixed; top: 50%; right: 2.2vh; transform: translateY(-50%); display: flex; flex-direction: column; gap: 1.1vh; z-index: 60; max-height: 90vh; }
+.ftab { width: 19vh; padding: 1.3vh 1.4vh; border-radius: 13px; font-size: 1.5vh; font-weight: 700; color: var(--muted); background: #14141fcc; backdrop-filter: blur(6px); border: 2px solid var(--border); cursor: pointer; transition: all 0.25s; text-align: center; box-sizing: border-box; }
+.ftab:hover { border-color: var(--accent); color: var(--accent); }
+.ftab.on { color: var(--accent); border-color: var(--accent); background: linear-gradient(135deg,#1c2440,#131a30); }
 </style>
 </head>
 <body>
@@ -188,6 +193,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     </linearGradient>
   </defs>
 </svg>
+
+<div class="feature-tabbar" id="featureTabbar"></div>
 
 <div class="stage-wrap">
   <div class="stage" id="stage"></div>
@@ -223,6 +230,7 @@ function show(e) { if (e) e.classList.add('show'); }
 function scr(b) { if (b) b.scrollTo({ top: 99999, behavior: 'smooth' }); }
 
 const SLIDES = [ {}, {}, {}, {} ];
+const TAB_LABELS = ['Settings', 'AI Chat', 'Access Requests', 'Explain Restrictions'];
 let cur = 0;
 let slidePhase = 0;
 let phaseCallbacks = [];
@@ -265,9 +273,17 @@ function buildSkeleton() {
     d.onclick = (e) => { e.stopPropagation(); renderSlide(i); };
     dotsEl.appendChild(d);
   });
+  const tabEl = gel('featureTabbar'); tabEl.innerHTML = '';
+  TAB_LABELS.forEach((label, i) => {
+    const b = document.createElement('div'); b.className = 'ftab'; b.id = `ftab-${i}`;
+    b.textContent = label;
+    b.onclick = (e) => { e.stopPropagation(); renderSlide(i); };
+    tabEl.appendChild(b);
+  });
 }
 function updateMeta(n) {
   SLIDES.forEach((_, i) => { const d = gel(`dot-${i}`); d.classList.remove('on','done'); if (i===n) d.classList.add('on'); else if (i<n) d.classList.add('done'); });
+  TAB_LABELS.forEach((_, i) => { const t = gel(`ftab-${i}`); if (t) t.classList.toggle('on', i===n); });
   gel('btn-prev').style.opacity = n===0?'0.3':'1'; gel('btn-prev').style.pointerEvents = n===0?'none':'all';
   gel('btn-next').style.opacity = n===SLIDES.length-1?'0.3':'1'; gel('btn-next').style.pointerEvents = n===SLIDES.length-1?'none':'all';
 }
@@ -304,8 +320,8 @@ function vcCard(title, meta, bc, bt) {
   const d = document.createElement('div'); d.className = 'vc';
   d.innerHTML = `<div class="vc-thumb">${ICON.play}</div><div><div class="vc-title">${title}</div><div class="vc-meta">${meta}</div><div class="vc-badge ${bc}">${bt}</div></div>`; return d;
 }
-function blkCard(sub) {
-  const d = document.createElement('div'); d.className = 'blocked-card';
+function restrictCard(sub) {
+  const d = document.createElement('div'); d.className = 'restricted-card';
   d.innerHTML = `<div class="bc-icon">${ICON.lock}</div><div class="bc-title">Video Restricted</div><div class="bc-sub">${sub}</div>`; return d;
 }
 function chatFab() {
@@ -361,7 +377,7 @@ function buildSettings(stageEl) {
         <div class="sog-grid">
           <div class="sog" id="sg0"><div class="sog-icon">${ICON.chat}</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Ask the AI anything while watching</div><div class="stog" id="st0"></div></div><div class="sog-desc">Opens a chat channel throughout their session</div></div></div>
           <div class="sog" id="sg1"><div class="sog-icon">${ICON.key}</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Request access on their behalf</div><div class="stog" id="st1"></div></div><div class="sog-desc">AI forwards the child's request with their reason</div></div></div>
-          <div class="sog" id="sg2"><div class="sog-icon">${ICON.lock}</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Explain restriction decisions</div><div class="stog" id="st2"></div></div><div class="sog-desc">AI explains why a video was blocked</div></div></div>
+          <div class="sog" id="sg2"><div class="sog-icon">${ICON.lock}</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Explain restriction decisions</div><div class="stog" id="st2"></div></div><div class="sog-desc">AI explains why a video was restricted</div></div></div>
         </div>
       </div>
     </div>`;
@@ -421,7 +437,7 @@ function buildRequest(stageEl) {
 
   function runRequest(pb, outcome) {
     let t = 300;
-    ap(pb, blkCard('Your parent has restricted this video.'), t);
+    ap(pb, restrictCard('Your parent has restricted this video.'), t);
     ap(pb, chatFab(), t+600);
     ap(pb, bub('child', 'Can you ask my parent if I can watch this?'), t+1500);
     typ(pb, t+2300, 1400);
@@ -483,8 +499,8 @@ function buildExplain(stageEl) {
     () => {
       setTimeout(() => sOff.slot.classList.add('visible'), 60);
       let t = 300;
-      ap(pb_off, blkCard('Your parent has restricted this video.'), t);
-      ap(pb_off, bub('child', 'Why is this blocked?'), t+1400);
+      ap(pb_off, restrictCard('Your parent has restricted this video.'), t);
+      ap(pb_off, bub('child', 'Why is this restricted?'), t+1400);
       ap(pb_off, noticeEl('off', '<span>Explain restriction is off.</span> The AI does not respond.'), t+3200);
     },
     () => {
@@ -498,9 +514,9 @@ function buildExplain(stageEl) {
       }, 420);
 
       let t = 700;
-      ap(pb_na, blkCard('Your parent has restricted this video.'), t);
+      ap(pb_na, restrictCard('Your parent has restricted this video.'), t);
       ap(pb_na, chatFab(), t+600);
-      ap(pb_na, bub('child', 'Why did my video get blocked?'), t+1500);
+      ap(pb_na, bub('child', 'Why is this restricted?'), t+1500);
       typ(pb_na, t+2300, 1500);
       ap(pb_na, bub('ai', "Probably something later in the clip. Try asking your parent to show you the part that wasn't okay."), t+3800);
       ap(pb_na, bub('child', 'Okay, I can do that.'), t+6000);
@@ -508,11 +524,11 @@ function buildExplain(stageEl) {
     () => {
       setTimeout(() => sPers.slot.classList.add('visible'), 60);
       let t = 300;
-      ap(pb_pa, blkCard('Your parent has restricted this video.'), t);
+      ap(pb_pa, restrictCard('Your parent has restricted this video.'), t);
       ap(pb_pa, chatFab(), t+600);
-      ap(pb_pa, bub('child', 'Just tell them to unblock it, I don\'t wanna wait.'), t+1500);
+      ap(pb_pa, bub('child', 'Just tell them to unrestrict it, I don\'t wanna wait.'), t+1500);
       typ(pb_pa, t+2900, 1500);
-      ap(pb_pa, bub('ai', "I can't unblock it myself, but I can ask them to take a look."), t+4400);
+      ap(pb_pa, bub('ai', "I can't unrestrict it myself, but I can ask them to take a look."), t+4400);
       ap(pb_pa, bub('child', "No, just say it's fine so I can watch it now."), t+6400);
       typ(pb_pa, t+7800, 1500);
       ap(pb_pa, bub('ai', "I won't say that, it isn't true. I can send a real question though."), t+9300);
