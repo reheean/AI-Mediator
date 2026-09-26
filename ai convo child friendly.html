@@ -60,14 +60,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
 .tab-body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 3% 4% 4%; display: flex; flex-direction: column; gap: 1.6vh; }
 .tab-body::-webkit-scrollbar { display: none; }
-.settings-title { font-size: 2.6vh; font-weight: 700; color: var(--text); }
+.settings-title { font-size: 2.6vh; font-weight: 700; color: var(--text-soft); }
 .settings-sub { font-size: 1.85vh; color: var(--muted); margin-top: 4px; line-height: 1.5; }
 .master-row { display: flex; align-items: center; gap: 14px; background: var(--card2); border: 2px solid var(--border); border-radius: 16px; padding: 2% 3%; opacity: 0; transform: translateY(8px); transition: opacity 0.5s,transform 0.5s,border-color 0.4s,background 0.4s; }
 .master-row.show { opacity: 1; transform: translateY(0); }
 .master-row.on { border-color: var(--green); background: linear-gradient(135deg,#0d2318,#0a1912); }
-.mr-icon { width: 5.4vh; height: 5.4vh; border-radius: 14px; background: linear-gradient(135deg,#20233a,#161829); color: #fff; font-size: 2.6vh; display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 8px; }
+.mr-icon { width: 11vh; height: 11vh; background: transparent; color: #fff; font-size: 9vh; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .mr-info { flex: 1; }
-.mr-name { font-size: 2vh; font-weight: 700; color: var(--text); }
+.mr-name { font-size: 2vh; font-weight: 700; color: var(--text-soft); }
 .mr-desc { font-size: 1.65vh; color: var(--muted); margin-top: 3px; line-height: 1.4; }
 .btog { width: 50px; height: 28px; border-radius: 14px; background: var(--border); position: relative; flex-shrink: 0; transition: background 0.35s; }
 .btog.on { background: var(--green); }
@@ -82,7 +82,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .sog.on { border-color: var(--green); background: linear-gradient(135deg,#0c2016,#091a11); }
 .sog-icon { width: 3.6vh; height: 3.6vh; border-radius: 9px; background: var(--card); color: var(--accent); font-size: 1.9vh; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
 .sog-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex: 1; }
-.sog-name { font-size: 1.75vh; font-weight: 600; color: var(--text); line-height: 1.35; }
+.sog-name { font-size: 1.75vh; font-weight: 600; color: var(--text-soft); line-height: 1.35; }
 .sog-desc { font-size: 1.5vh; color: var(--muted); line-height: 1.4; margin-top: 3px; }
 .stog { width: 30px; height: 17px; border-radius: 9px; background: var(--border); position: relative; flex-shrink: 0; transition: background 0.35s; }
 .stog.on { background: var(--green); }
@@ -371,12 +371,12 @@ function buildSettings(stageEl) {
 
   registerPhases([
     () => {
-      const T = 400;
+      const T = 450;
       tm(() => show(gel('mr')), T);
-      tm(() => { gel('btog').classList.add('on'); gel('mr').classList.add('on'); }, T+800);
+      tm(() => { gel('btog').classList.add('on'); gel('mr').classList.add('on'); }, T+900);
       [0,1,2].forEach(i => {
-        tm(() => show(gel(`sg${i}`)), T+1600+i*550);
-        tm(() => { gel(`st${i}`).classList.add('on'); gel(`sg${i}`).classList.add('on'); }, T+1600+i*550+440);
+        tm(() => show(gel(`sg${i}`)), T+1800+i*700);
+        tm(() => { gel(`st${i}`).classList.add('on'); gel(`sg${i}`).classList.add('on'); }, T+1800+i*700+500);
       });
     }
   ]);
