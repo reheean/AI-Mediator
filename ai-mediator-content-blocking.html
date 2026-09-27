@@ -3,334 +3,396 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Mediator - Content Moderation</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Content Moderation</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #000; --card: #22222e; --border: #2e2e3e; --text: #f0f0f5;
-    --muted: #8888aa; --accent: #5b8dee; --red: #ff4d6d; --red-soft: #ff4d6d22;
-    --yt-red: #ff0000; --green: #34d399;
-    --phone-w: 340px; --phone-h: 630px; --phone-w-sm: 205px; --phone-h-sm: 400px;
-    --tr: 0.55s cubic-bezier(0.4,0,0.2,1);
+    --bg: #000; --card: #1a1a26; --border: #2e2e3e; --text: #e2e2f2;
+    --muted: #a5a5cf; --accent: #7c93ff; --red: #ff4d6d; --red-soft: #ff4d6d22;
+    --green: #34d399; --pr: 2.1666;
   }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow-x: hidden; padding: 24px 20px 40px; }
-  h1.title { font-size: 13px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; text-align: center; }
-  h2.subtitle { font-size: 30px; font-weight: 700; color: var(--text); margin-bottom: 8px; text-align: center; letter-spacing: -0.5px; }
-  h2.subtitle span { color: var(--accent); }
-  .intro { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 28px; line-height: 1.6; }
-  .intro span { color: var(--accent); font-weight: 600; }
-  .stage { display: flex; align-items: center; justify-content: center; gap: 20px; width: 100%; max-width: 1200px; min-height: 560px; }
+  html, body { height: 100%; }
+  body { font-family: 'DM Sans', sans-serif; background: #000; color: var(--text); height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; gap: 2.2vh; }
+  .bloom{width:1em;height:1em;display:inline-block;vertical-align:middle;flex-shrink:0}
+  .bloom path{fill:none;stroke:url(#bloomGrad);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+  .bloom.spin path{animation:bloomspin 4.5s linear infinite}
+  @keyframes bloomspin{to{filter:hue-rotate(360deg)}}
+  .icon { width: 1em; height: 1em; flex-shrink: 0; }
 
-  .slot { display: flex; flex-direction: column; align-items: center; gap: 14px; transition: var(--tr); cursor: pointer; position: relative; }
-  .slot .lbl { font-size: 12px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); transition: var(--tr); }
-  .slot.focused .lbl { color: var(--accent); }
+  /* ===== External option controls — NOT part of the simulated phone ===== */
+  .tabbar-external { display: flex; gap: 1.2vh; z-index: 5; }
+  .tabbtn { padding: 1.4vh 2.6vh; border-radius: 14px; font-size: 2.1vh; font-weight: 700; color: var(--muted); background: #16161f; border: 2px solid var(--border); cursor: pointer; transition: all 0.25s; }
+  .tabbtn.on { color: #fff; }
+  .tabbtn[data-tab="none"].on { background: linear-gradient(135deg,#1b3a2c,#123023); border-color: var(--green); color: var(--green); }
+  .tabbtn[data-tab="full"].on { background: linear-gradient(135deg,#3a1b22,#2a1017); border-color: var(--red); color: var(--red); }
+  .tabbtn[data-tab="gran"].on { background: linear-gradient(135deg,#1c2440,#131a30); border-color: var(--accent); color: var(--accent); }
 
-  /* PHONE WRAPPER */
-  .phone-wrap { position: relative; }
+  /* ===== Phone, held horizontally ===== */
+  .phone { position: relative; width: min(90vw, 82vh * var(--pr)); height: min(82vh, 90vw / var(--pr)); background: #0c0c12; border-radius: 4.4vh; border: 3px solid #2a2a3a; box-shadow: 0 0 0 1px #ffffff0d inset, 0 26px 70px #00000099; overflow: hidden; display: flex; flex-direction: column; }
+  .cam-dot { position: absolute; top: 50%; right: 1.4vh; transform: translateY(-50%); width: 1.3vh; height: 1.3vh; border-radius: 50%; background: #060608; border: 1px solid #333; z-index: 6; }
 
-  .phone { width: var(--phone-w-sm); height: var(--phone-h-sm); background: #111118; border-radius: 38px; border: 2px solid var(--border); box-shadow: 0 8px 32px #00000060, inset 0 1px 0 #ffffff10; overflow: hidden; display: flex; flex-direction: column; transition: var(--tr); }
-  .slot.focused .phone { width: var(--phone-w); height: var(--phone-h); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent)44, 0 24px 64px #00000090; cursor: default; }
-  .slot.side .phone { opacity: 0.5; filter: blur(0.5px); }
-  .slot.side:hover .phone { opacity: 0.72; }
-
-  /* YouTube bottom nav */
-  .yt-nav { background: #0f0f0f; border-top: 1px solid #1c1c1c; display: flex; align-items: center; justify-content: space-around; padding: 5px 0 7px; flex-shrink: 0; }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 5.5px; color: var(--muted); flex: 1; transition: color 0.3s; }
-  .slot.focused .nav-item { font-size: 8px; gap: 3px; }
-  .nav-item.active { color: #fff; }
-  .nav-item.ai-nav { color: var(--accent); }
-  .nav-icon-wrap { width: 18px; height: 18px; border-radius: 50%; background: var(--accent)22; border: 1px solid var(--accent)55; display: flex; align-items: center; justify-content: center; }
-  .slot.focused .nav-icon-wrap { width: 26px; height: 26px; }
-
-  .notch { width: 90px; height: 24px; background: #000; border-radius: 0 0 16px 16px; margin: 0 auto; flex-shrink: 0; }
-  .slot.focused .notch { width: 120px; height: 28px; }
-  .screen { flex: 1; overflow: hidden; display: flex; flex-direction: column; background: #0f0f0f; }
-  .sbar { display: flex; justify-content: space-between; padding: 4px 16px; font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; background: #0f0f0f; }
-  .slot.focused .sbar { font-size: 12px; padding: 6px 20px; }
-  .yth { background: #0f0f0f; padding: 6px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1c1c1c; flex-shrink: 0; }
-  .slot.focused .yth { padding: 8px 18px; }
-  .ytlogo { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 800; color: #fff; }
-  .slot.focused .ytlogo { font-size: 18px; }
-  .ytico { background: var(--yt-red); border-radius: 4px; width: 16px; height: 11px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: #fff; }
-  .slot.focused .ytico { width: 22px; height: 15px; font-size: 9px; }
-  .ytright { display: flex; gap: 8px; font-size: 13px; color: #aaa; }
-  .slot.focused .ytright { font-size: 17px; }
-
-  .vplayer { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; flex-shrink: 0; overflow: hidden; }
+  .stagewrap { flex: 1; position: relative; min-height: 0; background: #000; }
   .scene { position: absolute; inset: 0; overflow: hidden; }
-  .sbg { position: absolute; inset: 0; background: linear-gradient(160deg,#0d1b2a 0%,#1b2838 60%,#0a1628 100%); }
-  .sbg::before { content:''; position:absolute; width:120px; height:120px; background:radial-gradient(circle,#1e3a5f44 0%,transparent 70%); top:-20px; right:-20px; animation:bgp 3s ease-in-out infinite; }
+  .sbg { position: absolute; inset: 0; background: linear-gradient(120deg,#8f6fd6,#4f9fd8 33%,#3fc79e 66%,#e88f4a); }
+  .sbg::before { content:''; position:absolute; width:22%; height:40%; background:radial-gradient(circle,#ffffff33 0%,transparent 70%); top:-6%; right:-4%; animation:bgp 3s ease-in-out infinite; animation-play-state: paused; }
+  .scene.playing .sbg::before { animation-play-state: running; }
   @keyframes bgp { 0%,100%{transform:scale(1);opacity:.5} 50%{transform:scale(1.3);opacity:1} }
-  .person { position:absolute; bottom:0; left:50%; transform:translateX(-50%); }
-  .pbody { width:36px; height:58px; background:linear-gradient(180deg,#2d6a9f 0%,#1a3a5c 100%); border-radius:8px 8px 0 0; position:relative; animation:bob 1.2s ease-in-out infinite; }
-  .slot.focused .pbody { width:50px; height:76px; }
-  @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-2px)} }
-  .phead { width:24px; height:24px; background:#e8c99a; border-radius:50%; position:absolute; top:-26px; left:50%; transform:translateX(-50%); animation:hbob 1.2s ease-in-out infinite; }
-  .slot.focused .phead { width:32px; height:32px; top:-34px; }
+  .cast { position:absolute; inset:0; }
+  .person { position:absolute; bottom:8%; left:50%; transform:translateX(-50%); }
+  .person.a { left:38%; }
+  .person.b { left:62%; }
+  .pbody { width:13vh; height:22vh; background:linear-gradient(180deg,#2d6a9f 0%,#1a3a5c 100%); border-radius:1.8vh 1.8vh 0 0; position:relative; animation:bob 1.2s ease-in-out infinite; animation-play-state: paused; box-shadow: 0 1vh 2vh -0.6vh #00000066; }
+  .person.b .pbody { background:linear-gradient(180deg,#e07a3a 0%,#a5501c 100%); animation-delay: 0.15s; }
+  .scene.playing .pbody { animation-play-state: running; }
+  @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-0.4vh)} }
+  .phead { width:9.8vh; height:9.8vh; background:#e8c99a; border-radius:50%; position:absolute; top:-9.4vh; left:50%; transform:translateX(-50%); animation:hbob 1.2s ease-in-out infinite; animation-play-state: paused; }
+  .person.b .phead { background:#e0b184; animation-delay: 0.15s; }
+  .scene.playing .phead { animation-play-state: running; }
   @keyframes hbob { 0%,100%{transform:translateX(-50%) rotate(-2deg)} 50%{transform:translateX(-50%) rotate(2deg)} }
+  .eyes { position:absolute; top:36%; left:50%; transform:translateX(-50%); display:flex; gap:1.5vh; }
+  .eye { width:1.3vh; height:1.3vh; background:#2a2a2a; border-radius:50%; display:block; }
+  .brow { position:absolute; top:24%; width:2vh; height:0.6vh; background:#6b4a30; border-radius:1px; transition: transform 0.2s ease; }
+  .brow.left { left:22%; transform:rotate(6deg); }
+  .brow.right { right:22%; transform:rotate(-6deg); }
+  .mouth { position:absolute; bottom:20%; left:50%; transform:translateX(-50%); width:2.6vh; height:1.1vh; background:#8a4a3a; border-radius:3px; transition: all 0.2s ease; }
 
-  .bubble { position:absolute; top:8px; left:8px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:10px; padding:3px 7px; font-size:7px; color:#fff; opacity:0; transform:translateY(4px); transition:opacity .3s,transform .3s; pointer-events:none; max-width:85px; line-height:1.4; }
-  .slot.focused .bubble { font-size:9px; padding:4px 9px; top:10px; }
-  .bubble.show { opacity:1; transform:translateY(0); }
-  .bubble.bad { background:rgba(255,50,50,.2); border-color:rgba(255,50,50,.4); color:#ffaaaa; }
-  .bubble.bleep { background:rgba(91,141,238,.2); border-color:var(--accent); color:var(--accent); font-weight:700; }
+  @keyframes yellFlap { 0%,100%{transform:translateX(-50%) scaleY(1)} 50%{transform:translateX(-50%) scaleY(0.4)} }
+  .person.yelling .brow.left { transform:rotate(-16deg) translateY(-1px); }
+  .person.yelling .brow.right { transform:rotate(16deg) translateY(-1px); }
+  .person.yelling .mouth { width:4.6vh; height:4.2vh; border-radius:50% 50% 60% 60%; background:#5c1616; transform-origin:center; animation: yellFlap 0.24s ease-in-out infinite; }
 
-  .cap { position:absolute; top:8px; right:6px; text-align:right; font-size:6px; color:#fff; background:rgba(0,0,0,.65); padding:2px 6px; border-radius:4px; opacity:0; transition:opacity .3s; }
-  .slot.focused .cap { font-size:9px; padding:3px 8px; top:10px; right:8px; }
-  .cap.show { opacity:1; }
-  .cap.cen { color:var(--accent); font-weight:600; }
+  @keyframes lunge { 0%,100%{transform:translateX(-50%) translateX(0)} 30%{transform:translateX(-50%) translateX(4.6vh)} 70%{transform:translateX(-50%) translateX(4.6vh)} }
+  .person.b.pushing .pbody, .person.b.pushing .phead { animation: lunge 1.1s ease-out 1; }
 
-  .mutebadge { position:absolute; bottom:32px; left:6px; background:rgba(0,0,0,.82); border:1px solid var(--accent); border-radius:6px; padding:3px 7px; font-size:7px; color:var(--accent); font-weight:700; opacity:0; transition:opacity .3s; z-index:15; text-transform:uppercase; letter-spacing:.05em; max-width:44%; text-align:center; line-height:1.4; }
-  .slot.focused .mutebadge { font-size:9px; padding:4px 9px; bottom:40px; left:8px; max-width:44%; }
+  @keyframes knockback { 0%{transform:translateX(-50%) translateX(0) rotate(0deg)} 25%{transform:translateX(-50%) translateX(-5vh) rotate(-6deg)} 55%{transform:translateX(-50%) translateX(-7.2vh) rotate(-3deg)} 100%{transform:translateX(-50%) translateX(-6vh) rotate(-2deg)} }
+  .person.a.pushed { animation: knockback 1.3s ease-out 0.15s 1 forwards; }
+
+  /* fixed, non-moving speech bubbles pinned above each character */
+  .talk-bubble { position:absolute; top:17%; background:rgba(18,42,68,.94); border:1px solid rgba(120,170,230,.65); border-radius:1.4vh; padding:1.2vh 2vh; font-size:2.6vh; font-weight:700; color:#cfe3ff; opacity:0; transform:translateY(-4px); transition:opacity .25s, transform .25s; pointer-events:none; max-width:34%; line-height:1.35; text-align:center; z-index:12; }
+  .talk-bubble.a { left:38%; transform:translateX(-50%) translateY(-4px); }
+  .talk-bubble.a.show { transform:translateX(-50%) translateY(0); }
+  .talk-bubble.b { left:62%; background:rgba(102,50,20,.94); border-color:rgba(230,150,100,.65); color:#ffd9b8; transform:translateX(-50%) translateY(-4px); }
+  .talk-bubble.b.show { transform:translateX(-50%) translateY(0); }
+  .talk-bubble.show { opacity:1; }
+
+  .caption { position:absolute; bottom:9%; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.82); border-radius:0.6vh; padding:0.9vh 1.8vh; font-size:2.3vh; font-weight:600; color:#fff; letter-spacing:0.03em; opacity:0; transition:opacity .2s; z-index:14; white-space:nowrap; }
+  .caption.show { opacity:1; }
+
+  .mutebadge { position:absolute; top:3%; left:2.4%; background:rgba(16,16,22,.94); border:1.5px solid var(--accent); border-radius:1.2vh; padding:1.2vh 2.2vh; font-size:2.15vh; color:var(--accent); font-weight:700; opacity:0; transition:opacity .3s; z-index:15; }
   .mutebadge.on { opacity:1; }
 
-  .blackout { position:absolute; inset:0; background:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; opacity:0; transition:opacity .25s; z-index:22; padding:12px; }
-  .blackout.on { opacity:1; }
-  .boico { font-size:22px; }
-  .slot.focused .boico { font-size:30px; }
-  .bolbl { font-size:8px; color:var(--accent); font-weight:700; text-transform:uppercase; letter-spacing:.08em; text-align:center; }
-  .slot.focused .bolbl { font-size:11px; }
+  .hidden-overlay { position:absolute; inset:0; background:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.6vh; opacity:0; transition:opacity .3s; z-index:18; }
+  .hidden-overlay.on { opacity:1; }
+  .hidden-overlay .icon { width:5.4vh; height:5.4vh; color:var(--muted); }
+  .hidden-overlay .lbl { font-size:2.6vh; font-weight:700; color:var(--text); letter-spacing:0.02em; }
 
-  .blockscreen { position:absolute; inset:0; background:#090909; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:4px; opacity:0; transition:opacity .35s; z-index:30; padding:10px 14px; overflow-y:auto; scrollbar-width:none; }
-  .blockscreen::-webkit-scrollbar { display:none; }
+  .blockscreen { position:absolute; inset:0; background:rgba(6,6,9,.96); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.8vh; opacity:0; transition:opacity .35s; z-index:30; padding:3% 9%; }
   .blockscreen.on { opacity:1; }
-  .bsico { font-size:20px; }
-  .slot.focused .bsico { font-size:26px; }
-  .bstitle { font-size:11px; font-weight:700; color:#fff; text-align:center; }
-  .slot.focused .bstitle { font-size:14px; }
-  .bssub { font-size:9px; color:var(--muted); text-align:center; line-height:1.4; width:100%; }
-  .slot.focused .bssub { font-size:11px; }
-  .bsbadge { background:var(--red-soft); border:1px solid var(--red)55; border-radius:8px; padding:3px 9px; font-size:8px; color:var(--red); font-weight:600; margin-top:1px; }
-  .slot.focused .bsbadge { font-size:10px; padding:4px 11px; }
+  .bsico { width:6.4vh; height:6.4vh; color:var(--red); }
+  .bstitle { font-size:3.6vh; font-weight:700; color:#fff; text-align:center; }
+  .bsbadge { background:var(--red-soft); border:1px solid var(--red)55; border-radius:1vh; padding:0.9vh 2.2vh; font-size:2.1vh; color:var(--red); font-weight:600; }
 
-  .ai-explain { background:rgba(91,141,238,.1); border:1px solid var(--accent)44; border-radius:8px; padding:7px 10px; font-size:8px; color:var(--text); line-height:1.55; text-align:left; width:100%; opacity:0; transform:translateY(6px); transition:opacity 0.5s,transform 0.5s; margin-top:4px; }
-  .slot.focused .ai-explain { font-size:10px; padding:9px 12px; border-radius:10px; }
+  .ai-explain { background:rgba(109,139,255,.12); border:1.5px solid rgba(124,147,255,.5); border-radius:1.6vh; padding:2vh 2.8vh; font-size:2.5vh; color:var(--text); line-height:1.55; text-align:left; width:100%; max-width:660px; opacity:0; transform:translateY(6px); transition:opacity 0.5s,transform 0.5s; display:flex; align-items:center; gap:2vh; }
   .ai-explain.on { opacity:1; transform:translateY(0); }
-  .ai-explain-label { font-size:7px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.1em; display:flex; align-items:center; gap:4px; margin-bottom:4px; }
-  .slot.focused .ai-explain-label { font-size:9px; }
-  .ai-pulse { width:5px; height:5px; border-radius:50%; background:var(--accent); animation:apulse 2s infinite; }
-  .slot.focused .ai-pulse { width:6px; height:6px; }
-  @keyframes apulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .ai-explain .bloom { width:9vh; height:9vh; flex-shrink:0; }
 
-  .chat-prompt { display:flex; align-items:center; gap:5px; background:rgba(91,141,238,.12); border:1px solid var(--accent)55; border-radius:20px; padding:4px 10px; font-size:7px; color:var(--accent); font-weight:600; width:100%; opacity:0; transform:translateY(4px); transition:opacity 0.5s 0.2s,transform 0.5s 0.2s; cursor:pointer; margin-top:2px; }
-  .slot.focused .chat-prompt { font-size:9px; padding:5px 12px; border-radius:24px; }
+  .chat-prompt { display:flex; align-items:center; gap:9px; background:rgba(109,139,255,.14); border:1px solid var(--accent)55; border-radius:22px; padding:1.2vh 2.6vh; font-size:2.1vh; color:var(--accent); font-weight:600; opacity:0; transform:translateY(4px); transition:opacity 0.5s 0.2s,transform 0.5s 0.2s; cursor:pointer; }
   .chat-prompt.on { opacity:1; transform:translateY(0); }
-  .chat-dot { width:5px; height:5px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+  .chat-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); flex-shrink:0; }
 
   .thumb { position:absolute; inset:0; background:linear-gradient(160deg,#0d1b2a 0%,#1b2838 60%,#0a1628 100%); display:flex; align-items:center; justify-content:center; z-index:25; transition:opacity .3s; }
   .thumb.gone { opacity:0; pointer-events:none; }
-  .playbtn { width:34px; height:34px; background:rgba(0,0,0,.78); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; color:#fff; }
-  .slot.focused .playbtn { width:48px; height:48px; font-size:21px; }
+  .playbtn { width:9vh; height:9vh; background:rgba(0,0,0,.78); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:4vh; color:#fff; }
 
-  .ytctrl { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(0,0,0,.93)); padding:10px 8px 5px; z-index:20; }
-  .slot.focused .ytctrl { padding:12px 10px 6px; }
-  .ptrack { width:100%; height:3px; background:rgba(255,255,255,.25); border-radius:2px; position:relative; margin-bottom:5px; }
-  .slot.focused .ptrack { height:4px; }
-  .pfill { height:100%; background:var(--yt-red); border-radius:2px; width:0%; transition:width .08s linear; position:relative; }
-  .pfill::after { content:''; position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:8px; height:8px; background:#fff; border-radius:50%; }
-  .slot.focused .pfill::after { width:10px; height:10px; right:-5px; }
-  .tmark { position:absolute; top:-3px; width:4px; height:9px; border-radius:2px; transform:translateX(-50%); transition:opacity .4s; opacity:0; }
-  .slot.focused .tmark { width:5px; height:11px; }
+  .ytctrl { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(0,0,0,.93)); padding:1.4% 2% 1%; z-index:20; }
+  .ptrack { width:100%; height:0.8vh; background:rgba(255,255,255,.25); border-radius:2px; position:relative; margin-bottom:1%; overflow:hidden; }
+  .pfill { height:100%; background:#ff0000; border-radius:2px; width:0%; position:relative; }
   .crow { display:flex; align-items:center; justify-content:space-between; }
-  .cleft { display:flex; align-items:center; gap:6px; }
-  .cbtn { font-size:10px; color:#fff; }
-  .slot.focused .cbtn { font-size:13px; }
-  .tdisp { font-size:7px; color:rgba(255,255,255,.82); font-family:'DM Mono',monospace; }
-  .slot.focused .tdisp { font-size:9px; }
+  .cleft { display:flex; align-items:center; gap:1.6vh; }
+  .cbtn { font-size:2.3vh; color:#fff; }
+  .tdisp { font-size:1.9vh; color:rgba(255,255,255,.82); font-family:'DM Mono',monospace; }
 
-  .aitag { position:absolute; bottom:32px; right:6px; background:rgba(91,141,238,.15); border:1px solid var(--accent); border-radius:6px; padding:3px 8px; font-size:7px; color:var(--accent); font-weight:600; opacity:0; transition:opacity .3s; z-index:21; text-transform:uppercase; letter-spacing:.06em; max-width:44%; text-align:center; line-height:1.4; }
-  .slot.focused .aitag { font-size:9px; padding:4px 10px; bottom:40px; right:8px; max-width:44%; }
+  .aitag { position:absolute; top:3%; right:2.4%; background:rgba(16,16,22,.92); border:1.5px solid var(--accent); border-radius:1.2vh; padding:1.1vh 2vh; font-size:2.05vh; color:var(--accent); font-weight:700; opacity:0; transition:opacity .3s; z-index:21; display:flex; align-items:center; gap:1vh; }
   .aitag.on { opacity:1; }
+  .aitag .bloom { width:3.2vh; height:3.2vh; }
 
-  .aibar { background:#0d1117; border-top:1px solid var(--accent)33; padding:6px 14px; display:flex; align-items:center; gap:6px; flex-shrink:0; opacity:0; transition:opacity .4s; }
-  .slot.focused .aibar { padding:8px 18px; }
-  .aibar.on { opacity:1; }
-  .aipulse { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 2s infinite; flex-shrink:0; }
-  .slot.focused .aipulse { width:8px; height:8px; }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
-  .ailbl { font-size:8px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.1em; }
-  .slot.focused .ailbl { font-size:11px; }
-  .aistatus { font-size:8px; color:var(--muted); margin-left:auto; }
-  .slot.focused .aistatus { font-size:11px; }
-
-  .vinfo { padding:10px 14px; background:#0f0f0f; flex:1; overflow:hidden; }
-  .slot.focused .vinfo { padding:12px 18px; }
-  .vtitle { font-size:10px; font-weight:600; color:#fff; line-height:1.4; margin-bottom:5px; }
-  .slot.focused .vtitle { font-size:13px; }
-  .vmeta { font-size:8px; color:#999; display:flex; gap:6px; margin-bottom:7px; }
-  .slot.focused .vmeta { font-size:10px; }
-  .chrow { display:flex; align-items:center; gap:8px; padding:6px 0; border-top:1px solid #1c1c1c; border-bottom:1px solid #1c1c1c; margin-bottom:6px; }
-  .chav { width:22px; height:22px; border-radius:50%; background:linear-gradient(135deg,#f43f5e,#fb923c); display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#fff; flex-shrink:0; }
-  .slot.focused .chav { width:30px; height:30px; font-size:11px; }
-  .chnm { font-size:9px; font-weight:600; color:#fff; flex:1; }
-  .slot.focused .chnm { font-size:12px; }
-  .subbtn { background:#fff; color:#000; border-radius:14px; padding:4px 9px; font-size:8px; font-weight:700; }
-  .slot.focused .subbtn { font-size:10px; padding:5px 11px; }
-  .actrow { display:flex; gap:6px; }
-  .actbtn { background:#1c1c1c; border-radius:14px; padding:4px 9px; font-size:8px; color:#fff; }
-  .slot.focused .actbtn { font-size:10px; padding:5px 11px; }
-
-  .rbtn { background:var(--card); border:1px solid var(--border); color:var(--muted); border-radius:20px; padding:6px 14px; font-size:11px; font-weight:500; cursor:pointer; transition:all .2s; font-family:'DM Sans',sans-serif; display:flex; align-items:center; gap:5px; }
-  .rbtn:hover { border-color:var(--accent); color:var(--accent); }
-  .clickhint { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--accent); opacity:0; transition:opacity .3s; white-space:nowrap; pointer-events:none; }
-  .slot.side:hover .clickhint { opacity:1; }
-  .gctrl { margin-top:28px; display:flex; flex-direction:column; align-items:center; gap:10px; }
-  .hint { font-size:12px; color:var(--muted); text-align:center; line-height:1.6; }
-  .hint span { color:var(--accent); font-weight:600; }
-  .grbtn { background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:24px; padding:8px 22px; font-size:12px; font-weight:500; cursor:pointer; transition:all .2s; font-family:'DM Sans',sans-serif; display:flex; align-items:center; gap:6px; }
-  .grbtn:hover { border-color:var(--accent); color:var(--accent); }
+  .rbtn { background: var(--card); border: 1px solid var(--border); color: var(--muted); border-radius: 22px; padding: 1.4vh 2.6vh; font-size: 2vh; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 6px; }
+  .rbtn:hover { border-color: var(--accent); color: var(--accent); }
 </style>
 </head>
 <body>
 
-<p class="title">AI Mediator</p>
-<h2 class="subtitle">Content <span>Moderation</span></h2>
-<p class="intro">The same video. Three different experiences. <span>Click a panel to expand it</span> and watch the video play.</p>
+<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="bloomGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff4d6d"/><stop offset="20%" stop-color="#fb923c"/><stop offset="40%" stop-color="#fbbf24"/><stop offset="60%" stop-color="#34d399"/><stop offset="80%" stop-color="#5b8dee"/><stop offset="100%" stop-color="#c084fc"/></linearGradient></defs></svg>
 
-<div class="stage">
-
-  <!-- P1: No Restriction -->
-  <div class="slot side" id="s1" onclick="handleClick(1)">
-    <div class="lbl">No Restriction</div>
-    <div class="phone-wrap">
-      <div class="phone">
-        <div class="notch"></div>
-        <div class="screen">
-          <div class="sbar"><span>9:41</span><span>▊▊▊▊</span></div>
-          <div class="yth"><div class="ytlogo"><div class="ytico">▶</div>YouTube</div><div class="ytright"><span>🔍</span><span>👤</span></div></div>
-          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-            <div class="vplayer">
-              <div class="scene"><div class="sbg"></div><div class="person"><div class="pbody"><div class="phead"></div></div></div><div class="bubble" id="p1b"></div><div class="cap" id="p1c"></div></div>
-              <div class="ytctrl"><div class="ptrack"><div class="pfill" id="p1f"></div></div><div class="crow"><div class="cleft"><span class="cbtn">⏸</span><span class="cbtn" id="p1v">🔊</span><span class="tdisp" id="p1t">0:00 / 4:12</span></div><span class="cbtn">⛶</span></div></div>
-            </div>
-            <div class="vinfo">
-              <div class="vtitle">EXTREME PRANK GONE WRONG 😂 ft. the crew</div>
-              <div class="vmeta"><span>1.2M views</span><span>·</span><span>3 days ago</span></div>
-              <div class="chrow"><div class="chav">OT</div><div class="chnm">Obbletrook</div><div class="subbtn">Subscribe</div></div>
-              <div class="actrow"><div class="actbtn">👍 48K</div><div class="actbtn">👎</div><div class="actbtn">↗ Share</div></div>
-            </div>
-          </div>
-        </div>
-        <div class="yt-nav"><div class="nav-item active"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="10" height="10" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#5b8dee" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
-      </div>
-    </div>
-    <div class="rbtn" onclick="event.stopPropagation();replaySlot(1)">↺ Replay</div>
-    <div class="clickhint">Tap to expand</div>
-  </div>
-
-  <!-- P2: Full Block -->
-  <div class="slot side" id="s2" onclick="handleClick(2)">
-    <div class="lbl">Full Block</div>
-    <div class="phone-wrap">
-      <div class="phone">
-        <div class="notch"></div>
-        <div class="screen">
-          <div class="sbar"><span>9:41</span><span>▊▊▊▊</span></div>
-          <div class="yth"><div class="ytlogo"><div class="ytico">▶</div>YouTube</div><div class="ytright"><span>🔍</span><span>👤</span></div></div>
-          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-            <div class="vplayer">
-              <div class="scene"><div class="sbg"></div><div class="person"><div class="pbody"><div class="phead"></div></div></div></div>
-              <div class="thumb" id="p2thumb"><div class="playbtn">▶</div></div>
-              <div class="blockscreen" id="p2block">
-                <div class="bsico">🔒</div>
-                <div class="bstitle">Video Restricted</div>
-                <div class="bssub">AI Mediator has restricted access to this content.</div>
-                <div class="bsbadge">⚠ Restricted by AI Mediator</div>
-                <div class="ai-explain on"><div class="ai-explain-label"><div class="ai-pulse"></div>AI Mediator</div>An explanation of why this content was blocked is shown here.</div>
-                <div class="chat-prompt on"><div class="chat-dot"></div>Have questions? Chat with AI Mediator</div>
-              </div>
-              <div class="ytctrl"><div class="ptrack"><div class="pfill" id="p2f"></div></div><div class="crow"><div class="cleft"><span class="cbtn">▶</span><span class="cbtn">🔊</span><span class="tdisp">0:00 / 4:12</span></div><span class="cbtn">⛶</span></div></div>
-            </div>
-            <div class="vinfo">
-              <div class="vtitle">EXTREME PRANK GONE WRONG 😂 ft. the crew</div>
-              <div class="vmeta"><span>1.2M views</span><span>·</span><span>3 days ago</span></div>
-              <div class="chrow"><div class="chav">OT</div><div class="chnm">Obbletrook</div><div class="subbtn">Subscribe</div></div>
-              <div class="actrow"><div class="actbtn">👍 48K</div><div class="actbtn">👎</div><div class="actbtn">↗ Share</div></div>
-            </div>
-          </div>
-        </div>
-        <div class="yt-nav"><div class="nav-item active"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="10" height="10" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#5b8dee" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
-      </div>
-    </div>
-    <div class="rbtn" onclick="event.stopPropagation();replaySlot(2)">↺ Replay</div>
-    <div class="clickhint">Tap to expand</div>
-  </div>
-
-  <!-- P3: Granular Moderation -->
-  <div class="slot side" id="s3" onclick="handleClick(3)">
-    <div class="lbl">Granular Moderation</div>
-    <div class="phone-wrap">
-      <div class="phone">
-        <div class="notch"></div>
-        <div class="screen">
-          <div class="sbar"><span>9:41</span><span>▊▊▊▊</span></div>
-          <div class="yth"><div class="ytlogo"><div class="ytico">▶</div>YouTube</div><div class="ytright"><span>🔍</span><span>👤</span></div></div>
-          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-            <div class="vplayer">
-              <div class="scene"><div class="sbg"></div><div class="person"><div class="pbody"><div class="phead"></div></div></div><div class="bubble" id="p3b"></div><div class="cap" id="p3c"></div></div>
-              <div class="mutebadge" id="p3mute">🔇 Audio Muted · AI Mediator</div>
-              <div class="blackout" id="p3bo">
-                <div class="boico">🚫</div>
-                <div class="bolbl">Content Blocked · AI Mediator</div>
-                <div class="ai-explain on"><div class="ai-explain-label"><div class="ai-pulse"></div>AI Mediator</div>An explanation of why this content was blocked is shown here.</div>
-              </div>
-              <div class="aitag" id="p3tag"></div>
-              <div class="ytctrl"><div class="ptrack"><div class="pfill" id="p3f"></div><div class="tmark" id="p3m1" style="left:37%;background:#fbbf24"></div><div class="tmark" id="p3m2" style="left:66%;background:#f43f5e"></div></div><div class="crow"><div class="cleft"><span class="cbtn">⏸</span><span class="cbtn" id="p3v">🔊</span><span class="tdisp" id="p3t">0:00 / 4:12</span></div><span class="cbtn">⛶</span></div></div>
-            </div>
-            <div class="aibar" id="p3bar"><div class="aipulse"></div><div class="ailbl">AI Mediator</div><div class="aistatus" id="p3st">Monitoring</div></div>
-            <div class="vinfo">
-              <div class="vtitle">EXTREME PRANK GONE WRONG 😂 ft. the crew</div>
-              <div class="vmeta"><span>1.2M views</span><span>·</span><span>3 days ago</span></div>
-              <div class="chrow"><div class="chav">OT</div><div class="chnm">Obbletrook</div><div class="subbtn">Subscribe</div></div>
-              <div class="actrow"><div class="actbtn">👍 48K</div><div class="actbtn">👎</div><div class="actbtn">↗ Share</div></div>
-            </div>
-          </div>
-        </div>
-        <div class="yt-nav"><div class="nav-item active"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="10" height="10" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#5b8dee" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>
-      </div>
-    </div>
-    <div class="rbtn" onclick="event.stopPropagation();replaySlot(3)">↺ Replay</div>
-    <div class="clickhint">Tap to expand</div>
-  </div>
-
+<div class="tabbar-external">
+  <div class="tabbtn" data-tab="none" onclick="selectTab('none')">No Restriction</div>
+  <div class="tabbtn" data-tab="full" onclick="selectTab('full')">Full Restriction</div>
+  <div class="tabbtn" data-tab="gran" onclick="selectTab('gran')">Granular Moderation</div>
 </div>
 
-<div class="gctrl">
-  <p class="hint">Click a panel to expand · video plays automatically · <span>side panels stay interactive</span></p>
-  <button class="grbtn" onclick="replayAll()">↺ &nbsp;Replay All</button>
+<div class="phone">
+  <div class="cam-dot"></div>
+  <div class="stagewrap">
+    <div class="scene" id="scene">
+      <div class="sbg"></div>
+      <div class="cast" id="cast">
+        <div class="person a"><div class="pbody"><div class="phead"><div class="eyes"><span class="eye"></span><span class="eye"></span></div><div class="brow left"></div><div class="brow right"></div><div class="mouth"></div></div></div></div>
+        <div class="person b"><div class="pbody"><div class="phead"><div class="eyes"><span class="eye"></span><span class="eye"></span></div><div class="brow left"></div><div class="brow right"></div><div class="mouth"></div></div></div></div>
+      </div>
+      <div class="talk-bubble a" id="bubA">You're the worst! @#$%&! </div>
+      <div class="talk-bubble b" id="bubB">*!#& !!! GET OUT!!! NOW!!</div>
+      <div class="caption" id="caption">[ being violent ]</div>
+    </div>
+    <div class="mutebadge" id="mutebadge">🔇 Audio Muted </div>
+    <div class="aitag" id="aitag"></div>
+    <div class="thumb" id="thumb"><div class="playbtn">▶</div></div>
+
+    <div class="hidden-overlay" id="hiddenOverlay">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.9 10.9 0 0 1 12 5c6 0 9.5 5 10.5 7-0.4.8-1.3 2.2-2.7 3.6M6.7 6.7C4.5 8.1 3 10.3 1.5 12c1 2 4.5 7 10.5 7 1.3 0 2.5-.2 3.6-.6"/><path d="M9.9 10a3 3 0 0 0 4.1 4.1"/></svg>
+      <div class="lbl">Video Content Hidden</div>
+    </div>
+
+    <div class="blockscreen" id="blockscreen">
+      <svg class="bsico icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      <div class="bstitle" id="bstitle">Video Restricted</div>
+      <div class="bsbadge">⚠ Restricted</div>
+      <div class="ai-explain on" id="ai-explain"><svg class="bloom" viewBox="0 0 100 100"><path d="M50 18 C56 30 70 30 74 20 C68 32 76 44 90 42 C76 46 76 60 86 68 C72 60 62 68 64 82 C58 70 44 70 40 82 C46 68 34 60 20 62 C34 56 32 42 20 34 C34 40 42 30 36 18 C44 28 50 28 50 18 Z"/></svg><span id="explain-text"></span></div>
+      <div class="chat-prompt on"><div class="chat-dot"></div>Have questions? Tap to chat</div>
+    </div>
+
+    <div class="ytctrl">
+      <div class="ptrack"><div class="pfill" id="pfill"></div></div>
+      <div class="crow"><div class="cleft"><span class="cbtn" id="playpause">⏸</span><span class="cbtn" id="volicon">🔊</span><span class="tdisp" id="tdisp">0:00 / 4:12</span></div><span class="cbtn">⛶</span></div>
+    </div>
+  </div>
 </div>
+
+<div class="rbtn" onclick="replayCurrent()">↺ Replay</div>
 
 <script>
 let ctx=null;
-function ac(){if(!ctx)ctx=new(window.AudioContext||window.webkitAudioContext)();return ctx;}
-let bgNodes=[],bgGain=null;
-function startBg(){stopBg();const a=ac();bgGain=a.createGain();bgGain.gain.setValueAtTime(0.025,a.currentTime);bgGain.connect(a.destination);[261.63,329.63,392.00,523.25].forEach((f,i)=>{const o=a.createOscillator();o.type='sine';o.frequency.setValueAtTime(f,a.currentTime);o.connect(bgGain);o.start(a.currentTime+i*0.04);bgNodes.push(o);});const bass=a.createOscillator();bass.type='triangle';bass.frequency.setValueAtTime(130.81,a.currentTime);const bg2=a.createGain();bg2.gain.setValueAtTime(0.018,a.currentTime);bass.connect(bg2);bg2.connect(a.destination);bass.start();bgNodes.push(bass);}
-function stopBg(){bgNodes.forEach(n=>{try{n.stop();}catch(e){}});bgNodes=[];}
-function muteBg(){if(bgGain)bgGain.gain.linearRampToValueAtTime(0,ac().currentTime+0.12);}
-function unmuteBg(){if(bgGain)bgGain.gain.linearRampToValueAtTime(0.025,ac().currentTime+0.12);}
-function bleep(dur){const a=ac();const o=a.createOscillator();const g=a.createGain();o.type='square';o.frequency.setValueAtTime(1000,a.currentTime);g.gain.setValueAtTime(0.08,a.currentTime);g.gain.linearRampToValueAtTime(0,a.currentTime+dur);o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+dur);}
-function rawSwear(){const a=ac();const o=a.createOscillator();const g=a.createGain();o.type='sawtooth';o.frequency.setValueAtTime(200,a.currentTime);o.frequency.linearRampToValueAtTime(120,a.currentTime+0.4);g.gain.setValueAtTime(0.06,a.currentTime);g.gain.linearRampToValueAtTime(0,a.currentTime+0.5);o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+0.5);}
+function ac(){
+  if(!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)();
+  if(ctx.state === 'suspended') ctx.resume();
+  return ctx;
+}
+// Some browsers only unlock audio on a real user gesture — make sure the very
+// first tap/click anywhere always tries to wake the context back up.
+['pointerdown','click','touchstart'].forEach(evt=>{
+  document.addEventListener(evt, ()=>{ if(ctx && ctx.state==='suspended') ctx.resume(); }, { passive:true });
+});
 
-const ST={focused:null,ivs:{},tms:{}};
-const TOTAL=16000,M1S=0.34,M1E=0.52,M2S=0.63,M2E=0.82,RW=0.87;
-function fmt(p){const s=Math.floor(p*252);return`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')} / 4:12`;}
-function clr(n){if(ST.ivs[n]){clearInterval(ST.ivs[n]);ST.ivs[n]=null;}if(ST.tms[n]){ST.tms[n].forEach(clearTimeout);ST.tms[n]=[];}}
-function tm(n,fn,d){if(!ST.tms[n])ST.tms[n]=[];ST.tms[n].push(setTimeout(fn,d));}
+// ---- gibberish "muffled adult mumble" voices, distinct per character ----
+let masterGain=null;
+function ensureGain(){ const a=ac(); if(!masterGain){ masterGain=a.createGain(); masterGain.gain.setValueAtTime(0.3,a.currentTime); masterGain.connect(a.destination);} return masterGain; }
+function muteGain(){ if(masterGain) masterGain.gain.linearRampToValueAtTime(0, ac().currentTime+0.12); }
+function unmuteGain(){ if(masterGain) masterGain.gain.linearRampToValueAtTime(0.3, ac().currentTime+0.12); }
 
-function playP1(){clr(1);const fill=document.getElementById('p1f'),tEl=document.getElementById('p1t'),bub=document.getElementById('p1b'),cap=document.getElementById('p1c');fill.style.width='0%';bub.className='bubble';cap.className='cap';startBg();let pct=0,m1=false,m2=false;const step=100/(TOTAL/50);ST.ivs[1]=setInterval(()=>{pct=Math.min(pct+step,100);fill.style.width=pct+'%';tEl.textContent=fmt(pct/100);const t=pct/100;if(t>=M1S&&!m1){m1=true;rawSwear();bub.textContent='😡 WTF!! #@$%!';bub.className='bubble bad show';cap.textContent='[unfiltered language]';cap.className='cap show';tm(1,()=>{bub.className='bubble';cap.className='cap';},1800);}if(t>=M2S&&!m2){m2=true;rawSwear();bub.textContent='🖕 @#$%!! Get out!!';bub.className='bubble bad show';cap.textContent='[offensive gesture + language]';cap.className='cap show';tm(1,()=>{bub.className='bubble';cap.className='cap';},2200);}if(pct>=100){clr(1);stopBg();}},50);}
+let liveNodes = { a: null, b: null };
+function startTalk(id){
+  stopTalk(id);
+  const a = ac(); ensureGain();
+  const cfg = id==='a'
+    ? { carrierFreq:105, carrierType:'sawtooth', lfoRate:2.6, lfoDepth:340, filterBase:420, filterQ:3.5, envRate:5.2, drive:false }
+    : { carrierFreq:150, carrierType:'square',   lfoRate:6.2, lfoDepth:600, filterBase:600, filterQ:6.5, envRate:9.5, drive:true  };
 
-function playP2(){clr(2);const thumb=document.getElementById('p2thumb'),block=document.getElementById('p2block');thumb.classList.remove('gone');block.classList.remove('on');document.getElementById('p2f').style.width='0%';tm(2,()=>{thumb.classList.add('gone');tm(2,()=>block.classList.add('on'),280);},1300);}
+  const carrier = a.createOscillator(); carrier.type = cfg.carrierType; carrier.frequency.value = cfg.carrierFreq;
+  const filter = a.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = cfg.filterBase; filter.Q.value = cfg.filterQ;
+  const lfo = a.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = cfg.lfoRate;
+  const lfoGain = a.createGain(); lfoGain.gain.value = cfg.lfoDepth;
+  lfo.connect(lfoGain); lfoGain.connect(filter.frequency);
 
-function playP3(){clr(3);stopBg();const fill=document.getElementById('p3f'),tEl=document.getElementById('p3t'),mute=document.getElementById('p3mute'),bo=document.getElementById('p3bo'),tag=document.getElementById('p3tag'),bar=document.getElementById('p3bar'),st=document.getElementById('p3st'),vol=document.getElementById('p3v'),m1=document.getElementById('p3m1'),m2=document.getElementById('p3m2'),bub=document.getElementById('p3b'),cap=document.getElementById('p3c');fill.style.width='0%';[mute,bo,tag,bar].forEach(e=>e.classList.remove('on'));m1.style.opacity='0';m2.style.opacity='0';vol.textContent='🔊';st.textContent='Monitoring';bub.className='bubble';cap.className='cap';tm(3,()=>bar.classList.add('on'),400);startBg();let pct=0,m1on=false,m2on=false,rewinding=false,m1bf=false,m2bf=false;const step=100/(TOTAL/50);ST.ivs[3]=setInterval(()=>{if(rewinding)return;pct=Math.min(pct+step,100);fill.style.width=pct+'%';tEl.textContent=fmt(pct/100);const t=pct/100;if(t>=M1S&&t<=M1E){if(!m1on){m1on=true;muteBg();if(!m1bf){bleep(0.75);m1bf=true;}mute.classList.add('on');vol.textContent='🔇';tag.textContent='🔇 Language Detected';tag.classList.add('on');m1.style.opacity='1';st.textContent='Audio muted';bub.textContent='🔇 [muted by AI Mediator]';bub.className='bubble bleep show';cap.textContent='Audio muted · language detected';cap.className='cap cen show';}}else if(m1on&&t>M1E&&t<M2S){m1on=false;unmuteBg();mute.classList.remove('on');tag.classList.remove('on');vol.textContent='🔊';st.textContent='Monitoring';bub.className='bubble';cap.className='cap';}if(t>=M2S&&t<=M2E){if(!m2on){m2on=true;muteBg();if(!m2bf){bleep(1.0);m2bf=true;}mute.classList.add('on');bo.classList.add('on');vol.textContent='🔇';tag.textContent='🚫 Language + Gesture';tag.classList.add('on');m2.style.opacity='1';st.textContent='Audio + Video blocked';bub.className='bubble';cap.className='cap';}}else if(m2on&&t>M2E){m2on=false;unmuteBg();mute.classList.remove('on');bo.classList.remove('on');tag.classList.remove('on');vol.textContent='🔊';st.textContent='Monitoring';}if(t>=RW&&!rewinding){rewinding=true;clearInterval(ST.ivs[3]);muteBg();st.textContent='Rewinding to flagged moment…';tag.textContent='↩ Rewinding…';tag.classList.add('on');tm(3,()=>{const target=M1S*100;const ri=setInterval(()=>{pct=Math.max(pct-2,target);fill.style.width=pct+'%';tEl.textContent=fmt(pct/100);if(pct<=target){clearInterval(ri);tm(3,()=>{mute.classList.add('on');vol.textContent='🔇';tag.textContent='🔇 Block persists on rewind';tag.classList.add('on');st.textContent='Still blocked on rewind';bub.textContent='🔇 [still muted]';bub.className='bubble bleep show';cap.textContent='Rewind confirmed · block is permanent';cap.className='cap cen show';bleep(0.5);},300);}},25);if(!ST.tms[3])ST.tms[3]=[];ST.tms[3].push(ri);},700);}if(pct>=100&&!rewinding){clr(3);stopBg();}},50);}
+  const envOsc = a.createOscillator(); envOsc.type = 'square'; envOsc.frequency.value = cfg.envRate;
+  const envDepth = a.createGain(); envDepth.gain.value = 0.42;
+  const voiceGain = a.createGain(); voiceGain.gain.value = 0.42;
+  envOsc.connect(envDepth); envDepth.connect(voiceGain.gain);
 
-function handleClick(n){if(ST.focused===n)return;stopBg();clr(1);clr(2);clr(3);ST.focused=n;[1,2,3].forEach(i=>{const s=document.getElementById('s'+i);s.classList.remove('focused','side');s.classList.add(i===n?'focused':'side');});setTimeout(()=>{if(n===1)playP1();if(n===2)playP2();if(n===3)playP3();},630);}
+  let chain = filter;
+  let shaper = null;
+  if (cfg.drive) {
+    shaper = a.createWaveShaper();
+    const curve = new Float32Array(256);
+    for (let i = 0; i < 256; i++) { const x = (i/255)*2-1; curve[i] = Math.tanh(x*3); }
+    shaper.curve = curve; shaper.oversample = '2x';
+    filter.connect(shaper); chain = shaper;
+  }
 
-function rP1(){document.getElementById('p1f').style.width='0%';document.getElementById('p1t').textContent='0:00 / 4:12';document.getElementById('p1b').className='bubble';document.getElementById('p1c').className='cap';}
-function rP2(){document.getElementById('p2f').style.width='0%';document.getElementById('p2thumb').classList.remove('gone');document.getElementById('p2block').classList.remove('on');}
-function rP3(){document.getElementById('p3f').style.width='0%';['p3mute','p3bo','p3tag','p3bar'].forEach(id=>document.getElementById(id).classList.remove('on'));document.getElementById('p3t').textContent='0:00 / 4:12';document.getElementById('p3v').textContent='🔊';document.getElementById('p3m1').style.opacity='0';document.getElementById('p3m2').style.opacity='0';document.getElementById('p3st').textContent='Monitoring';document.getElementById('p3b').className='bubble';document.getElementById('p3c').className='cap';}
-function replaySlot(n){stopBg();clr(n);if(n===1){rP1();if(ST.focused===1)playP1();}if(n===2){rP2();if(ST.focused===2)playP2();}if(n===3){rP3();if(ST.focused===3)playP3();}}
-function replayAll(){stopBg();clr(1);clr(2);clr(3);[1,2,3].forEach(i=>{const s=document.getElementById('s'+i);s.classList.remove('focused');s.classList.add('side');});ST.focused=null;rP1();rP2();rP3();}
+  carrier.connect(filter);
+  chain.connect(voiceGain);
+  voiceGain.connect(masterGain);
+
+  carrier.start(); lfo.start(); envOsc.start();
+  liveNodes[id] = { carrier, lfo, envOsc, filter, lfoGain, envDepth, voiceGain, shaper };
+}
+function stopTalk(id){
+  const n = liveNodes[id];
+  if (!n) return;
+  const a = ac();
+  try {
+    n.voiceGain.gain.linearRampToValueAtTime(0, a.currentTime+0.06);
+    n.carrier.stop(a.currentTime+0.08); n.lfo.stop(a.currentTime+0.08); n.envOsc.stop(a.currentTime+0.08);
+  } catch(e){}
+  liveNodes[id] = null;
+}
+function stopAllTalk(){ stopTalk('a'); stopTalk('b'); }
+
+// ---- a small looping background tune, routed through the same master gain as the
+// voices, so it keeps running the whole time but audibly cuts to silence at exactly
+// the moments the feature mutes something ----
+let bgTimer = null, bgActive = false;
+function startBgMusic(){
+  stopBgMusic();
+  const a = ac(); ensureGain();
+  bgActive = true;
+  const notes = [130.81, 164.81, 196.00, 164.81, 130.81, 196.00, 220.00, 164.81]; // simple looping bounce
+  let i = 0;
+  function step(){
+    if(!bgActive) return;
+    const f = notes[i % notes.length]; i++;
+    const o = a.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
+    const o2 = a.createOscillator(); o2.type = 'sine'; o2.frequency.value = f/2;
+    const g = a.createGain();
+    g.gain.setValueAtTime(0.0001, a.currentTime);
+    g.gain.linearRampToValueAtTime(0.55, a.currentTime+0.05);
+    g.gain.linearRampToValueAtTime(0.0001, a.currentTime+0.44);
+    o.connect(g); o2.connect(g); g.connect(masterGain);
+    o.start(); o2.start(); o.stop(a.currentTime+0.46); o2.stop(a.currentTime+0.46);
+    bgTimer = setTimeout(step, 460);
+  }
+  step();
+}
+function stopBgMusic(){ bgActive = false; if(bgTimer){ clearTimeout(bgTimer); bgTimer = null; } }
+
+const EXPLAIN_TEXT = "This video is restricted because it shows people getting hurt or fighting. It can be upsetting for your age.";
+const GRAN_MUTE_MSG = "🔇 Audio Muted — Language";
+
+const TOTAL=15000, AS=0.30, AE=0.50, BS=0.58, BE=0.80, PUSH_AT=0.63;
+function fmt(frac){const s=Math.floor(frac*252);return`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')} / 4:12`;}
+
+let curTab='none';
+let runToken=0;
+let timers = [];
+function tm(fn, d){ timers.push(setTimeout(fn, d)); }
+function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+
+function gel(id){return document.getElementById(id);}
+
+function resetVisual(){
+  clearTimers();
+  gel('pfill').style.transition = 'none';
+  gel('pfill').style.width='0%';
+  gel('tdisp').textContent='0:00 / 4:12';
+  gel('bubA').classList.remove('show'); gel('bubB').classList.remove('show');
+  gel('caption').classList.remove('show');
+  gel('scene').classList.remove('playing');
+  gel('mutebadge').classList.remove('on'); gel('aitag').classList.remove('on'); gel('aitag').innerHTML='';
+  gel('blockscreen').classList.remove('on');
+  gel('hiddenOverlay').classList.remove('on');
+  gel('volicon').textContent='🔊';
+  const cast=gel('cast');
+  cast.querySelector('.person.a').classList.remove('yelling','pushed');
+  cast.querySelector('.person.b').classList.remove('yelling','pushing');
+  gel('bstitle').textContent = 'Video Restricted';
+  stopAllTalk();
+  stopBgMusic();
+}
+
+function selectTab(tab){
+  curTab = tab;
+  document.querySelectorAll('.tabbtn').forEach(b=>b.classList.toggle('on', b.dataset.tab===tab));
+  runToken++;
+  const myToken = runToken;
+  resetVisual();
+  gel('thumb').classList.remove('gone');
+  tm(()=>{ if(myToken===runToken) runTab(tab, myToken); }, 250);
+}
+function replayCurrent(){ selectTab(curTab); }
+
+function runTab(tab, token){
+  if(tab==='full'){ runFullBlock(token); return; }
+
+  const scene=gel('scene'), cast=gel('cast'), pA=cast.querySelector('.person.a'), pB=cast.querySelector('.person.b');
+  scene.classList.add('playing');
+  gel('thumb').classList.add('gone');
+  startBgMusic();
+
+  // progress bar + time readout driven purely by CSS transition + a lightweight display ticker
+  requestAnimationFrame(()=>{
+    gel('pfill').style.transition = `width ${TOTAL/1000}s linear`;
+    gel('pfill').style.width = '100%';
+  });
+  let elapsed = 0;
+  const dispIv = setInterval(()=>{
+    if(token!==runToken){ clearInterval(dispIv); return; }
+    elapsed += 200;
+    gel('tdisp').textContent = fmt(Math.min(elapsed/TOTAL,1));
+    if(elapsed>=TOTAL) clearInterval(dispIv);
+  }, 200);
+
+  function at(frac, fn){ tm(()=>{ if(token===runToken) fn(); }, frac*TOTAL); }
+
+  // Person A's "bad word" moment. Always animates; the speech bubble only shows when
+  // nothing is being moderated, since it would still be readable text over a muted clip.
+  at(AS, ()=>{
+    pA.classList.add('yelling'); startTalk('a');
+    if(tab==='gran'){
+      muteGain();
+      gel('mutebadge').innerHTML = GRAN_MUTE_MSG; gel('mutebadge').classList.add('on'); gel('volicon').textContent='🔇';
+      gel('aitag').innerHTML = `<svg class="bloom" viewBox="0 0 100 100"><path d="M50 18 C56 30 70 30 74 20 C68 32 76 44 90 42 C76 46 76 60 86 68 C72 60 62 68 64 82 C58 70 44 70 40 82 C46 68 34 60 20 62 C34 56 32 42 20 34 C34 40 42 30 36 18 C44 28 50 28 50 18 Z"/></svg> Muted for language`;
+      gel('aitag').classList.add('on');
+    } else {
+      gel('bubA').classList.add('show');
+    }
+  });
+  at(AE, ()=>{
+    pA.classList.remove('yelling'); gel('bubA').classList.remove('show'); stopTalk('a');
+    if(tab==='gran'){ unmuteGain(); gel('mutebadge').classList.remove('on'); gel('aitag').classList.remove('on'); gel('volicon').textContent='🔊'; }
+  });
+
+  if(tab==='none'){
+    at(BS, ()=>{ pB.classList.add('yelling'); gel('bubB').classList.add('show'); startTalk('b'); });
+    at(PUSH_AT, ()=>{
+      pB.classList.remove('yelling'); gel('bubB').classList.remove('show'); stopTalk('b');
+      pB.classList.add('pushing'); pA.classList.add('pushed');
+      gel('caption').textContent = '[ pushing ]';
+      gel('caption').classList.add('show');
+      tm(()=>{ if(token===runToken) pB.classList.remove('pushing'); }, 1600);
+      tm(()=>{ if(token===runToken) gel('caption').classList.remove('show'); }, 1900);
+    });
+  } else if(tab==='gran'){
+    // The shove + "GET OUT NOW" is rude and violent — hide it completely, audio and video both, no explanation needed
+    at(BS, ()=>{
+      muteGain(); gel('volicon').textContent='🔇';
+      gel('hiddenOverlay').classList.add('on');
+      gel('aitag').innerHTML = `<svg class="bloom" viewBox="0 0 100 100"><path d="M50 18 C56 30 70 30 74 20 C68 32 76 44 90 42 C76 46 76 60 86 68 C72 60 62 68 64 82 C58 70 44 70 40 82 C46 68 34 60 20 62 C34 56 32 42 20 34 C34 40 42 30 36 18 C44 28 50 28 50 18 Z"/></svg> Hidden for fighting`;
+      gel('aitag').classList.add('on');
+    });
+    at(BE, ()=>{
+      gel('hiddenOverlay').classList.remove('on'); unmuteGain(); gel('volicon').textContent='🔊';
+      gel('aitag').classList.remove('on');
+    });
+  }
+
+  tm(()=>{ if(token===runToken){ scene.classList.remove('playing'); stopAllTalk(); stopBgMusic(); } }, TOTAL+80);
+}
+
+function runFullBlock(token){
+  const scene=gel('scene');
+  scene.classList.add('playing');
+  gel('bstitle').textContent='Video Restricted';
+  gel('explain-text').textContent = EXPLAIN_TEXT;
+  const logo = document.querySelector('#ai-explain .bloom');
+  tm(()=>{ if(token!==runToken) return; logo.classList.add('spin');
+    tm(()=>{ if(token!==runToken) return; logo.classList.remove('spin'); }, 2600);
+  }, 900);
+  tm(()=>{ if(token!==runToken) return; gel('thumb').classList.add('gone'); }, 1000);
+  tm(()=>{ if(token!==runToken) return; gel('blockscreen').classList.add('on'); scene.classList.remove('playing'); }, 1350);
+}
+
+window.addEventListener('load', ()=>{
+  
+});
 </script>
 </body>
 </html>
