@@ -20,7 +20,7 @@
   html, body { height: 100%; }
   body {
     font-family: 'DM Sans', sans-serif; background: #000000; color: var(--text);
-    min-height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; width: 100%;
     overflow: auto; padding: env(safe-area-inset-top, 0px) 16px env(safe-area-inset-bottom, 0px);
   }
   .icon { width: 26px; height: 26px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -29,16 +29,24 @@
   .bloom.spin path{animation:bloomspin 4.5s linear infinite}
   @keyframes bloomspin{to{filter:hue-rotate(360deg)}}
 
-  /* ===== Stage: phone + side buttons ===== */
+  /* ===== Stage: phone dead-centered, buttons pinned to the right edge ===== */
   .stage {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(16px, 3vw, 40px);
-    flex-wrap: wrap;
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
   }
 
-  .phone { width: min(94vw, 94vh * var(--pr)); height: min(94vh, 94vw / var(--pr)); background: #14141f; border-radius: 6%/2.8%; border: 3px solid var(--accent); box-shadow: 0 0 0 1px var(--accent)33, 0 30px 80px #00000090, 0 0 60px -20px var(--accent)55; overflow: hidden; display: flex; flex-direction: column; }
+  .phone {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(94vw, 94vh * var(--pr));
+    height: min(94vh, 94vw / var(--pr));
+    background: #14141f; border-radius: 6%/2.8%; border: 3px solid var(--accent);
+    box-shadow: 0 0 0 1px var(--accent)33, 0 30px 80px #00000090, 0 0 60px -20px var(--accent)55;
+    overflow: hidden; display: flex; flex-direction: column;
+  }
   .notch { width: 30%; height: 2.4%; min-height: 20px; background: #05050a; border-radius: 0 0 30% 30%; margin: 0 auto; flex-shrink: 0; }
   .screen { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
   .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 1% 6%; font-size: 1.9vh; font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; }
@@ -97,11 +105,16 @@
   .nav-icon-wrap { width: 7vh; height: 7vh; display: flex; align-items: center; justify-content: center; }
   .nav-icon-wrap .bloom { width: 100%; height: 100%; }
 
-  /* ===== Side buttons ===== */
+  /* ===== Side buttons, pinned to the right edge ===== */
   .btn-col {
+    position: absolute;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-50%);
     display: flex;
     flex-direction: column;
     gap: 16px;
+    z-index: 5;
   }
   .level-btn {
     font-family: 'DM Sans', sans-serif;
@@ -136,8 +149,16 @@
   .level-btn.active .btn-sub { color: #c9d0ff; }
 
   @media (max-width: 640px) {
-    .stage { flex-direction: column-reverse; }
-    .btn-col { flex-direction: row; width: 100%; max-width: 420px; }
+    .stage { min-height: auto; padding-bottom: 140px; }
+    .phone { position: relative; top: auto; left: auto; transform: none; margin: 0 auto; }
+    .btn-col {
+      position: static;
+      transform: none;
+      flex-direction: row;
+      width: 100%;
+      max-width: 420px;
+      margin: 16px auto 0;
+    }
     .level-btn { flex: 1; min-width: 0; text-align: center; padding: 12px 8px; }
     .level-btn .btn-sub { display: none; }
   }
