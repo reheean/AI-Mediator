@@ -79,8 +79,11 @@
   .cat-name { font-size: 2.2vh; font-weight: 700; color: var(--text); }
   .cat-desc { font-size: 1.65vh; color: var(--muted); margin-top: 3px; line-height: 1.4; }
 
-  .blocked-row { display: none; align-items: center; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 1.6vh; color: var(--red); font-weight: 600; }
+  .blocked-row { display: none; align-items: center; justify-content: space-between; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 1.6vh; color: var(--red); font-weight: 600; }
   .cat-card.blocked .blocked-row { display: flex; }
+  .blocked-left { display: flex; align-items: center; gap: 6px; }
+  .note-link { display: flex; align-items: center; gap: 4px; color: var(--danger); font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .note-link:hover { opacity: 0.8; }
   #cc-v.blocked        { border-color: var(--violence); background: linear-gradient(135deg, var(--violence-bg), #1c0a10); }
   #cc-p.blocked        { border-color: var(--language); background: linear-gradient(135deg, var(--language-bg), #1c130a); }
   #cc-danger.blocked   { border-color: var(--danger); background: linear-gradient(135deg, var(--danger-bg), #1c1a0a); }
@@ -101,7 +104,7 @@
   .sub:last-child { border-bottom: none; }
   .sub.show { opacity: 1; transform: translateX(0); }
   .sub.blocked { background: #241018; }
-  .sub.allowed { background: linear-gradient(135deg, #10301f, #0a2016); border: 2px solid var(--green); border-radius: 14px; margin: 3px 8px; }
+  .sub.allowed { background: linear-gradient(135deg, #26253f, #201f30); border: 2px solid var(--border); border-radius: 14px; margin: 3px 8px; }
 
   .sub-row { padding: 1.6% 2.4%; display: flex; align-items: flex-start; gap: 12px; }
   .sub-left { flex: 1; min-width: 0; }
@@ -185,7 +188,7 @@
             <div class="cat-info"><div class="cat-name">Violence</div><div class="cat-desc">Fighting, combat, injuries, and graphic content</div></div>
             <div class="toggle" id="tog-v"></div>
           </div>
-          <div class="blocked-row"><div class="bdot"></div>Restricted</div>
+          <div class="blocked-row"><div class="blocked-left"><div class="bdot"></div>Restricted</div><div class="note-link">&#9998;&nbsp;Add a note</div></div>
         </div>
 
         <div class="cat-card" id="cc-p">
@@ -194,7 +197,7 @@
             <div class="cat-info"><div class="cat-name">Language</div><div class="cat-desc">Swearing, slurs, and aggressive verbal content</div></div>
             <div class="toggle" id="tog-p"></div>
           </div>
-          <div class="blocked-row"><div class="bdot"></div>Restricted</div>
+          <div class="blocked-row"><div class="blocked-left"><div class="bdot"></div>Restricted</div><div class="note-link">&#9998;&nbsp;Add a note</div></div>
         </div>
 
         <div class="cat-card" id="cc-danger">
@@ -203,7 +206,7 @@
             <div class="cat-info"><div class="cat-name">Dangerous Challenges</div><div class="cat-desc">Stunts, physical risks, and viral dare content</div></div>
             <div class="toggle" id="tog-danger"></div>
           </div>
-          <div class="blocked-row"><div class="bdot"></div>Restricted</div>
+          <div class="blocked-row"><div class="blocked-left"><div class="bdot"></div>Restricted</div><div class="note-link">&#9998;&nbsp;Add a note</div></div>
         </div>
 
         <div class="cat-card" id="cc-substance">
@@ -212,7 +215,7 @@
             <div class="cat-info"><div class="cat-name">Substance Use</div><div class="cat-desc">Alcohol, smoking, and drug-related content</div></div>
             <div class="toggle" id="tog-substance"></div>
           </div>
-          <div class="blocked-row"><div class="bdot"></div>Restricted</div>
+          <div class="blocked-row"><div class="blocked-left"><div class="bdot"></div>Restricted</div><div class="note-link">&#9998;&nbsp;Add a note</div></div>
         </div>
 
         <div class="cat-card" id="cc-sexual">
@@ -221,7 +224,7 @@
             <div class="cat-info"><div class="cat-name">Sexual Content</div><div class="cat-desc">Suggestive, mature, or explicit content</div></div>
             <div class="toggle" id="tog-sexual"></div>
           </div>
-          <div class="blocked-row"><div class="bdot"></div>Restricted</div>
+          <div class="blocked-row"><div class="blocked-left"><div class="bdot"></div>Restricted</div><div class="note-link">&#9998;&nbsp;Add a note</div></div>
         </div>
 
       </div>
@@ -231,10 +234,6 @@
         <div class="slide-head">
           <div class="slide-title">Fine-tune your rules</div>
           <div class="slide-sub">Each sub-type has a severity level based on child media standards. Tap &#x2139; to see why.</div>
-        </div>
-
-        <div class="tip-box" id="tip">
-          <span>Customizing:</span> Here you can allow specific sub-types back. Severity levels are grounded in ESRB, TV Parental Guidelines, and BBFC official standards &#8212; tap &#x2139; on any row to see the exact descriptor.
         </div>
 
         <!-- VIOLENCE -->
@@ -409,6 +408,7 @@
   function show(id)  { const e = document.getElementById(id); if (e) e.classList.add('show'); }
   function togOn(id) { const e = document.getElementById(id); if (e) { e.classList.remove('allowed'); e.classList.add('on'); } }
   function togAllow(id) { const e = document.getElementById(id); if (e) { e.classList.remove('on'); e.classList.add('allowed'); } }
+  function togOff(id) { const e = document.getElementById(id); if (e) { e.classList.remove('on', 'allowed'); } }
   function cardBlock(id) { const e = document.getElementById(id); if (e) e.classList.add('blocked'); }
   function subBlock(id)  { const e = document.getElementById(id); if (e) e.classList.add('blocked'); }
   function subAllow(id)  { const e = document.getElementById(id); if (e) { e.classList.remove('blocked'); e.classList.add('allowed'); } }
@@ -443,12 +443,12 @@
     const T = 3200;
     const base = 400;
     tm(() => {
-      show('tip'); show('eb-v');
+      show('eb-v');
       ['sv1','sv2','sv3','sv4','sv5'].forEach(show);
-      subBlock('sv3'); subBlock('sv4'); subBlock('sv5');
+      subBlock('sv1'); subBlock('sv2'); subBlock('sv3'); subBlock('sv4'); subBlock('sv5');
     }, base);
-    tm(() => { togAllow('st-v1'); subAllow('sv1'); show('co-v1'); setCount('v-cnt', 4, 5); }, base + T * 0.8);
-    tm(() => { togAllow('st-v2'); subAllow('sv2'); show('co-v2'); setCount('v-cnt', 3, 5); }, base + T * 1.6);
+    tm(() => { togOff('st-v1'); subAllow('sv1'); show('co-v1'); setCount('v-cnt', 4, 5); }, base + T * 0.8);
+    tm(() => { togOff('st-v2'); subAllow('sv2'); show('co-v2'); setCount('v-cnt', 3, 5); }, base + T * 1.6);
     tm(() => show('save-btn'), base + T * 2.4);
     tm(() => pulse('save-btn'), base + T * 3.1);
   }
@@ -471,7 +471,7 @@
     CARD_IDS.forEach(id => { const e = document.getElementById(id); if (e) e.classList.remove('show','blocked'); });
     ['tog-v','tog-p','tog-danger','tog-substance','tog-sexual'].forEach(id => { const e = document.getElementById(id); if (e) e.classList.remove('on','allowed'); });
     const nb = document.getElementById('next-btn'); if (nb) nb.classList.remove('show','pulse');
-    ['tip','eb-v','save-btn'].forEach(id => { const e = document.getElementById(id); if (e) e.classList.remove('show','pulse'); });
+    ['eb-v','save-btn'].forEach(id => { const e = document.getElementById(id); if (e) e.classList.remove('show','pulse'); });
     ['sv1','sv2','sv3','sv4','sv5'].forEach(id => { const e = document.getElementById(id); if (e) e.classList.remove('show','blocked','allowed'); });
     ['st-v1','st-v2','st-v3','st-v4','st-v5'].forEach(id => { const e = document.getElementById(id); if (e) { e.classList.remove('allowed'); e.classList.add('on'); } });
     ['co-v1','co-v2'].forEach(id => { const e = document.getElementById(id); if (e) e.classList.remove('show'); });
