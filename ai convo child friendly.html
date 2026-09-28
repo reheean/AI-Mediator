@@ -34,10 +34,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .phone-slot.lbl-child  .slot-lbl { color: var(--child); }
 .phone-slot.lbl-parent .slot-lbl { color: var(--teal); }
 .outer-phone { width: min(42vw, 82vh * var(--pr)); height: min(82vh, 42vw / var(--pr)); background: #14141f; border-radius: 6%/3%;
-  border: 3px solid var(--accent); box-shadow: 0 0 0 1px var(--accent)33, 0 20px 56px #00000088;
+  border: 3px solid var(--accent); box-shadow: 0 0 0 1px #7c93ff33, 0 20px 56px #00000088;
   overflow: hidden; display: flex; flex-direction: column;
   transition: border-color 0.4s, box-shadow 0.4s; }
-.phone-slot.single .outer-phone { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent)44, 0 26px 68px #00000099; width: min(60vw, 83vh * var(--pr)); height: min(83vh, 60vw / var(--pr)); }
+.phone-slot.single .outer-phone { border-color: var(--accent); box-shadow: 0 0 0 1px #7c93ff44, 0 26px 68px #00000099; width: min(60vw, 83vh * var(--pr)); height: min(83vh, 60vw / var(--pr)); }
 .op-notch { width: 24%; height: 2.6%; min-height: 18px; background: #000; border-radius: 0 0 30% 30%; margin: 0 auto; flex-shrink: 0; }
 .op-sbar { display: flex; justify-content: space-between; padding: 1.2% 5% 0.4%; font-size: 1.7vh; font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; }
 .op-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
@@ -52,11 +52,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .nav-row { display: flex; justify-content: center; gap: 10px; }
 .nav-btn { background: var(--card); border: 2px solid var(--border); color: var(--muted); border-radius: 24px; padding: 8px 18px; font-size: 1.7vh; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 6px; }
 .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
-.nav-btn.primary { background: var(--accent)22; border-color: var(--accent); color: var(--accent); }
+.nav-btn.primary { background: #7c93ff22; border-color: var(--accent); color: var(--accent); }
 .dots { display: flex; gap: 6px; }
 .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); transition: background 0.4s; cursor: pointer; }
 .dot.on { background: var(--accent); }
-.dot.done { background: var(--green)AA; }
+.dot.done { background: #2ee6a8AA; }
 
 .tab-body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 3% 4% 4%; display: flex; flex-direction: column; gap: 1.6vh; }
 .tab-body::-webkit-scrollbar { display: none; }
@@ -75,7 +75,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .btog.on::after { transform: translateX(22px); }
 .sog-section { display: flex; flex-direction: column; gap: 6px; }
 .sog-section-label { font-size: 1.5vh; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 0 2px; margin-top: 4px; }
-.sog-indent { padding-left: 10px; border-left: 3px solid var(--green)44; margin-left: 4px; display: flex; flex-direction: column; gap: 8px; }
+.sog-indent { padding-left: 10px; border-left: 3px solid #2ee6a844; margin-left: 4px; display: flex; flex-direction: column; gap: 8px; }
 .sog-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
 .sog { background: var(--card2); border: 2px solid var(--border); border-radius: 13px; padding: 2% 2.4%; display: flex; flex-direction: row; align-items: flex-start; gap: 10px; opacity: 0; transform: translateY(5px); transition: opacity 0.45s,transform 0.45s,border-color 0.4s,background 0.4s; }
 .sog.show { opacity: 1; transform: translateY(0); }
@@ -104,15 +104,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .brow.parent .bsender { color: var(--teal); }
 .bsender.bloom-sender .bloom { width: 3.4vh; height: 3.4vh; }
 .bubble { border-radius: 14px; padding: 1.4% 2%; font-size: 1.95vh; line-height: 1.5; max-width: 88%; }
-.brow.ai     .bubble { background: #10203b; border: 1px solid var(--ai-col)33; color: var(--text); border-bottom-left-radius: 4px; }
-.brow.child  .bubble { background: #200f38; border: 1px solid var(--child)33; color: var(--text); border-bottom-right-radius: 4px; }
-.brow.parent .bubble { background: #0a2321; border: 1px solid var(--teal)33; color: var(--text); border-bottom-right-radius: 4px; }
-.brow.sys    .bubble { background: var(--accent)14; border: 1px solid var(--accent)33; color: var(--accent); font-size: 1.65vh; font-weight: 600; border-radius: 8px; text-align: center; max-width: 94%; padding: 1% 2%; }
+.brow.ai     .bubble { background: #10203b; border: 1px solid #4d9dff33; color: var(--text); border-bottom-left-radius: 4px; }
+.brow.child  .bubble { background: #200f38; border: 1px solid #c583ff33; color: var(--text); border-bottom-right-radius: 4px; }
+.brow.parent .bubble { background: #0a2321; border: 1px solid #23d3bd33; color: var(--text); border-bottom-right-radius: 4px; }
+.brow.sys    .bubble { background: #7c93ff14; border: 1px solid #7c93ff33; color: var(--accent); font-size: 1.65vh; font-weight: 600; border-radius: 8px; text-align: center; max-width: 94%; padding: 1% 2%; }
 
 .typing-row { align-items: flex-start; opacity: 0; transition: opacity 0.3s; flex-shrink: 0; display: flex; flex-direction: column; }
 .typing-row.show { opacity: 1; }
-.typing-dots { display: flex; align-items: center; gap: 4px; padding: 1.4% 2%; background: #10203b; border: 1px solid var(--ai-col)33; border-radius: 14px; border-bottom-left-radius: 4px; }
-.typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--ai-col)AA; animation: td 1.2s infinite; }
+.typing-dots { display: flex; align-items: center; gap: 4px; padding: 1.4% 2%; background: #10203b; border: 1px solid #4d9dff33; border-radius: 14px; border-bottom-left-radius: 4px; }
+.typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: #4d9dffAA; animation: td 1.2s infinite; }
 .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
 .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 @keyframes td { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-3px)} }
@@ -123,41 +123,41 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .vc-title { font-size: 1.85vh; font-weight: 600; color: var(--text); }
 .vc-meta  { font-size: 1.5vh; color: var(--muted); margin-top: 2px; }
 .vc-badge { font-size: 1.3vh; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; width: fit-content; margin-top: 3px; display: flex; align-items: center; gap: 4px; }
-.badge-playing  { background: var(--green)18; color: var(--green); border: 1px solid var(--green)55; }
-.badge-blocked  { background: var(--red)18;   color: var(--red);   border: 1px solid var(--red)55; }
-.badge-unlocked { background: var(--green)18; color: var(--green); border: 1px solid var(--green)55; }
+.badge-playing  { background: #2ee6a818; color: var(--green); border: 1px solid #2ee6a855; }
+.badge-blocked  { background: #ff2d5518; color: var(--red);   border: 1px solid #ff2d5555; }
+.badge-unlocked { background: #2ee6a818; color: var(--green); border: 1px solid #2ee6a855; }
 
-.restricted-card { background: var(--red)0d; border: 2px solid var(--red)44; border-radius: 13px; padding: 2%; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.restricted-card { background: #ff2d550d; border: 2px solid #ff2d5544; border-radius: 13px; padding: 2%; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
 .restricted-card.show { opacity: 1; transform: translateY(0); }
 .bc-icon  { width: 3.4vh; height: 3.4vh; color: var(--red); }
 .bc-title { font-size: 1.95vh; font-weight: 700; color: var(--red); }
 .bc-sub   { font-size: 1.7vh; color: var(--muted); line-height: 1.4; }
 
-.chat-fab-mini { display: flex; align-items: center; gap: 7px; background: var(--accent)18; border: 1px solid var(--accent)55; border-radius: 22px; padding: 1% 2.6%; font-size: 1.6vh; color: var(--accent); font-weight: 600; flex-shrink: 0; opacity: 0; transform: translateY(3px); transition: opacity 0.4s,transform 0.4s; width: fit-content; }
+.chat-fab-mini { display: flex; align-items: center; gap: 7px; background: #7c93ff18; border: 1px solid #7c93ff55; border-radius: 22px; padding: 1% 2.6%; font-size: 1.6vh; color: var(--accent); font-weight: 600; flex-shrink: 0; opacity: 0; transform: translateY(3px); transition: opacity 0.4s,transform 0.4s; width: fit-content; }
 .chat-fab-mini.show { opacity: 1; transform: translateY(0); }
 .cfm-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 
 .notice { background: var(--card2); border: 2px solid var(--border); border-radius: 12px; padding: 1.4% 2%; font-size: 1.7vh; color: var(--muted); line-height: 1.5; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
 .notice.show { opacity: 1; transform: translateY(0); }
-.notice.off { border-color: var(--red)44; background: var(--red)0a; }
+.notice.off { border-color: #ff2d5544; background: #ff2d550a; }
 .notice span { font-weight: 700; color: var(--text); }
 
 .p-ping { display: flex; align-items: center; gap: 12px; background: var(--card2); border: 2px solid var(--border); border-radius: 15px; padding: 1.8% 2%; flex-shrink: 0; opacity: 0; transform: translateY(5px); transition: opacity 0.45s,transform 0.45s,border-color 0.4s,background 0.4s; }
 .p-ping.show { opacity: 1; transform: translateY(0); }
-.p-ping-avatar { width: 5.2vh; height: 5.2vh; border-radius: 50%; background: var(--teal)18; border: 2px solid var(--teal)66; display: flex; align-items: center; justify-content: center; color: var(--teal); flex-shrink: 0; font-size: 2.4vh; }
+.p-ping-avatar { width: 5.2vh; height: 5.2vh; border-radius: 50%; background: #23d3bd18; border: 2px solid #23d3bd66; display: flex; align-items: center; justify-content: center; color: var(--teal); flex-shrink: 0; font-size: 2.4vh; }
 .p-ping-body { flex: 1; min-width: 0; }
 .p-ping-name { font-size: 1.8vh; font-weight: 700; color: var(--text); }
 .p-ping-status { font-size: 1.6vh; color: var(--muted); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
 .pp-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: bpulse 1.4s infinite; }
 @keyframes bpulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 .p-ping.approved { border-color: var(--green); background: linear-gradient(135deg,#0d2318,#0a1912); }
-.p-ping.approved .p-ping-avatar { background: var(--green)18; border-color: var(--green); color: var(--green); }
+.p-ping.approved .p-ping-avatar { background: #2ee6a818; border-color: var(--green); color: var(--green); }
 .p-ping.approved .p-ping-status { color: var(--green); font-weight: 700; }
 .p-ping.discuss { border-color: var(--teal); background: linear-gradient(135deg,#0a2321,#081c1a); }
-.p-ping.discuss .p-ping-avatar { background: var(--teal)18; border-color: var(--teal); color: var(--teal); }
+.p-ping.discuss .p-ping-avatar { background: #23d3bd18; border-color: var(--teal); color: var(--teal); }
 .p-ping.discuss .p-ping-status { color: var(--teal); font-weight: 700; }
 
-.toast-card { background: var(--card2); border: 2px solid var(--teal)44; border-radius: 13px; padding: 1.6% 2%; display: flex; align-items: flex-start; gap: 9px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.toast-card { background: var(--card2); border: 2px solid #23d3bd44; border-radius: 13px; padding: 1.6% 2%; display: flex; align-items: flex-start; gap: 9px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
 .toast-card.show { opacity: 1; transform: translateY(0); }
 .tc-icon  { width: 2.4vh; height: 2.4vh; color: var(--teal); flex-shrink: 0; margin-top: 1px; }
 .tc-title { font-size: 1.6vh; font-weight: 700; color: var(--teal); }
@@ -166,8 +166,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .fast-forward { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 2% 2px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
 .fast-forward.show { opacity: 1; transform: translateY(0); }
 .ff-rule { display: flex; align-items: center; gap: 10px; width: 100%; }
-.ff-line { flex: 1; height: 1px; background: var(--green)44; }
-.ff-badge { display: flex; align-items: center; gap: 6px; background: var(--green)18; border: 1px solid var(--green)77; border-radius: 22px; padding: 5px 13px; font-size: 1.35vh; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green); white-space: nowrap; flex-shrink: 0; }
+.ff-line { flex: 1; height: 1px; background: #2ee6a844; }
+.ff-badge { display: flex; align-items: center; gap: 6px; background: #2ee6a818; border: 1px solid #2ee6a877; border-radius: 22px; padding: 5px 13px; font-size: 1.35vh; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green); white-space: nowrap; flex-shrink: 0; }
 .ff-badge .icon { width: 12px; height: 12px; }
 .ff-text { font-size: 1.65vh; color: #c0c0e8; text-align: center; line-height: 1.5; max-width: 94%; font-style: italic; padding: 0 4px; }
 
@@ -177,6 +177,96 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .ftab { width: 19vh; padding: 1.3vh 1.4vh; border-radius: 13px; font-size: 1.5vh; font-weight: 700; color: var(--muted); background: #14141fcc; backdrop-filter: blur(6px); border: 2px solid var(--border); cursor: pointer; transition: all 0.25s; text-align: center; box-sizing: border-box; }
 .ftab:hover { border-color: var(--accent); color: var(--accent); }
 .ftab.on { color: var(--accent); border-color: var(--accent); background: linear-gradient(135deg,#1c2440,#131a30); }
+
+/* ── Landscape phone (shared) ── */
+:root { --pr-land: 2.1666; --yt-red: #ff0000; }
+.phone-l { container-type: size; --u: 1.2195cqh; position: relative; width: min(72vw, 82vh * var(--pr-land)); height: min(82vh, 72vw / var(--pr-land)); background: #0c0c12; border-radius: 4.4vh; border: 3px solid #2a2a3a; box-shadow: 0 26px 70px #00000099; overflow: hidden; }
+.cam-dot { position: absolute; top: 50%; right: calc(1.4 * var(--u)); transform: translateY(-50%); width: calc(1.3 * var(--u)); height: calc(1.3 * var(--u)); border-radius: 50%; background: #060608; border: 1px solid #333; z-index: 6; }
+.stagewrap { position: absolute; inset: 0; background: #000; }
+.scene { position: absolute; inset: 0; overflow: hidden; }
+.sbg { position: absolute; inset: 0; background: linear-gradient(120deg,#8f6fd6,#4f9fd8 33%,#3fc79e 66%,#e88f4a); }
+.cast { position: absolute; inset: 0; }
+.person { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); }
+.person.a { left: 38%; } .person.b { left: 62%; }
+.pbody { width: calc(11 * var(--u)); height: calc(19 * var(--u)); background: linear-gradient(180deg,#2d6a9f,#1a3a5c); border-radius: calc(1.6 * var(--u)) calc(1.6 * var(--u)) 0 0; position: relative; animation: bob 1.4s ease-in-out infinite; box-shadow: 0 calc(1 * var(--u)) calc(2 * var(--u)) calc(-0.6 * var(--u)) #00000066; }
+.person.b .pbody { background: linear-gradient(180deg,#e07a3a,#a5501c); animation-delay: .15s; }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(calc(-0.4 * var(--u)))} }
+.phead { width: calc(8.4 * var(--u)); height: calc(8.4 * var(--u)); background: #e8c99a; border-radius: 50%; position: absolute; top: calc(-8 * var(--u)); left: 50%; transform: translateX(-50%); animation: hbob 1.4s ease-in-out infinite; }
+.person.b .phead { background: #e0b184; animation-delay: .15s; }
+@keyframes hbob { 0%,100%{transform:translateX(-50%) rotate(-2deg)} 50%{transform:translateX(-50%) rotate(2deg)} }
+.eyes { position: absolute; top: 36%; left: 50%; transform: translateX(-50%); display: flex; gap: calc(1.3 * var(--u)); }
+.eye { width: calc(1.1 * var(--u)); height: calc(1.1 * var(--u)); background: #2a2a2a; border-radius: 50%; }
+.lbrow { position: absolute; top: 24%; width: calc(1.7 * var(--u)); height: calc(.55 * var(--u)); background: #6b4a30; border-radius: 1px; }
+.lbrow.l { left: 22%; transform: rotate(6deg); } .lbrow.r { right: 22%; transform: rotate(-6deg); }
+.mouth { position: absolute; bottom: 20%; left: 50%; transform: translateX(-50%); width: calc(2.2 * var(--u)); height: calc(1 * var(--u)); background: #8a4a3a; border-radius: 3px; }
+.thumb2 { position: absolute; inset: 0; background: linear-gradient(160deg,#0d1b2a,#1b2838); display: flex; align-items: center; justify-content: center; z-index: 20; transition: opacity .3s; }
+.thumb2.gone { opacity: 0; pointer-events: none; }
+.playbtn2 { width: calc(9 * var(--u)); height: calc(9 * var(--u)); background: rgba(0,0,0,.75); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: calc(4 * var(--u)); color: #fff; }
+.land-title { position: absolute; top: calc(2.6 * var(--u)); left: calc(4 * var(--u)); z-index: 10; font-size: calc(3.2 * var(--u)); font-weight: 700; color: #fff; text-shadow: 0 1px 6px #000; }
+.land-prompt { position: absolute; right: calc(4 * var(--u)); bottom: calc(9 * var(--u)); z-index: 15; display: flex; align-items: center; gap: 7px; background: rgba(20,20,40,.85); border: 1px solid #7c93ff55; border-radius: 22px; padding: calc(1 * var(--u)) calc(2 * var(--u)); font-size: calc(1.9 * var(--u)); color: var(--accent); font-weight: 600; opacity: 0; transform: translateY(6px); transition: opacity .5s, transform .5s, box-shadow .3s; }
+.land-prompt.on { opacity: 1; transform: none; }
+.land-prompt.tapped { box-shadow: 0 0 0 5px #7c93ff33, 0 0 0 11px #7c93ff12; }
+.ytctrl2 { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent,rgba(0,0,0,.9)); padding: 1% 2% .8%; z-index: 10; }
+.ptrack2 { width: 100%; height: calc(.8 * var(--u)); background: rgba(255,255,255,.22); border-radius: 2px; margin-bottom: .8%; }
+.pfill2 { height: 100%; background: var(--yt-red); border-radius: 2px; width: 0%; transition: width 6s linear; }
+.crow2 { display: flex; justify-content: space-between; color: #fff; font-size: calc(2.5 * var(--u)); font-family: 'DM Mono', monospace; }
+
+/* ── Restricted-video landscape screen (no people, no rainbow bg) ── */
+.rl-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, #10121f 0%, #07070e 70%); }
+.rl-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(2 * var(--u)); z-index: 5; padding-bottom: calc(3 * var(--u)); }
+.rl-lock { width: calc(7.5 * var(--u)); height: calc(7.5 * var(--u)); color: var(--red); }
+.rl-title { font-size: calc(5 * var(--u)); font-weight: 800; color: #fff; letter-spacing: -0.01em; line-height: 1; }
+.rl-badge { font-size: calc(2.8 * var(--u)); font-weight: 700; color: #ff3b62; background: #3a1524; border-radius: calc(1.2 * var(--u)); padding: calc(1.4 * var(--u)) calc(3.4 * var(--u)); }
+.rl-card { width: 64%; background: #131a2d; border-radius: calc(2 * var(--u)); padding: calc(3 * var(--u)) calc(3.6 * var(--u)) calc(3 * var(--u)) calc(3 * var(--u)); display: flex; align-items: center; gap: calc(3.2 * var(--u)); }
+.rl-card .bloom { width: calc(7.5 * var(--u)); height: calc(7.5 * var(--u)); }
+.rl-card-txt { font-size: calc(3.5 * var(--u)); line-height: 1.42; color: #e4e4f4; }
+.rl-tapwrap { position: relative; margin-top: calc(0.4 * var(--u)); }
+.rl-tap { position: relative; display: flex; align-items: center; gap: calc(1.4 * var(--u)); background: #161c33; border-radius: 40px; padding: calc(2 * var(--u)) calc(4.4 * var(--u)); font-size: calc(3 * var(--u)); font-weight: 700; color: #8fa2ff; transition: transform .18s ease, background .18s ease, box-shadow .25s ease; }
+.rl-tap .cfm-dot { width: calc(1.1 * var(--u)); height: calc(1.1 * var(--u)); }
+.rl-tap.pressed { transform: scale(.93); background: #232c52; box-shadow: 0 0 0 calc(0.6 * var(--u)) #7c93ff33; }
+.rl-ripple { position: absolute; left: 50%; top: 50%; width: calc(5 * var(--u)); height: calc(5 * var(--u)); margin: calc(-2.5 * var(--u)) 0 0 calc(-2.5 * var(--u)); border-radius: 50%; background: #7c93ff55; border: 2px solid #9fb0ff; pointer-events: none; opacity: 0; transform: scale(.3); }
+.rl-ripple.go { animation: ripple .7s ease-out forwards; }
+@keyframes ripple { 0% { opacity: .95; transform: scale(.3); } 100% { opacity: 0; transform: scale(3.4); } }
+.rl-finger { z-index: 30; position: absolute; left: 62%; top: 55%; width: calc(3.4 * var(--u)); height: calc(3.4 * var(--u)); margin: calc(-1.7 * var(--u)) 0 0 calc(-1.7 * var(--u)); border-radius: 50%; background: #ffffffcc; box-shadow: 0 0 0 calc(0.5 * var(--u)) #ffffff33; opacity: 0; transform: translate(calc(9 * var(--u)), calc(11 * var(--u))); transition: transform 1.3s cubic-bezier(.3,.7,.2,1), opacity .5s; pointer-events: none; z-index: 3; }
+.rl-finger.in { opacity: 1; transform: translate(0,0); }
+.rl-finger.down { transform: scale(.75); }
+.rl-finger.out { opacity: 0; transition: opacity .35s; }
+.rl-ctrl { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.4% 2.4%; z-index: 4; opacity: .3; display: flex; justify-content: space-between; color: #fff; font-size: calc(2.4 * var(--u)); font-family: 'DM Mono', monospace; }
+
+/* ── Obstacle-course video scene (different look from the rainbow/people scene) ── */
+.ob-scene { position: absolute; inset: 0; background: linear-gradient(#4fb0f0, #bfe6ff 60%, #e8f6ff); overflow: hidden; }
+.ob-sun { position: absolute; top: 9%; right: 14%; width: calc(9 * var(--u)); height: calc(9 * var(--u)); border-radius: 50%; background: #ffe27a; box-shadow: 0 0 calc(4 * var(--u)) #ffe27a99; }
+.ob-cloud { position: absolute; background: #fff; border-radius: calc(5 * var(--u)); height: calc(3.4 * var(--u)); opacity: .92; animation: drift 9s ease-in-out infinite alternate; }
+.ob-cloud.c1 { top: 14%; left: 12%; width: calc(13 * var(--u)); }
+.ob-cloud.c2 { top: 27%; left: 52%; width: calc(9 * var(--u)); animation-delay: -4s; }
+@keyframes drift { to { transform: translateX(calc(7 * var(--u))); } }
+.ob-hills { position: absolute; left: -5%; right: -5%; bottom: 30%; height: 18%; background: #7fcf8a; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+.ob-grass { position: absolute; left: 0; right: 0; bottom: 0; height: 34%; background: linear-gradient(#57bf62, #3a9a4b); }
+.ob-tires { position: absolute; left: 22%; bottom: 14%; display: flex; flex-direction: column-reverse; align-items: center; }
+.ob-tires i { display: block; width: calc(6 * var(--u)); height: calc(2.2 * var(--u)); border-radius: calc(1.2 * var(--u)); background: #222; border: calc(.5 * var(--u)) solid #4a4a4a; margin-top: calc(-.3 * var(--u)); }
+.ob-hurdle { position: absolute; left: 45%; bottom: 14%; width: calc(9 * var(--u)); height: calc(6 * var(--u)); transform: translateX(-50%); }
+.ob-hurdle b { position: absolute; }
+.ob-hurdle .p1 { left: 0; bottom: 0; width: calc(.9 * var(--u)); height: 100%; background: #fff; }
+.ob-hurdle .p2 { right: 0; bottom: 0; width: calc(.9 * var(--u)); height: 100%; background: #fff; }
+.ob-hurdle .bar { left: 0; right: 0; top: 20%; height: calc(1.3 * var(--u)); background: repeating-linear-gradient(90deg, #ff5a3c 0 calc(1.4 * var(--u)), #fff calc(1.4 * var(--u)) calc(2.8 * var(--u))); }
+.ob-ramp { position: absolute; left: 66%; bottom: 14%; width: calc(14 * var(--u)); height: calc(6 * var(--u)); background: linear-gradient(#e0a458, #b9752f); clip-path: polygon(0 100%, 100% 100%, 100% 0); }
+.ob-runner { position: absolute; bottom: 14%; left: 8%; width: calc(5 * var(--u)); }
+.ob-scene.go .ob-runner { animation: obrun 9s linear forwards; }
+@keyframes obrun { from { left: 8%; } to { left: 88%; } }
+.ob-scene.go .ob-hop { animation: obhop 9s ease-in-out forwards; }
+@keyframes obhop { 0%,36% { transform: translateY(0); } 42% { transform: translateY(calc(-7 * var(--u))); } 50% { transform: translateY(0); } 66%,70% { transform: translateY(0); } 76% { transform: translateY(calc(-4.5 * var(--u))); } 84%,100% { transform: translateY(0); } }
+.ob-kid { width: calc(4.4 * var(--u)); height: calc(7.4 * var(--u)); margin: 0 auto; background: linear-gradient(#ff5a5f, #c93a45); border-radius: calc(1.2 * var(--u)) calc(1.2 * var(--u)) calc(.6 * var(--u)) calc(.6 * var(--u)); position: relative; animation: bob .5s ease-in-out infinite; }
+.ob-head { position: absolute; top: calc(-4.2 * var(--u)); left: 50%; width: calc(4 * var(--u)); height: calc(4 * var(--u)); margin-left: calc(-2 * var(--u)); border-radius: 50%; background: #f2c9a0; border-top: calc(.9 * var(--u)) solid #4a2b16; }
+
+/* ── End-of-video screen ── */
+.vend { position: absolute; inset: 0; z-index: 12; background: radial-gradient(ellipse at 50% 45%, #10142cee, #060710f2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(2 * var(--u)); opacity: 0; transition: opacity .9s; pointer-events: none; padding-bottom: calc(3 * var(--u)); }
+.vend.on { opacity: 1; }
+.vend .bloom { width: calc(12 * var(--u)); height: calc(12 * var(--u)); }
+.vend-title { font-size: calc(5.6 * var(--u)); font-weight: 800; color: #fff; letter-spacing: -0.01em; }
+.vend-sub { font-size: calc(3.3 * var(--u)); color: #cfcfe6; text-align: center; max-width: calc(80 * var(--u)); line-height: 1.4; }
+.rl-lock .icon { width: 100%; height: 100%; }
+.rl-dim { position: absolute; inset: 0; background: rgba(6,6,12,.9); }
+.rl-tap .icon { width: calc(3.4 * var(--u)); height: calc(3.4 * var(--u)); }
 </style>
 </head>
 <body>
@@ -234,6 +324,66 @@ const TAB_LABELS = ['Settings', 'AI Chat', 'Access Requests', 'Explain Restricti
 let cur = 0;
 let slidePhase = 0;
 let phaseCallbacks = [];
+
+const person = c => `<div class="person ${c}"><div class="pbody"><div class="phead"><div class="eyes"><span class="eye"></span><span class="eye"></span></div><div class="lbrow l"></div><div class="lbrow r"></div><div class="mouth"></div></div></div></div>`;
+function sceneHTML() { return `<div class="scene"><div class="sbg"></div><div class="cast">${person('a')}${person('b')}</div></div>`; }
+
+/* Landscape: obstacle-course video (AI Chat slide). Plays from the middle to the end, then an end screen. */
+function mkObstacleLandscape() {
+  const slot = document.createElement('div');
+  slot.className = 'phone-slot';
+  slot.innerHTML = `<div class="phone-l"><div class="cam-dot"></div><div class="stagewrap">
+    <div class="ob-scene">
+      <div class="ob-sun"></div><div class="ob-cloud c1"></div><div class="ob-cloud c2"></div>
+      <div class="ob-hills"></div><div class="ob-grass"></div>
+      <div class="ob-tires"><i></i><i></i><i></i></div>
+      <div class="ob-hurdle"><b class="p1"></b><b class="p2"></b><b class="bar"></b></div>
+      <div class="ob-ramp"></div>
+      <div class="ob-runner"><div class="ob-hop"><div class="ob-kid"><div class="ob-head"></div></div></div></div>
+    </div>
+    <div class="land-title">Backyard Obstacle Course Challenge</div>
+    <div class="ytctrl2"><div class="ptrack2"><div class="pfill2" style="width:50%;transition:none"></div></div><div class="crow2"><span>▶</span><span class="ptime">6:00 / 12:00</span></div></div>
+    <div class="vend">${BLOOM_SVG.replace('class="bloom"','class="bloom spin"')}<div class="vend-title">Did you enjoy this video?</div><div class="vend-sub">Want to talk about it? Ask me anything about what you just watched.</div><div class="rl-tapwrap"><div class="rl-tap">${ICON.chat}Have a conversation</div><div class="rl-ripple"></div></div></div>
+    <div class="rl-finger"></div>
+  </div></div>`;
+  return slot;
+}
+
+/* Landscape: a restricted video (original scene dimmed, with the explanation) */
+function mkRestrictedLandscape(text) {
+  const slot = document.createElement('div');
+  slot.className = 'phone-slot';
+  slot.innerHTML = `<div class="phone-l"><div class="cam-dot"></div><div class="stagewrap">
+    ${sceneHTML()}
+    <div class="rl-dim"></div>
+    <div class="rl-center">
+      <div class="rl-lock">${ICON.lock}</div>
+      <div class="rl-title">Video Unavailable</div>
+      <div class="rl-badge">Restricted</div>
+      <div class="rl-card">${BLOOM_SVG}<div class="rl-card-txt">${text}</div></div>
+      <div class="rl-tapwrap"><div class="rl-tap"><div class="cfm-dot"></div>Have questions? Tap to chat</div><div class="rl-ripple"></div></div>
+    </div>
+    <div class="rl-finger"></div>
+    <div class="rl-ctrl"><span>▶</span><span>0:00 / 4:12</span></div>
+  </div></div>`;
+  return slot;
+}
+
+/* Animated tap: a finger dot moves onto the button, presses it, ripple, release. Returns the time when done. */
+function tapSequence(land, btn, t0) {
+  const ripple = land.querySelector('.rl-ripple');
+  const finger = land.querySelector('.rl-finger');
+  tm(() => {
+    const wr = land.querySelector('.stagewrap').getBoundingClientRect();
+    const br = btn.getBoundingClientRect();
+    finger.style.left = (br.left - wr.left + br.width * 0.6) + 'px';
+    finger.style.top  = (br.top  - wr.top  + br.height * 0.5) + 'px';
+    finger.classList.add('in');
+  }, t0);
+  tm(() => { finger.classList.add('down'); btn.classList.add('pressed'); ripple.classList.add('go'); }, t0 + 1600);
+  tm(() => { finger.classList.remove('down'); finger.classList.add('out'); btn.classList.remove('pressed'); }, t0 + 2300);
+  return t0 + 3400;
+}
 
 function registerPhases(cbs) {
   phaseCallbacks = cbs;
@@ -399,72 +549,128 @@ function buildSettings(stageEl) {
   stageEl.onclick = () => advancePhase();
 }
 
-/* ══════════ SLIDE 1: CHAT — single phone, feature on only ══════════ */
+/* ══════════ SLIDE 1: CHAT — video plays to the end → "Did you enjoy this video?" → tap → chat ══════════ */
 function buildChat(stageEl) {
-  const { slot, body } = mkSlot('', 'single', 'slot-chat-on');
-  const pb = document.createElement('div'); pb.className = 'phone-body'; body.appendChild(pb);
-  stageEl.appendChild(slot);
-  setTimeout(() => slot.classList.add('visible'), 60);
+  const land = mkObstacleLandscape();
+  stageEl.appendChild(land);
+  setTimeout(() => land.classList.add('visible'), 60);
+
+  function startChat() {
+    const { slot, body } = mkSlot('', 'single', 'slot-chat-on');
+    const pb = document.createElement('div'); pb.className = 'phone-body'; body.appendChild(pb);
+    stageEl.appendChild(slot);
+    setTimeout(() => slot.classList.add('visible'), 60);
+
+    let t = 300;
+    ap(pb, vcCard('Backyard Obstacle Course Challenge','ChannelName · 12 min','badge-playing','Just finished'), t);
+    ap(pb, chatFab(), t+700);
+    ap(pb, bub('child', 'That jump was so cool! How are they landing it without getting hurt?'), t+1600);
+    typ(pb, t+2400, 1500);
+    ap(pb, bub('ai', 'They plan it carefully with padding and safety gear you just can\'t see on camera.'), t+3900);
+    ap(pb, bub('child', 'Could I try something like that?'), t+5900);
+    typ(pb, t+6700, 1500);
+    ap(pb, bub('ai', 'Better not — that\'s something for trained people with the right setup. Just enjoy watching!'), t+8200);
+  }
 
   registerPhases([
     () => {
-      let t = 300;
-      ap(pb, vcCard('Backyard Obstacle Course Challenge','ChannelName · 12 min','badge-playing','Playing now'), t);
-      ap(pb, chatFab(), t+700);
-      ap(pb, bub('child', 'How are they landing that jump without getting hurt?'), t+1600);
-      typ(pb, t+2400, 1500);
-      ap(pb, bub('ai', 'They plan it carefully with padding and safety gear you just can\'t see on camera.'), t+3900);
-      ap(pb, bub('child', 'Could I try something like that?'), t+5900);
-      typ(pb, t+6700, 1500);
-      ap(pb, bub('ai', 'Better not — that\'s something for trained people with the right setup. Just enjoy watching!'), t+8200);
+      const fill = land.querySelector('.pfill2');
+      const time = land.querySelector('.ptime');
+      const vend = land.querySelector('.vend');
+      const btn  = land.querySelector('.rl-tap');
+      // video plays from the middle to the end (slowly, one run-through)
+      tm(() => {
+        land.querySelector('.ob-scene').classList.add('go');
+        fill.style.transition = 'width 9s linear'; fill.style.width = '100%';
+      }, 800);
+      const steps = 12;
+      for (let i = 1; i <= steps; i++) {
+        tm(() => {
+          const s = Math.round(360 + 360 * i / steps);
+          time.textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')} / 12:00`;
+        }, 800 + 9000 * i / steps);
+      }
+      // end screen appears, then the kid has time to read it before tapping
+      tm(() => vend.classList.add('on'), 10600);
+      const end = tapSequence(land, btn, 13400);
+      tm(() => {
+        land.classList.remove('visible');
+        tm(() => { land.remove(); startChat(); }, 500);
+      }, end);
     }
   ]);
   stageEl.onclick = () => advancePhase();
 }
 
-/* ══════════ SLIDE 2: ACCESS REQUESTS ══════════ */
+/* ══════════ SLIDE 2: ACCESS REQUESTS — restricted screen → tap → chat ══════════ */
 function buildRequest(stageEl) {
-  const { pb1, pb2, showPhone2 } = mk2phones(stageEl,
-    { label: 'Parent Approves', cls: 'lbl-on',     id: 'slot-rq-a' },
-    { label: "Let's Discuss",   cls: 'lbl-parent', id: 'slot-rq-b' }
-  );
+  const s1 = mkSlot('Parent Approves', 'lbl-on',     'slot-rq-a');
+  const s2 = mkSlot("Let's Discuss",   'lbl-parent', 'slot-rq-b');
+  const pb1 = document.createElement('div'); pb1.className = 'phone-body'; s1.body.appendChild(pb1);
+  const pb2 = document.createElement('div'); pb2.className = 'phone-body'; s2.body.appendChild(pb2);
 
-  function runRequest(pb, outcome) {
-    let t = 300;
+  const land = mkRestrictedLandscape("This video was restricted because the challenges get rough and people push each other in ways that can be upsetting. We want to make sure you're watching things that are safe, fun, and right for your age.");
+  stageEl.appendChild(land);
+  setTimeout(() => land.classList.add('visible'), 60);
+
+  function runRequest(pb, outcome, k) {
+    const d = n => n * k;
+    let t = d(300);
     ap(pb, restrictCard('Your parent has restricted this video.'), t);
-    ap(pb, chatFab(), t+600);
-    ap(pb, bub('child', 'Can you ask my parent if I can watch this?'), t+1500);
-    typ(pb, t+2300, 1400);
-    ap(pb, bub('ai', 'Sure — why do you want to watch it?'), t+3800);
-    ap(pb, bub('child', "Everyone at school already saw it and I'm the only one who hasn't."), t+5600);
-    typ(pb, t+6400, 1400);
-    ap(pb, bub('ai', "Okay, sending that to your parent now."), t+7900);
-    const ping = ap(pb, pingEl(), t+9200);
+    ap(pb, chatFab(), t+d(600));
+    ap(pb, bub('child', 'Can you ask my parent if I can watch this?'), t+d(1500));
+    typ(pb, t+d(2300), d(1400));
+    ap(pb, bub('ai', 'Sure — why do you want to watch it?'), t+d(3800));
+    ap(pb, bub('child', "Everyone at school already saw it and I'm the only one who hasn't."), t+d(5600));
+    typ(pb, t+d(6400), d(1400));
+    ap(pb, bub('ai', "Okay, sending that to your parent now."), t+d(7900));
+    const ping = ap(pb, pingEl(), t+d(9200));
 
     tm(() => {
       if (outcome === 'approved') resolvePing(ping, 'approved', 'Approved');
       else resolvePing(ping, 'discuss', "Let's discuss");
-    }, t+11500);
+    }, t+d(11500));
 
     if (outcome === 'approved') {
-      typ(pb, t+12300, 1300);
-      ap(pb, bub('ai', 'Good news — they said yes! You can watch now.'), t+13700);
-      ap(pb, vcCard('Last To Leave The Circle','ChannelName · 22 min','badge-unlocked','Unlocked'), t+15000);
+      typ(pb, t+d(12300), d(1300));
+      ap(pb, bub('ai', 'Good news — they said yes! You can watch now.'), t+d(13700));
+      ap(pb, vcCard('Last To Leave The Circle','ChannelName · 22 min','badge-unlocked','Unlocked'), t+d(15000));
     } else {
-      typ(pb, t+12300, 1300);
-      ap(pb, bub('ai', "They'd like to watch the start with you first, maybe tonight."), t+13700);
-      ap(pb, bub('child', 'Okay, that works.'), t+15700);
+      typ(pb, t+d(12300), d(1300));
+      ap(pb, bub('ai', "They'd like to watch the start with you first, maybe tonight."), t+d(13700));
+      ap(pb, bub('child', 'Okay, that works.'), t+d(15700));
     }
   }
 
+  let firstStarted = false;
+  function startFirst(k) {
+    if (firstStarted) return; firstStarted = true;
+    if (land.parentNode) land.remove();
+    stageEl.appendChild(s1.slot);
+    setTimeout(() => s1.slot.classList.add('visible'), 60);
+    runRequest(pb1, 'approved', k);
+  }
+
   registerPhases([
-    () => { runRequest(pb1, 'approved'); },
-    () => { showPhone2(); runRequest(pb2, 'discuss'); }
+    () => {
+      const btn = land.querySelector('.rl-tap');
+      const end = tapSequence(land, btn, 4500);
+      tm(() => {
+        land.classList.remove('visible');
+        tm(() => startFirst(1), 500);
+      }, end);
+    },
+    () => {
+      startFirst(0.01); // skipped ahead: put the first chat in place instantly
+      stageEl.appendChild(s2.slot);
+      setTimeout(() => s2.slot.classList.add('visible'), 60);
+      runRequest(pb2, 'discuss', 1);
+    }
   ]);
   stageEl.onclick = () => advancePhase();
 }
 
-/* ══════════ SLIDE 3: EXPLAIN RESTRICTIONS — two phones, feature-on only ══════════ */
+/* ══════════ SLIDE 3: EXPLAIN RESTRICTIONS — restricted screen → tap → chat ══════════ */
 function buildExplain(stageEl) {
   function mkGroup(titleText, titleCls) {
     const wrap = document.createElement('div');
@@ -485,22 +691,38 @@ function buildExplain(stageEl) {
   phonesNorm.appendChild(sNorm.slot);
   phonesPers.appendChild(sPers.slot);
 
-  stageEl.appendChild(wrapNorm);
-  stageEl.appendChild(wrapPers);
-  setTimeout(() => sNorm.slot.classList.add('visible'), 60);
+  const land = mkRestrictedLandscape("This video was restricted because it shows people getting hurt or fighting in ways that can be upsetting or scary. We want to make sure you're watching things that are safe, fun, and right for your age.");
+  stageEl.appendChild(land);
+  setTimeout(() => land.classList.add('visible'), 60);
+
+  let normStarted = false;
+  function startNorm(k) {
+    if (normStarted) return; normStarted = true;
+    if (land.parentNode) land.remove();
+    stageEl.appendChild(wrapNorm);
+    setTimeout(() => sNorm.slot.classList.add('visible'), 60);
+    const t = 300 * k;
+    ap(pb_na, restrictCard('Your parent has restricted this video.'), t);
+    ap(pb_na, chatFab(), t+600*k);
+    ap(pb_na, bub('child', 'Why is this restricted?'), t+1500*k);
+    typ(pb_na, t+2300*k, 1500*k);
+    ap(pb_na, bub('ai', "It has scenes with people getting hurt or fighting, which can feel scary. Your parent restricted it to keep what you watch safe and fun."), t+3800*k);
+    ap(pb_na, bub('child', 'Oh okay, that makes sense.'), t+6000*k);
+  }
 
   registerPhases([
     () => {
-      let t = 300;
-      ap(pb_na, restrictCard('Your parent has restricted this video.'), t);
-      ap(pb_na, chatFab(), t+600);
-      ap(pb_na, bub('child', 'Why is this restricted?'), t+1500);
-      typ(pb_na, t+2300, 1500);
-      ap(pb_na, bub('ai', "Probably something later in the clip. Try asking your parent to show you the part that wasn't okay."), t+3800);
-      ap(pb_na, bub('child', 'Okay, I can do that.'), t+6000);
+      const btn = land.querySelector('.rl-tap');
+      const end = tapSequence(land, btn, 4500);
+      tm(() => {
+        land.classList.remove('visible');
+        tm(() => startNorm(1), 500);
+      }, end);
     },
     () => {
+      startNorm(0.01);
       setTimeout(() => sPers.slot.classList.add('visible'), 60);
+      stageEl.appendChild(wrapPers);
       let t = 300;
       ap(pb_pa, restrictCard('Your parent has restricted this video.'), t);
       ap(pb_pa, chatFab(), t+600);
