@@ -332,6 +332,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .hs-logo { width: 74%; height: auto; display: block; }
 .hs-lbl { font-size: 1.25vh; color: #b4b6be; text-shadow: 0 1px 3px #0006; }
 .hs-dock { margin-top: 3vh; width: 100%; display: flex; justify-content: space-around; padding: 1.4vh 1vh; border-radius: 3vh; background: #ffffff14; backdrop-filter: blur(8px); }
+.pn-top { justify-content: flex-end; }
+.pn-logo { display: block; height: 4.6vh; width: auto; max-width: 6vh; }
+.pn-logo.vt-fallback svg { height: 100%; width: auto; display: block; }
 </style>
 </head>
 <body>
@@ -728,7 +731,7 @@ function idleEl() {
 }
 function notifEl(title, body) {
   const d = document.createElement('div'); d.className = 'pnotif';
-  d.innerHTML = `<div class="pn-ico">${BLOOM_SVG}</div><div class="pn-txt"><div class="pn-top"><span class="pn-app">${logoImg('vt-logo')}</span><span>now</span></div><div class="pn-title">${title}</div><div class="pn-body">${body}</div></div>`;
+  d.innerHTML = `<div class="pn-ico">${logoImg('pn-logo')}</div><div class="pn-txt"><div class="pn-top"><span>now</span></div><div class="pn-title">${title}</div><div class="pn-body">${body}</div></div>`;
   return d;
 }
 function reqHeadEl() {
