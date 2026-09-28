@@ -676,7 +676,7 @@ function logoImg(cls) {
     // placeholder shown until you paste the real logo
     return `<span class="${cls} vt-fallback"><svg viewBox="0 0 26 24"><rect x="1" y="4" width="24" height="16" rx="5" fill="#a83a3a"/><path d="M11 8.5v7l6-3.5z" fill="#e8e8ea"/></svg></span>`;
   }
-  return `<img class="${cls}" src="${VIDEOTUBE_LOGO}" alt="videoTUBE">`;
+  return `<img class="${cls}" src="${VIDEOTUBE_LOGO}" alt="videoHub">`;
 }
 
 /* ── Parent phone home screen (outside the app) ── */
@@ -709,7 +709,7 @@ function mkHome() {
       ${hsApp('linear-gradient(#4a5062,#3b404e)', 'cloud', 'Weather')}
       ${hsApp('linear-gradient(#5c584a,#4a473b)', 'note', 'Notes')}
       ${hsApp('linear-gradient(#5b4c52,#493d42)', 'music', 'Music')}
-      <div class="hs-app"><div class="hs-ico vt">${logoImg('hs-logo')}</div><div class="hs-lbl">videoTUBE</div></div>
+      <div class="hs-app"><div class="hs-ico vt">${logoImg('hs-logo')}</div><div class="hs-lbl">VideoHub</div></div>
     </div>
     <div class="hs-dock">
       ${hsApp('linear-gradient(#4b5650,#3c4540)', 'phone')}
