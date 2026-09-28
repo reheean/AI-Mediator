@@ -3,106 +3,93 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Mediator - AI Child Conversations</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>AI-Child Conversations</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #06060f; --card: #12121e; --card2: #1a1a2a; --border: #252538;
-  --text: #eeeef5; --muted: #7070a0; --accent: #5b8dee;
-  --green: #34d399; --red: #ff4d6d; --teal: #2dd4bf;
-  --child: #c084fc; --ai-col: #60a5fa;
+  --bg: #06060f; --card: #201f36; --card2: #201f36; --border: #33325a;
+  --text: #d9d9ec; --text-soft: #b9b9d6; --muted: #9494b8; --accent: #7c93ff;
+  --green: #2ee6a8; --red: #ff2d55; --teal: #23d3bd;
+  --child: #c583ff; --ai-col: #4d9dff;
+  --pr: 0.5333;
 }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px 52px; }
-h1.title { font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; text-align: center; }
-h2.subtitle { font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 5px; text-align: center; letter-spacing: -0.5px; }
-h2.subtitle span { color: var(--accent); }
-.intro { font-size: 12px; color: var(--muted); text-align: center; margin-bottom: 20px; line-height: 1.6; max-width: 820px; }
-.stage-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; max-width: 1200px; }
-.stage { display: flex; flex-direction: row; align-items: flex-start; justify-content: center; gap: 24px; width: 100%; min-height: 580px; }
-.phone-slot { display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0;
+html, body { height: 100%; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); height: 100vh; width: 100vw; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.bloom{width:1em;height:1em;display:inline-block;vertical-align:middle;flex-shrink:0}
+.bloom path{fill:none;stroke:url(#bloomGrad);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.bloom.spin path{animation:bloomspin 1.3s linear infinite}
+@keyframes bloomspin{to{filter:hue-rotate(360deg)}}
+
+.icon { width: 1em; height: 1em; flex-shrink: 0; }
+
+.stage-wrap { position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5vh 0 11vh; box-sizing: border-box; }
+.stage { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 3vw; width: 100%; height: 100%; flex-wrap: wrap; }
+.phone-slot { display: flex; flex-direction: column; align-items: center; gap: 14px; flex-shrink: 0;
   opacity: 0; transform: translateY(16px); transition: opacity 0.55s cubic-bezier(0.4,0,0.2,1), transform 0.55s cubic-bezier(0.4,0,0.2,1); pointer-events: none; }
 .phone-slot.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.phone-slot .slot-lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-align: center; }
+.phone-slot .slot-lbl { font-size: 1.4vh; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-align: center; }
 .phone-slot.lbl-off .slot-lbl { color: var(--red); }
 .phone-slot.lbl-on  .slot-lbl { color: var(--green); }
 .phone-slot.lbl-child  .slot-lbl { color: var(--child); }
 .phone-slot.lbl-parent .slot-lbl { color: var(--teal); }
-.outer-phone { width: 300px; height: 560px; background: #111118; border-radius: 40px;
-  border: 2px solid var(--border); box-shadow: 0 8px 32px #00000060;
+.outer-phone { width: min(42vw, 82vh * var(--pr)); height: min(82vh, 42vw / var(--pr)); background: #14141f; border-radius: 6%/3%;
+  border: 3px solid var(--accent); box-shadow: 0 0 0 1px #7c93ff33, 0 20px 56px #00000088;
   overflow: hidden; display: flex; flex-direction: column;
   transition: border-color 0.4s, box-shadow 0.4s; }
-.phone-slot.lbl-on  .outer-phone { border-color: var(--green)66; box-shadow: 0 0 0 1px var(--green)22, 0 16px 48px #00000088; }
-.phone-slot.lbl-off .outer-phone { border-color: var(--red)55; box-shadow: 0 0 0 1px var(--red)18, 0 16px 48px #00000088; }
-.phone-slot.lbl-child  .outer-phone { border-color: var(--child)55; }
-.phone-slot.lbl-parent .outer-phone { border-color: var(--teal)55; }
-.phone-slot.single .outer-phone { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent)44, 0 24px 64px #00000099; width: 320px; height: 580px; }
-.op-notch { width: 80px; height: 22px; background: #000; border-radius: 0 0 14px 14px; margin: 0 auto; flex-shrink: 0; }
-.op-sbar { display: flex; justify-content: space-between; padding: 4px 16px; font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; }
-.op-header { background: #0f0f0f; padding: 7px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1c1c1c; flex-shrink: 0; }
-.op-appname { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; }
-.op-page { font-size: 9px; color: var(--muted); font-family: 'DM Mono', monospace; }
-.op-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-.click-hint { font-size: 11px; color: var(--accent); text-align: center; opacity: 0; transition: opacity 0.5s; margin-top: 2px; }
-.click-hint.show { opacity: 1; }
-.yt-nav { background: #0f0f0f; border-top: 1px solid #1c1c1c; display: flex; align-items: center; justify-content: space-around; padding: 6px 0 8px; flex-shrink: 0; }
-.nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 8px; color: var(--muted); flex: 1; }
+.phone-slot.single .outer-phone { border-color: var(--accent); box-shadow: 0 0 0 1px #7c93ff44, 0 26px 68px #00000099; width: min(60vw, 83vh * var(--pr)); height: min(83vh, 60vw / var(--pr)); }
+.op-notch { width: 24%; height: 2.6%; min-height: 18px; background: #000; border-radius: 0 0 30% 30%; margin: 0 auto; flex-shrink: 0; }
+.op-sbar { display: flex; justify-content: space-between; padding: 1.2% 5% 0.4%; font-size: 1.7vh; font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; }
+.op-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+.yt-nav { background: #0f0f0f; border-top: 1px solid #1c1c1c; display: flex; align-items: center; justify-content: space-around; padding: 1.4% 0 1.8%; flex-shrink: 0; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 1.35vh; color: var(--muted); flex: 1; }
 .nav-item.active { color: #fff; }
 .nav-item.ai-nav { color: var(--accent); }
-.nav-icon-wrap { width: 24px; height: 24px; border-radius: 50%; background: var(--accent)22; border: 1px solid var(--accent)55; display: flex; align-items: center; justify-content: center; }
-.slide-header { width: 100%; max-width: 700px; padding: 8px 14px 14px; }
-.slide-header-sup { font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
-.slide-header-title { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
-.sog-section { display: flex; flex-direction: column; gap: 4px; }
-.sog-section-label { font-size: 7.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 0 2px; margin-top: 2px; }
-.sog-indent { padding-left: 8px; border-left: 2px solid var(--green)44; margin-left: 4px; display: flex; flex-direction: column; gap: 6px; }
-.scen-line { width: 1px; flex: 1; background: var(--border); min-height: 40px; }
-.scen-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); writing-mode: vertical-rl; text-orientation: mixed; white-space: nowrap; }
-.scenario-group { display: flex; flex-direction: row; align-items: flex-start; gap: 16px; flex-shrink: 0; }
-.scenario-title { font-size: 10px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; text-align: center; margin-bottom: 6px; }
-.scenario-title.yes { color: var(--green); }
-.scenario-title.discuss { color: var(--teal); }
-.slide-counter { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); }
-.dots { display: flex; gap: 5px; }
-.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); transition: background 0.4s; cursor: pointer; }
+.nav-icon-wrap { width: 5vh; height: 5vh; display: flex; align-items: center; justify-content: center; }
+.nav-icon-wrap .bloom { width: 100%; height: 100%; }
+
+.floatnav { position: absolute; bottom: 2vh; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 50; }
+.nav-row { display: flex; justify-content: center; gap: 10px; }
+.nav-btn { background: var(--card); border: 2px solid var(--border); color: var(--muted); border-radius: 24px; padding: 8px 18px; font-size: 1.7vh; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 6px; }
+.nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+.nav-btn.primary { background: #7c93ff22; border-color: var(--accent); color: var(--accent); }
+.dots { display: flex; gap: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); transition: background 0.4s; cursor: pointer; }
 .dot.on { background: var(--accent); }
-.dot.done { background: var(--green)88; }
+.dot.done { background: #2ee6a8AA; }
 
-.click-hint { font-size: 10px; color: var(--muted); text-align: center; padding: 6px 0 0; opacity: 0; transition: opacity 0.5s; }
-.click-hint.show { opacity: 1; }
-
-.tab-body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+.tab-body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 3% 4% 4%; display: flex; flex-direction: column; gap: 1.6vh; }
 .tab-body::-webkit-scrollbar { display: none; }
-.settings-title { font-size: 13px; font-weight: 700; color: var(--text); }
-.settings-sub { font-size: 9.5px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
-.master-row { display: flex; align-items: center; gap: 12px; background: var(--card2); border: 1px solid var(--border); border-radius: 13px; padding: 12px 14px; opacity: 0; transform: translateY(8px); transition: opacity 0.5s,transform 0.5s,border-color 0.4s,background 0.4s; }
+.settings-title { font-size: 2.6vh; font-weight: 700; color: var(--text-soft); }
+.settings-sub { font-size: 1.85vh; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.master-row { display: flex; align-items: center; gap: 14px; background: var(--card2); border: 2px solid var(--border); border-radius: 16px; padding: 2% 3%; opacity: 0; transform: translateY(8px); transition: opacity 0.5s,transform 0.5s,border-color 0.4s,background 0.4s; }
 .master-row.show { opacity: 1; transform: translateY(0); }
-.master-row.on { border-color: var(--green)55; background: #0d1912; }
-.mr-icon { font-size: 20px; flex-shrink: 0; }
+.master-row.on { border-color: var(--green); background: linear-gradient(135deg,#0d2318,#0a1912); }
+.mr-icon { width: 11vh; height: 11vh; background: transparent; color: #fff; font-size: 9vh; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .mr-info { flex: 1; }
-.mr-name { font-size: 11px; font-weight: 700; color: var(--text); }
-.mr-desc { font-size: 9px; color: var(--muted); margin-top: 2px; }
-.btog { width: 44px; height: 25px; border-radius: 13px; background: var(--border); position: relative; flex-shrink: 0; transition: background 0.35s; }
+.mr-name { font-size: 2vh; font-weight: 700; color: var(--text-soft); }
+.mr-desc { font-size: 1.65vh; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+.btog { width: 50px; height: 28px; border-radius: 14px; background: var(--border); position: relative; flex-shrink: 0; transition: background 0.35s; }
 .btog.on { background: var(--green); }
-.btog::after { content: ''; position: absolute; width: 19px; height: 19px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.35s; box-shadow: 0 1px 4px #00000050; }
-.btog.on::after { transform: translateX(19px); }
-.sog-grid { display: grid; grid-template-columns: 1fr; gap: 6px; }
-.sog { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: row; align-items: flex-start; gap: 8px; opacity: 0; transform: translateY(5px); transition: opacity 0.45s,transform 0.45s,border-color 0.4s,background 0.4s; }
+.btog::after { content: ''; position: absolute; width: 22px; height: 22px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.35s; box-shadow: 0 1px 4px #00000050; }
+.btog.on::after { transform: translateX(22px); }
+.sog-section { display: flex; flex-direction: column; gap: 6px; }
+.sog-section-label { font-size: 1.5vh; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 0 2px; margin-top: 4px; }
+.sog-indent { padding-left: 10px; border-left: 3px solid #2ee6a844; margin-left: 4px; display: flex; flex-direction: column; gap: 8px; }
+.sog-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.sog { background: var(--card2); border: 2px solid var(--border); border-radius: 13px; padding: 2% 2.4%; display: flex; flex-direction: row; align-items: flex-start; gap: 10px; opacity: 0; transform: translateY(5px); transition: opacity 0.45s,transform 0.45s,border-color 0.4s,background 0.4s; }
 .sog.show { opacity: 1; transform: translateY(0); }
-.sog.on { border-color: var(--green)44; background: #0c1810; }
-.sog-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex: 1; }
-.sog-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-.sog-name { font-size: 9.5px; font-weight: 600; color: var(--text); line-height: 1.3; }
-.sog-desc { font-size: 8px; color: var(--muted); line-height: 1.4; margin-top: 2px; }
-.stog { width: 24px; height: 14px; border-radius: 7px; background: var(--border); position: relative; flex-shrink: 0; transition: background 0.35s; }
+.sog.on { border-color: var(--green); background: linear-gradient(135deg,#0c2016,#091a11); }
+.sog-icon { width: 3.6vh; height: 3.6vh; border-radius: 9px; background: var(--card); color: var(--accent); font-size: 1.9vh; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.sog-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex: 1; }
+.sog-name { font-size: 1.75vh; font-weight: 600; color: var(--text-soft); line-height: 1.35; }
+.sog-desc { font-size: 1.5vh; color: var(--muted); line-height: 1.4; margin-top: 3px; }
+.stog { width: 30px; height: 17px; border-radius: 9px; background: var(--border); position: relative; flex-shrink: 0; transition: background 0.35s; }
 .stog.on { background: var(--green); }
-.stog::after { content: ''; position: absolute; width: 10px; height: 10px; background: #fff; border-radius: 50%; top: 2px; left: 2px; transition: transform 0.35s; }
-.stog.on::after { transform: translateX(10px); }
+.stog::after { content: ''; position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; top: 2.5px; left: 2.5px; transition: transform 0.35s; }
+.stog.on::after { transform: translateX(13px); }
 
-/* two-panels no longer used - single phones per slot */
-.label-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-
-.phone-body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+.phone-body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 2.6% 3.2%; display: flex; flex-direction: column; gap: 1.2vh; min-height: 0; }
 .phone-body::-webkit-scrollbar { display: none; }
 
 .brow { display: flex; flex-direction: column; opacity: 0; transform: translateY(5px); transition: opacity 0.4s,transform 0.4s; flex-shrink: 0; }
@@ -111,137 +98,220 @@ h2.subtitle span { color: var(--accent); }
 .brow.child  { align-items: flex-end; }
 .brow.parent { align-items: flex-end; }
 .brow.sys    { align-items: center; }
-.bsender { font-size: 8px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 2px; padding: 0 3px; }
+.bsender { display: flex; align-items: center; gap: 5px; font-size: 1.4vh; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 4px; padding: 0 3px; }
 .brow.ai     .bsender { color: var(--ai-col); }
 .brow.child  .bsender { color: var(--child); }
 .brow.parent .bsender { color: var(--teal); }
-.bubble { border-radius: 12px; padding: 7px 10px; font-size: 12px; line-height: 1.5; max-width: 88%; }
-.brow.ai     .bubble { background: #131c32; border: 1px solid var(--ai-col)25; color: var(--text); border-bottom-left-radius: 3px; }
-.brow.child  .bubble { background: #1b0e2e; border: 1px solid var(--child)25; color: var(--text); border-bottom-right-radius: 3px; }
-.brow.parent .bubble { background: #0a1f1e; border: 1px solid rgba(45,212,191,0.2); color: var(--text); border-bottom-right-radius: 3px; }
-.brow.sys    .bubble { background: var(--accent)10; border: 1px solid var(--accent)28; color: var(--accent); font-size: 10px; font-weight: 600; border-radius: 6px; text-align: center; max-width: 94%; padding: 4px 9px; }
+.bsender.bloom-sender .bloom { width: 3.4vh; height: 3.4vh; }
+.bubble { border-radius: 14px; padding: 1.4% 2%; font-size: 1.95vh; line-height: 1.5; max-width: 88%; }
+.brow.ai     .bubble { background: #10203b; border: 1px solid #4d9dff33; color: var(--text); border-bottom-left-radius: 4px; }
+.brow.child  .bubble { background: #200f38; border: 1px solid #c583ff33; color: var(--text); border-bottom-right-radius: 4px; }
+.brow.parent .bubble { background: #0a2321; border: 1px solid #23d3bd33; color: var(--text); border-bottom-right-radius: 4px; }
+.brow.sys    .bubble { background: #7c93ff14; border: 1px solid #7c93ff33; color: var(--accent); font-size: 1.65vh; font-weight: 600; border-radius: 8px; text-align: center; max-width: 94%; padding: 1% 2%; }
 
 .typing-row { align-items: flex-start; opacity: 0; transition: opacity 0.3s; flex-shrink: 0; display: flex; flex-direction: column; }
 .typing-row.show { opacity: 1; }
-.typing-dots { display: flex; align-items: center; gap: 3px; padding: 7px 11px; background: #131c32; border: 1px solid var(--ai-col)25; border-radius: 12px; border-bottom-left-radius: 3px; }
-.typing-dots span { width: 4px; height: 4px; border-radius: 50%; background: var(--ai-col)80; animation: td 1.2s infinite; }
+.typing-dots { display: flex; align-items: center; gap: 4px; padding: 1.4% 2%; background: #10203b; border: 1px solid #4d9dff33; border-radius: 14px; border-bottom-left-radius: 4px; }
+.typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: #4d9dffAA; animation: td 1.2s infinite; }
 .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
 .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 @keyframes td { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-3px)} }
 
-.vc { background: var(--card2); border: 1px solid var(--border); border-radius: 9px; padding: 7px 8px; display: flex; align-items: center; gap: 7px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.vc { background: var(--card2); border: 2px solid var(--border); border-radius: 13px; padding: 1.6% 1.8%; display: flex; align-items: center; gap: 10px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
 .vc.show { opacity: 1; transform: translateY(0); }
-.vc-thumb { width: 34px; height: 26px; border-radius: 5px; background: linear-gradient(135deg,#1a1a2e,#252540); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-.vc-title { font-size: 9.5px; font-weight: 600; color: var(--text); }
-.vc-meta  { font-size: 8px; color: var(--muted); margin-top: 1px; }
-.vc-badge { font-size: 7px; font-weight: 700; text-transform: uppercase; padding: 1px 5px; border-radius: 3px; width: fit-content; margin-top: 2px; }
-.badge-playing  { background: var(--green)18; color: var(--green); border: 1px solid var(--green)40; }
-.badge-blocked  { background: var(--red)18;   color: var(--red);   border: 1px solid var(--red)40; }
-.badge-unlocked { background: var(--green)18; color: var(--green); border: 1px solid var(--green)40; }
+.vc-thumb { width: 7vh; height: 5.2vh; border-radius: 8px; background: linear-gradient(135deg,var(--ai-col),var(--child)); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2vh; flex-shrink: 0; }
+.vc-title { font-size: 1.85vh; font-weight: 600; color: var(--text); }
+.vc-meta  { font-size: 1.5vh; color: var(--muted); margin-top: 2px; }
+.vc-badge { font-size: 1.3vh; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; width: fit-content; margin-top: 3px; display: flex; align-items: center; gap: 4px; }
+.badge-playing  { background: #2ee6a818; color: var(--green); border: 1px solid #2ee6a855; }
+.badge-blocked  { background: #ff2d5518; color: var(--red);   border: 1px solid #ff2d5555; }
+.badge-unlocked { background: #2ee6a818; color: var(--green); border: 1px solid #2ee6a855; }
 
-.blocked-card { background: var(--red)08; border: 1px solid var(--red)33; border-radius: 9px; padding: 9px; display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
-.blocked-card.show { opacity: 1; transform: translateY(0); }
-.bc-icon  { font-size: 18px; }
-.bc-title { font-size: 11px; font-weight: 700; color: var(--red); }
-.bc-sub   { font-size: 9.5px; color: var(--muted); line-height: 1.4; }
+.restricted-card { background: #ff2d550d; border: 2px solid #ff2d5544; border-radius: 13px; padding: 2%; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.restricted-card.show { opacity: 1; transform: translateY(0); }
+.bc-icon  { width: 3.4vh; height: 3.4vh; color: var(--red); }
+.bc-title { font-size: 1.95vh; font-weight: 700; color: var(--red); }
+.bc-sub   { font-size: 1.7vh; color: var(--muted); line-height: 1.4; }
 
-.chat-fab-mini { display: flex; align-items: center; gap: 5px; background: var(--accent)18; border: 1px solid var(--accent)55; border-radius: 20px; padding: 4px 10px; font-size: 9.5px; color: var(--accent); font-weight: 600; flex-shrink: 0; opacity: 0; transform: translateY(3px); transition: opacity 0.4s,transform 0.4s; width: fit-content; }
+.chat-fab-mini { display: flex; align-items: center; gap: 7px; background: #7c93ff18; border: 1px solid #7c93ff55; border-radius: 22px; padding: 1% 2.6%; font-size: 1.6vh; color: var(--accent); font-weight: 600; flex-shrink: 0; opacity: 0; transform: translateY(3px); transition: opacity 0.4s,transform 0.4s; width: fit-content; }
 .chat-fab-mini.show { opacity: 1; transform: translateY(0); }
-.cfm-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.cfm-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 
-.notice { background: var(--card2); border: 1px solid var(--border); border-radius: 9px; padding: 7px 9px; font-size: 10.5px; color: var(--muted); line-height: 1.5; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.notice { background: var(--card2); border: 2px solid var(--border); border-radius: 12px; padding: 1.4% 2%; font-size: 1.7vh; color: var(--muted); line-height: 1.5; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
 .notice.show { opacity: 1; transform: translateY(0); }
-.notice.off { border-color: var(--red)28; background: var(--red)06; }
-.notice span { font-weight: 600; color: var(--text); }
+.notice.off { border-color: #ff2d5544; background: #ff2d550a; }
+.notice span { font-weight: 700; color: var(--text); }
 
-.parent-notif { background: #081a18; border: 1px solid rgba(45,212,191,0.25); border-radius: 11px; padding: 10px 11px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; opacity: 0; transform: translateY(5px); transition: opacity 0.5s,transform 0.5s; }
-.parent-notif.show { opacity: 1; transform: translateY(0); }
-.pn-header { display: flex; align-items: center; gap: 7px; }
-.pn-icon  { font-size: 15px; }
-.pn-title { font-size: 9.5px; font-weight: 700; color: var(--teal); }
-.pn-app   { font-size: 8px; color: var(--muted); }
-.pn-video { font-size: 9px; color: var(--text); line-height: 1.4; }
-.pn-video strong { color: rgba(45,212,191,0.85); }
+.p-ping { display: flex; align-items: center; gap: 12px; background: var(--card2); border: 2px solid var(--border); border-radius: 15px; padding: 1.8% 2%; flex-shrink: 0; opacity: 0; transform: translateY(5px); transition: opacity 0.45s,transform 0.45s,border-color 0.4s,background 0.4s; }
+.p-ping.show { opacity: 1; transform: translateY(0); }
+.p-ping-avatar { width: 5.2vh; height: 5.2vh; border-radius: 50%; background: #23d3bd18; border: 2px solid #23d3bd66; display: flex; align-items: center; justify-content: center; color: var(--teal); flex-shrink: 0; font-size: 2.4vh; }
+.p-ping-body { flex: 1; min-width: 0; }
+.p-ping-name { font-size: 1.8vh; font-weight: 700; color: var(--text); }
+.p-ping-status { font-size: 1.6vh; color: var(--muted); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+.pp-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: bpulse 1.4s infinite; }
+@keyframes bpulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.p-ping.approved { border-color: var(--green); background: linear-gradient(135deg,#0d2318,#0a1912); }
+.p-ping.approved .p-ping-avatar { background: #2ee6a818; border-color: var(--green); color: var(--green); }
+.p-ping.approved .p-ping-status { color: var(--green); font-weight: 700; }
+.p-ping.discuss { border-color: var(--teal); background: linear-gradient(135deg,#0a2321,#081c1a); }
+.p-ping.discuss .p-ping-avatar { background: #23d3bd18; border-color: var(--teal); color: var(--teal); }
+.p-ping.discuss .p-ping-status { color: var(--teal); font-weight: 700; }
 
-.child-reason { background: var(--child)10; border: 1px solid var(--child)35; border-radius: 8px; padding: 8px 10px; flex-shrink: 0; }
-.cr-label { font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--child); margin-bottom: 4px; }
-.cr-text  { font-size: 10px; color: var(--text); line-height: 1.55; font-style: italic; }
+.toast-card { background: var(--card2); border: 2px solid #23d3bd44; border-radius: 13px; padding: 1.6% 2%; display: flex; align-items: flex-start; gap: 9px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.toast-card.show { opacity: 1; transform: translateY(0); }
+.tc-icon  { width: 2.4vh; height: 2.4vh; color: var(--teal); flex-shrink: 0; margin-top: 1px; }
+.tc-title { font-size: 1.6vh; font-weight: 700; color: var(--teal); }
+.tc-body  { font-size: 1.7vh; color: var(--muted); margin-top: 2px; line-height: 1.4; }
 
-.pn-chips { display: flex; flex-direction: column; gap: 5px; }
-.chip { border-radius: 7px; padding: 6px 9px; font-size: 8.5px; font-weight: 600; border: 1px solid; text-align: left; cursor: pointer; transition: background 0.2s, border-color 0.2s, opacity 0.2s; }
-.chip-info { background: var(--accent)10; border-color: var(--accent)40; color: var(--ai-col); }
-.chip-yes  { background: var(--green)12;  border-color: var(--green)44;  color: var(--green); }
-.chip-no   { background: rgba(45,212,191,0.08); border-color: rgba(45,212,191,0.3); color: var(--teal); }
-
-.vid-summary { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
-.vid-summary.show { opacity: 1; transform: translateY(0); }
-.vs-label { font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 3px; }
-.vs-text  { font-size: 9px; color: var(--muted); line-height: 1.5; }
-
-.decision-badge { border-radius: 8px; padding: 7px 10px; font-size: 9px; font-weight: 600; text-align: center; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.4s,transform 0.4s; }
-.decision-badge.show { opacity: 1; transform: translateY(0); }
-.decision-yes { background: var(--green)12; border: 1px solid var(--green)44; color: var(--green); }
-.decision-no  { background: rgba(45,212,191,0.08); border: 1px solid rgba(45,212,191,0.3); color: var(--teal); }
-
-.phone-toast { background: #081a18; border: 1px solid rgba(45,212,191,0.3); border-radius: 9px; padding: 7px 9px; display: flex; align-items: flex-start; gap: 7px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
-.phone-toast.show { opacity: 1; transform: translateY(0); }
-.pt-icon  { font-size: 12px; flex-shrink: 0; }
-.pt-title { font-size: 9px; font-weight: 700; color: var(--teal); }
-.pt-body  { font-size: 10px; color: var(--muted); margin-top: 1px; line-height: 1.4; }
-
-.fast-forward { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 8px 2px 4px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
+.fast-forward { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 2% 2px; flex-shrink: 0; opacity: 0; transform: translateY(4px); transition: opacity 0.45s,transform 0.45s; }
 .fast-forward.show { opacity: 1; transform: translateY(0); }
-.fast-forward .ff-rule { display: flex; align-items: center; gap: 8px; width: 100%; }
-.fast-forward .ff-line { flex: 1; height: 1px; background: var(--green)40; }
-.fast-forward .ff-badge { display: flex; align-items: center; gap: 5px; background: var(--green)18; border: 1px solid var(--green)70; border-radius: 20px; padding: 4px 11px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--green); white-space: nowrap; flex-shrink: 0; }
-.fast-forward .ff-text { font-size: 11px; color: #b0b0d8; text-align: center; line-height: 1.5; max-width: 94%; font-style: italic; padding: 0 4px; }
+.ff-rule { display: flex; align-items: center; gap: 10px; width: 100%; }
+.ff-line { flex: 1; height: 1px; background: #2ee6a844; }
+.ff-badge { display: flex; align-items: center; gap: 6px; background: #2ee6a818; border: 1px solid #2ee6a877; border-radius: 22px; padding: 5px 13px; font-size: 1.35vh; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green); white-space: nowrap; flex-shrink: 0; }
+.ff-badge .icon { width: 12px; height: 12px; }
+.ff-text { font-size: 1.65vh; color: #c0c0e8; text-align: center; line-height: 1.5; max-width: 94%; font-style: italic; padding: 0 4px; }
 
-.not-yet-overlay { position: absolute; inset: 0; z-index: 10; display: flex; align-items: stretch; opacity: 0; pointer-events: none; transition: opacity 0.8s; }
-.not-yet-overlay.show { opacity: 1; pointer-events: auto; }
-.nyo-dim { position: absolute; inset: 0; background: rgba(6,6,15,0.82); }
-.nyo-panels { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
-.nyo-panel { display: flex; flex-direction: column; border-right: 1px solid var(--border); }
-.nyo-panel:last-child { border-right: none; }
-.nyo-label { padding: 7px 13px; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.nyo-p .nyo-label { color: var(--teal); background: rgba(45,212,191,0.06); }
-.nyo-c .nyo-label { color: var(--child); background: #1b0e2e88; }
-.nyo-phone-frame { flex: 1; padding: 10px; display: flex; flex-direction: column; }
+.legend-row { display: none; }
 
-.nav-row { display: flex; justify-content: center; gap: 10px; margin-top: 14px; }
-.nav-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 22px; padding: 7px 18px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 5px; }
-.nav-btn:hover { border-color: var(--accent); color: var(--accent); }
-.nav-btn.primary { background: var(--accent)18; border-color: var(--accent)66; color: var(--accent); }
-.legend-row { display: flex; gap: 18px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
-.leg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
-.leg-pip { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+.feature-tabbar { position: fixed; top: 50%; right: 2.2vh; transform: translateY(-50%); display: flex; flex-direction: column; gap: 1.1vh; z-index: 60; max-height: 90vh; }
+.ftab { width: 19vh; padding: 1.3vh 1.4vh; border-radius: 13px; font-size: 1.5vh; font-weight: 700; color: var(--muted); background: #14141fcc; backdrop-filter: blur(6px); border: 2px solid var(--border); cursor: pointer; transition: all 0.25s; text-align: center; box-sizing: border-box; }
+.ftab:hover { border-color: var(--accent); color: var(--accent); }
+.ftab.on { color: var(--accent); border-color: var(--accent); background: linear-gradient(135deg,#1c2440,#131a30); }
+
+/* ── Landscape phone (shared) ── */
+:root { --pr-land: 2.1666; --yt-red: #ff0000; }
+.phone-l { container-type: size; --u: 1.2195cqh; position: relative; width: min(72vw, 82vh * var(--pr-land)); height: min(82vh, 72vw / var(--pr-land)); background: #0c0c12; border-radius: 4.4vh; border: 3px solid #2a2a3a; box-shadow: 0 26px 70px #00000099; overflow: hidden; }
+.cam-dot { position: absolute; top: 50%; right: calc(1.4 * var(--u)); transform: translateY(-50%); width: calc(1.3 * var(--u)); height: calc(1.3 * var(--u)); border-radius: 50%; background: #060608; border: 1px solid #333; z-index: 6; }
+.stagewrap { position: absolute; inset: 0; background: #000; }
+.scene { position: absolute; inset: 0; overflow: hidden; }
+.sbg { position: absolute; inset: 0; background: linear-gradient(120deg,#8f6fd6,#4f9fd8 33%,#3fc79e 66%,#e88f4a); }
+.cast { position: absolute; inset: 0; }
+.person { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); }
+.person.a { left: 38%; } .person.b { left: 62%; }
+.pbody { width: calc(11 * var(--u)); height: calc(19 * var(--u)); background: linear-gradient(180deg,#2d6a9f,#1a3a5c); border-radius: calc(1.6 * var(--u)) calc(1.6 * var(--u)) 0 0; position: relative; animation: bob 1.4s ease-in-out infinite; box-shadow: 0 calc(1 * var(--u)) calc(2 * var(--u)) calc(-0.6 * var(--u)) #00000066; }
+.person.b .pbody { background: linear-gradient(180deg,#e07a3a,#a5501c); animation-delay: .15s; }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(calc(-0.4 * var(--u)))} }
+.phead { width: calc(8.4 * var(--u)); height: calc(8.4 * var(--u)); background: #e8c99a; border-radius: 50%; position: absolute; top: calc(-8 * var(--u)); left: 50%; transform: translateX(-50%); animation: hbob 1.4s ease-in-out infinite; }
+.person.b .phead { background: #e0b184; animation-delay: .15s; }
+@keyframes hbob { 0%,100%{transform:translateX(-50%) rotate(-2deg)} 50%{transform:translateX(-50%) rotate(2deg)} }
+.eyes { position: absolute; top: 36%; left: 50%; transform: translateX(-50%); display: flex; gap: calc(1.3 * var(--u)); }
+.eye { width: calc(1.1 * var(--u)); height: calc(1.1 * var(--u)); background: #2a2a2a; border-radius: 50%; }
+.lbrow { position: absolute; top: 24%; width: calc(1.7 * var(--u)); height: calc(.55 * var(--u)); background: #6b4a30; border-radius: 1px; }
+.lbrow.l { left: 22%; transform: rotate(6deg); } .lbrow.r { right: 22%; transform: rotate(-6deg); }
+.mouth { position: absolute; bottom: 20%; left: 50%; transform: translateX(-50%); width: calc(2.2 * var(--u)); height: calc(1 * var(--u)); background: #8a4a3a; border-radius: 3px; }
+.thumb2 { position: absolute; inset: 0; background: linear-gradient(160deg,#0d1b2a,#1b2838); display: flex; align-items: center; justify-content: center; z-index: 20; transition: opacity .3s; }
+.thumb2.gone { opacity: 0; pointer-events: none; }
+.playbtn2 { width: calc(9 * var(--u)); height: calc(9 * var(--u)); background: rgba(0,0,0,.75); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: calc(4 * var(--u)); color: #fff; }
+.land-title { position: absolute; top: calc(2.6 * var(--u)); left: calc(4 * var(--u)); z-index: 10; font-size: calc(3.2 * var(--u)); font-weight: 700; color: #fff; text-shadow: 0 1px 6px #000; }
+.land-prompt { position: absolute; right: calc(4 * var(--u)); bottom: calc(9 * var(--u)); z-index: 15; display: flex; align-items: center; gap: 7px; background: rgba(20,20,40,.85); border: 1px solid #7c93ff55; border-radius: 22px; padding: calc(1 * var(--u)) calc(2 * var(--u)); font-size: calc(1.9 * var(--u)); color: var(--accent); font-weight: 600; opacity: 0; transform: translateY(6px); transition: opacity .5s, transform .5s, box-shadow .3s; }
+.land-prompt.on { opacity: 1; transform: none; }
+.land-prompt.tapped { box-shadow: 0 0 0 5px #7c93ff33, 0 0 0 11px #7c93ff12; }
+.ytctrl2 { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent,rgba(0,0,0,.9)); padding: 1% 2% .8%; z-index: 10; }
+.ptrack2 { width: 100%; height: calc(.8 * var(--u)); background: rgba(255,255,255,.22); border-radius: 2px; margin-bottom: .8%; }
+.pfill2 { height: 100%; background: var(--yt-red); border-radius: 2px; width: 0%; transition: width 6s linear; }
+.crow2 { display: flex; justify-content: space-between; color: #fff; font-size: calc(2.5 * var(--u)); font-family: 'DM Mono', monospace; }
+
+/* ── Restricted-video landscape screen (no people, no rainbow bg) ── */
+.rl-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, #10121f 0%, #07070e 70%); }
+.rl-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(2 * var(--u)); z-index: 5; padding-bottom: calc(3 * var(--u)); }
+.rl-lock { width: calc(7.5 * var(--u)); height: calc(7.5 * var(--u)); color: var(--red); }
+.rl-title { font-size: calc(5 * var(--u)); font-weight: 800; color: #fff; letter-spacing: -0.01em; line-height: 1; }
+.rl-badge { font-size: calc(2.8 * var(--u)); font-weight: 700; color: #ff3b62; background: #3a1524; border-radius: calc(1.2 * var(--u)); padding: calc(1.4 * var(--u)) calc(3.4 * var(--u)); }
+.rl-card { width: 64%; background: #131a2d; border-radius: calc(2 * var(--u)); padding: calc(3 * var(--u)) calc(3.6 * var(--u)) calc(3 * var(--u)) calc(3 * var(--u)); display: flex; align-items: center; gap: calc(3.2 * var(--u)); }
+.rl-card .bloom { width: calc(7.5 * var(--u)); height: calc(7.5 * var(--u)); }
+.rl-card-txt { font-size: calc(3.5 * var(--u)); line-height: 1.42; color: #e4e4f4; }
+.rl-tapwrap { position: relative; margin-top: calc(0.4 * var(--u)); }
+.rl-tap { position: relative; display: flex; align-items: center; gap: calc(1.4 * var(--u)); background: #161c33; border-radius: 40px; padding: calc(2 * var(--u)) calc(4.4 * var(--u)); font-size: calc(3 * var(--u)); font-weight: 700; color: #8fa2ff; transition: transform .18s ease, background .18s ease, box-shadow .25s ease; }
+.rl-tap .cfm-dot { width: calc(1.1 * var(--u)); height: calc(1.1 * var(--u)); }
+.rl-tap.pressed { transform: scale(.93); background: #232c52; box-shadow: 0 0 0 calc(0.6 * var(--u)) #7c93ff33; }
+.rl-ripple { position: absolute; left: 50%; top: 50%; width: calc(5 * var(--u)); height: calc(5 * var(--u)); margin: calc(-2.5 * var(--u)) 0 0 calc(-2.5 * var(--u)); border-radius: 50%; background: #7c93ff55; border: 2px solid #9fb0ff; pointer-events: none; opacity: 0; transform: scale(.3); }
+.rl-ripple.go { animation: ripple .7s ease-out forwards; }
+@keyframes ripple { 0% { opacity: .95; transform: scale(.3); } 100% { opacity: 0; transform: scale(3.4); } }
+.rl-finger { z-index: 30; position: absolute; left: 62%; top: 55%; width: calc(3.4 * var(--u)); height: calc(3.4 * var(--u)); margin: calc(-1.7 * var(--u)) 0 0 calc(-1.7 * var(--u)); border-radius: 50%; background: #ffffffcc; box-shadow: 0 0 0 calc(0.5 * var(--u)) #ffffff33; opacity: 0; transform: translate(calc(9 * var(--u)), calc(11 * var(--u))); transition: transform 1.3s cubic-bezier(.3,.7,.2,1), opacity .5s; pointer-events: none; z-index: 3; }
+.rl-finger.in { opacity: 1; transform: translate(0,0); }
+.rl-finger.down { transform: scale(.75); }
+.rl-finger.out { opacity: 0; transition: opacity .35s; }
+.rl-ctrl { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.4% 2.4%; z-index: 4; opacity: .3; display: flex; justify-content: space-between; color: #fff; font-size: calc(2.4 * var(--u)); font-family: 'DM Mono', monospace; }
+
+/* ── Obstacle-course video scene (different look from the rainbow/people scene) ── */
+.ob-scene { position: absolute; inset: 0; background: linear-gradient(#4fb0f0, #bfe6ff 60%, #e8f6ff); overflow: hidden; }
+.ob-sun { position: absolute; top: 9%; right: 14%; width: calc(9 * var(--u)); height: calc(9 * var(--u)); border-radius: 50%; background: #ffe27a; box-shadow: 0 0 calc(4 * var(--u)) #ffe27a99; }
+.ob-cloud { position: absolute; background: #fff; border-radius: calc(5 * var(--u)); height: calc(3.4 * var(--u)); opacity: .92; animation: drift 9s ease-in-out infinite alternate; }
+.ob-cloud.c1 { top: 14%; left: 12%; width: calc(13 * var(--u)); }
+.ob-cloud.c2 { top: 27%; left: 52%; width: calc(9 * var(--u)); animation-delay: -4s; }
+@keyframes drift { to { transform: translateX(calc(7 * var(--u))); } }
+.ob-hills { position: absolute; left: -5%; right: -5%; bottom: 30%; height: 18%; background: #7fcf8a; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+.ob-grass { position: absolute; left: 0; right: 0; bottom: 0; height: 34%; background: linear-gradient(#57bf62, #3a9a4b); }
+.ob-tires { position: absolute; left: 22%; bottom: 14%; display: flex; flex-direction: column-reverse; align-items: center; }
+.ob-tires i { display: block; width: calc(6 * var(--u)); height: calc(2.2 * var(--u)); border-radius: calc(1.2 * var(--u)); background: #222; border: calc(.5 * var(--u)) solid #4a4a4a; margin-top: calc(-.3 * var(--u)); }
+.ob-hurdle { position: absolute; left: 45%; bottom: 14%; width: calc(9 * var(--u)); height: calc(6 * var(--u)); transform: translateX(-50%); }
+.ob-hurdle b { position: absolute; }
+.ob-hurdle .p1 { left: 0; bottom: 0; width: calc(.9 * var(--u)); height: 100%; background: #fff; }
+.ob-hurdle .p2 { right: 0; bottom: 0; width: calc(.9 * var(--u)); height: 100%; background: #fff; }
+.ob-hurdle .bar { left: 0; right: 0; top: 20%; height: calc(1.3 * var(--u)); background: repeating-linear-gradient(90deg, #ff5a3c 0 calc(1.4 * var(--u)), #fff calc(1.4 * var(--u)) calc(2.8 * var(--u))); }
+.ob-ramp { position: absolute; left: 66%; bottom: 14%; width: calc(14 * var(--u)); height: calc(6 * var(--u)); background: linear-gradient(#e0a458, #b9752f); clip-path: polygon(0 100%, 100% 100%, 100% 0); }
+.ob-runner { position: absolute; bottom: 14%; left: 8%; width: calc(5 * var(--u)); }
+.ob-scene.go .ob-runner { animation: obrun 9s linear forwards; }
+@keyframes obrun { from { left: 8%; } to { left: 88%; } }
+.ob-scene.go .ob-hop { animation: obhop 9s ease-in-out forwards; }
+@keyframes obhop { 0%,36% { transform: translateY(0); } 42% { transform: translateY(calc(-7 * var(--u))); } 50% { transform: translateY(0); } 66%,70% { transform: translateY(0); } 76% { transform: translateY(calc(-4.5 * var(--u))); } 84%,100% { transform: translateY(0); } }
+.ob-kid { width: calc(4.4 * var(--u)); height: calc(7.4 * var(--u)); margin: 0 auto; background: linear-gradient(#ff5a5f, #c93a45); border-radius: calc(1.2 * var(--u)) calc(1.2 * var(--u)) calc(.6 * var(--u)) calc(.6 * var(--u)); position: relative; animation: bob .5s ease-in-out infinite; }
+.ob-head { position: absolute; top: calc(-4.2 * var(--u)); left: 50%; width: calc(4 * var(--u)); height: calc(4 * var(--u)); margin-left: calc(-2 * var(--u)); border-radius: 50%; background: #f2c9a0; border-top: calc(.9 * var(--u)) solid #4a2b16; }
+
+/* ── End-of-video screen ── */
+.vend { position: absolute; inset: 0; z-index: 12; background: radial-gradient(ellipse at 50% 45%, #10142cee, #060710f2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(2 * var(--u)); opacity: 0; transition: opacity .9s; pointer-events: none; padding-bottom: calc(3 * var(--u)); }
+.vend.on { opacity: 1; }
+.vend .bloom { width: calc(12 * var(--u)); height: calc(12 * var(--u)); }
+.vend-title { font-size: calc(5.6 * var(--u)); font-weight: 800; color: #fff; letter-spacing: -0.01em; }
+.vend-sub { font-size: calc(3.3 * var(--u)); color: #cfcfe6; text-align: center; max-width: calc(80 * var(--u)); line-height: 1.4; }
+.rl-lock .icon { width: 100%; height: 100%; }
+.rl-dim { position: absolute; inset: 0; background: rgba(6,6,12,.9); }
+.rl-tap .icon { width: calc(3.4 * var(--u)); height: calc(3.4 * var(--u)); }
 </style>
 </head>
 <body>
 
-<p class="title">AI Mediator</p>
-<h2 class="subtitle">AI-Child <span>Conversations</span></h2>
-<p class="intro">Click anywhere on a slide to advance. Each panel plays one at a time so you can follow the flow.</p>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="bloomGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff4d6d"/>
+      <stop offset="20%" stop-color="#fb923c"/>
+      <stop offset="40%" stop-color="#fbbf24"/>
+      <stop offset="60%" stop-color="#34d399"/>
+      <stop offset="80%" stop-color="#5b8dee"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="feature-tabbar" id="featureTabbar"></div>
 
 <div class="stage-wrap">
   <div class="stage" id="stage"></div>
-  <div class="slide-meta">
-    <div class="slide-counter" id="slide-counter">Slide 1 of 4</div>
+  <div class="floatnav">
     <div class="dots" id="dots"></div>
-  </div>
-  <div class="nav-row">
-    <button class="nav-btn" id="btn-prev" onclick="prevSlide()">&#x2190; Prev</button>
-    <button class="nav-btn primary" onclick="replaySlide()">&#x21BA; Replay</button>
-    <button class="nav-btn" id="btn-next" onclick="nextSlide()">Next &#x2192;</button>
-  </div>
-  <div class="legend-row">
-    <div class="leg"><div class="leg-pip" style="background:var(--ai-col)"></div>AI Mediator</div>
-    <div class="leg"><div class="leg-pip" style="background:var(--child)"></div>Child</div>
-    <div class="leg"><div class="leg-pip" style="background:var(--teal)"></div>Parent</div>
-    <div class="leg"><div class="leg-pip" style="background:var(--accent)"></div>System</div>
+    <div class="nav-row">
+      <button class="nav-btn" id="btn-prev" onclick="prevSlide()">&#x2190;</button>
+      <button class="nav-btn primary" onclick="replaySlide()">&#x21BA; Replay</button>
+      <button class="nav-btn" id="btn-next" onclick="nextSlide()">&#x2192;</button>
+    </div>
   </div>
 </div>
 
 <script>
+const BLOOM_SVG = '<svg class="bloom" viewBox="0 0 100 100"><path d="M50 18 C56 30 70 30 74 20 C68 32 76 44 90 42 C76 46 76 60 86 68 C72 60 62 68 64 82 C58 70 44 70 40 82 C46 68 34 60 20 62 C34 56 32 42 20 34 C34 40 42 30 36 18 C44 28 50 28 50 18 Z"/></svg>';
+
+const ICON = {
+  chat:  '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg>',
+  key:   '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 5l3 3M13 8l2 2"/></svg>',
+  lock:  '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  check: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>',
+  bell:  '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+  ff:    '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4l8 8-8 8z"/><path d="M13 4l8 8-8 8z"/></svg>',
+  play:  '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  person:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/></svg>',
+};
+
 let timers = [];
 function tm(fn, d) { timers.push(setTimeout(fn, d)); return d; }
 function clrT() { timers.forEach(clearTimeout); timers = []; }
@@ -249,23 +319,77 @@ function gel(id) { return document.getElementById(id); }
 function show(e) { if (e) e.classList.add('show'); }
 function scr(b) { if (b) b.scrollTo({ top: 99999, behavior: 'smooth' }); }
 
-const SLIDES = [
-  { title: 'Parent Settings',      num: null },
-  { title: 'AI Conversation',      num: 1    },
-  { title: 'Access Requests',      num: 2    },
-  { title: 'Explain Restrictions', num: 3    },
-];
+const SLIDES = [ {}, {}, {}, {} ];
+const TAB_LABELS = ['Settings', 'AI Chat', 'Access Requests', 'Explain Restrictions'];
 let cur = 0;
-
 let slidePhase = 0;
 let phaseCallbacks = [];
+
+const person = c => `<div class="person ${c}"><div class="pbody"><div class="phead"><div class="eyes"><span class="eye"></span><span class="eye"></span></div><div class="lbrow l"></div><div class="lbrow r"></div><div class="mouth"></div></div></div></div>`;
+function sceneHTML() { return `<div class="scene"><div class="sbg"></div><div class="cast">${person('a')}${person('b')}</div></div>`; }
+
+/* Landscape: obstacle-course video (AI Chat slide). Plays from the middle to the end, then an end screen. */
+function mkObstacleLandscape() {
+  const slot = document.createElement('div');
+  slot.className = 'phone-slot';
+  slot.innerHTML = `<div class="phone-l"><div class="cam-dot"></div><div class="stagewrap">
+    <div class="ob-scene">
+      <div class="ob-sun"></div><div class="ob-cloud c1"></div><div class="ob-cloud c2"></div>
+      <div class="ob-hills"></div><div class="ob-grass"></div>
+      <div class="ob-tires"><i></i><i></i><i></i></div>
+      <div class="ob-hurdle"><b class="p1"></b><b class="p2"></b><b class="bar"></b></div>
+      <div class="ob-ramp"></div>
+      <div class="ob-runner"><div class="ob-hop"><div class="ob-kid"><div class="ob-head"></div></div></div></div>
+    </div>
+    <div class="land-title">Backyard Obstacle Course Challenge</div>
+    <div class="ytctrl2"><div class="ptrack2"><div class="pfill2" style="width:50%;transition:none"></div></div><div class="crow2"><span>▶</span><span class="ptime">6:00 / 12:00</span></div></div>
+    <div class="vend">${BLOOM_SVG.replace('class="bloom"','class="bloom spin"')}<div class="vend-title">Did you enjoy this video?</div><div class="vend-sub">Want to talk about it? Ask me anything about what you just watched.</div><div class="rl-tapwrap"><div class="rl-tap">${ICON.chat}Have a conversation</div><div class="rl-ripple"></div></div></div>
+    <div class="rl-finger"></div>
+  </div></div>`;
+  return slot;
+}
+
+/* Landscape: a restricted video (original scene dimmed, with the explanation) */
+function mkRestrictedLandscape(text) {
+  const slot = document.createElement('div');
+  slot.className = 'phone-slot';
+  slot.innerHTML = `<div class="phone-l"><div class="cam-dot"></div><div class="stagewrap">
+    ${sceneHTML()}
+    <div class="rl-dim"></div>
+    <div class="rl-center">
+      <div class="rl-lock">${ICON.lock}</div>
+      <div class="rl-title">Video Unavailable</div>
+      <div class="rl-badge">Restricted</div>
+      <div class="rl-card">${BLOOM_SVG}<div class="rl-card-txt">${text}</div></div>
+      <div class="rl-tapwrap"><div class="rl-tap"><div class="cfm-dot"></div>Have questions? Tap to chat</div><div class="rl-ripple"></div></div>
+    </div>
+    <div class="rl-finger"></div>
+    <div class="rl-ctrl"><span>▶</span><span>0:00 / 4:12</span></div>
+  </div></div>`;
+  return slot;
+}
+
+/* Animated tap: a finger dot moves onto the button, presses it, ripple, release. Returns the time when done. */
+function tapSequence(land, btn, t0) {
+  const ripple = land.querySelector('.rl-ripple');
+  const finger = land.querySelector('.rl-finger');
+  tm(() => {
+    const wr = land.querySelector('.stagewrap').getBoundingClientRect();
+    const br = btn.getBoundingClientRect();
+    finger.style.left = (br.left - wr.left + br.width * 0.6) + 'px';
+    finger.style.top  = (br.top  - wr.top  + br.height * 0.5) + 'px';
+    finger.classList.add('in');
+  }, t0);
+  tm(() => { finger.classList.add('down'); btn.classList.add('pressed'); ripple.classList.add('go'); }, t0 + 1600);
+  tm(() => { finger.classList.remove('down'); finger.classList.add('out'); btn.classList.remove('pressed'); }, t0 + 2300);
+  return t0 + 3400;
+}
 
 function registerPhases(cbs) {
   phaseCallbacks = cbs;
   slidePhase = 0;
   phaseCallbacks[0]();
 }
-
 function advancePhase() {
   slidePhase++;
   if (slidePhase < phaseCallbacks.length) {
@@ -276,9 +400,9 @@ function advancePhase() {
   }
 }
 
-const NAV_HTML = `<div class="yt-nav"><div class="nav-item active"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Shorts</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Sub</div><div class="nav-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap"><svg width="10" height="10" viewBox="0 0 28 28" fill="none"><path d="M5 9 Q5 6 8 6 L20 6 Q23 6 23 9 L23 17 Q23 20 20 20 L15 20 L11 24 L11 20 L8 20 Q5 20 5 17 Z" fill="#5b8dee" opacity="0.9"/><circle cx="10.5" cy="13" r="1.4" fill="white"/><circle cx="14" cy="13" r="1.4" fill="white"/><circle cx="17.5" cy="13" r="1.4" fill="white"/></svg></div>AI</div></div>`;
+const NAV_HTML = `<div class="yt-nav"><div class="nav-item active"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</div><div class="nav-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Search</div><div class="nav-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Videos</div><div class="nav-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>Library</div><div class="nav-item ai-nav"><div class="nav-icon-wrap">${BLOOM_SVG}</div></div></div>`;
 
-function mkSlot(lblText, lblCls, pageTitle, id) {
+function mkSlot(lblText, lblCls, id) {
   const slot = document.createElement('div');
   slot.className = `phone-slot ${lblCls}`; slot.id = id;
   const lbl = document.createElement('div'); lbl.className = 'slot-lbl'; lbl.textContent = lblText;
@@ -286,24 +410,11 @@ function mkSlot(lblText, lblCls, pageTitle, id) {
   if (lblCls === 'single') op.classList.add('single');
   op.innerHTML = `<div class="op-notch"></div>
     <div class="op-sbar"><span>9:41</span><span>▊▊▊▊</span></div>
-    <div class="op-header"><div class="op-appname">AI Mediator</div><div class="op-page">${pageTitle}</div></div>
     <div class="op-body"></div>
     ${NAV_HTML}`;
-  const hint = document.createElement('div'); hint.className = 'click-hint'; hint.textContent = 'Click to continue →';
-  slot.appendChild(lbl); slot.appendChild(op); slot.appendChild(hint);
-  return { slot, op, hint, body: op.querySelector('.op-body') };
+  slot.appendChild(lbl); slot.appendChild(op);
+  return { slot, op, body: op.querySelector('.op-body') };
 }
-
-function mkPhone(who) {
-  // Inner phone replaced by direct op-body usage — stub for compat
-  const p = document.createElement('div'); p.style.cssText = 'display:flex;flex-direction:column;flex:1;overflow:hidden;';
-  p.innerHTML = `<div class="phone-body"></div>`;
-  return p;
-}
-function pb(ph) { return ph.querySelector('.phone-body'); }
-
-/* ── STAGE MANAGER ── */
-let stage_slots = [];
 
 function buildSkeleton() {
   const dotsEl = gel('dots'); dotsEl.innerHTML = '';
@@ -312,36 +423,29 @@ function buildSkeleton() {
     d.onclick = (e) => { e.stopPropagation(); renderSlide(i); };
     dotsEl.appendChild(d);
   });
+  const tabEl = gel('featureTabbar'); tabEl.innerHTML = '';
+  TAB_LABELS.forEach((label, i) => {
+    const b = document.createElement('div'); b.className = 'ftab'; b.id = `ftab-${i}`;
+    b.textContent = label;
+    b.onclick = (e) => { e.stopPropagation(); renderSlide(i); };
+    tabEl.appendChild(b);
+  });
 }
-
 function updateMeta(n) {
-  gel('slide-counter').textContent = `Slide ${n+1} of ${SLIDES.length}`;
   SLIDES.forEach((_, i) => { const d = gel(`dot-${i}`); d.classList.remove('on','done'); if (i===n) d.classList.add('on'); else if (i<n) d.classList.add('done'); });
+  TAB_LABELS.forEach((_, i) => { const t = gel(`ftab-${i}`); if (t) t.classList.toggle('on', i===n); });
   gel('btn-prev').style.opacity = n===0?'0.3':'1'; gel('btn-prev').style.pointerEvents = n===0?'none':'all';
   gel('btn-next').style.opacity = n===SLIDES.length-1?'0.3':'1'; gel('btn-next').style.pointerEvents = n===SLIDES.length-1?'none':'all';
 }
-
 function renderSlide(n) {
   clrT(); phaseCallbacks = []; slidePhase = 0;
   cur = n; updateMeta(n);
-  // Remove any existing slide header
-  const existing = document.querySelector('.slide-header');
-  if (existing) existing.remove();
   const stageEl = gel('stage'); stageEl.innerHTML = '';
-  stage_slots = [];
   [buildSettings, buildChat, buildRequest, buildExplain][n](stageEl);
 }
-
 function prevSlide() { if (cur > 0) renderSlide(cur - 1); }
 function nextSlide() { if (cur < SLIDES.length-1) renderSlide(cur + 1); }
 function replaySlide() { renderSlide(cur); }
-
-function mkPhone(who) {
-  const p = document.createElement('div'); p.className = 'phone';
-  p.innerHTML = `<div class="phone-bar"><div class="phone-bar-name">AI Mediator</div><div class="phone-bar-who">${who}</div><div class="phone-bar-time">9:41</div></div><div class="phone-body"></div>`;
-  return p;
-}
-function pb(ph) { return ph.querySelector('.phone-body'); }
 
 function ap(b, node, d) {
   tm(() => { b.appendChild(node); requestAnimationFrame(() => show(node)); scr(b); }, d);
@@ -349,91 +453,81 @@ function ap(b, node, d) {
 }
 function typ(b, d, dur) {
   let r;
-  tm(() => { r = document.createElement('div'); r.className = 'typing-row'; r.innerHTML = `<div class="bsender" style="color:var(--ai-col);font-size:8px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:2px;padding:0 3px;">AI Mediator</div><div class="typing-dots"><span></span><span></span><span></span></div>`; b.appendChild(r); requestAnimationFrame(() => show(r)); scr(b); }, d);
+  tm(() => { r = document.createElement('div'); r.className = 'typing-row'; r.innerHTML = `<div class="bsender bloom-sender">${BLOOM_SVG}</div><div class="typing-dots"><span></span><span></span><span></span></div>`; r.querySelector('.bloom').classList.add('spin'); b.appendChild(r); requestAnimationFrame(() => show(r)); scr(b); }, d);
   tm(() => { if (r && r.parentNode) r.remove(); }, d + dur);
 }
 function bub(role, text) {
   const row = document.createElement('div'); row.className = `brow ${role}`;
-  if (role !== 'sys') { const s = document.createElement('div'); s.className = 'bsender'; s.textContent = role === 'ai' ? 'AI Mediator' : role === 'child' ? 'Child' : 'Parent'; row.appendChild(s); }
+  if (role !== 'sys') {
+    const s = document.createElement('div'); s.className = 'bsender';
+    if (role === 'ai') { s.classList.add('bloom-sender'); s.innerHTML = BLOOM_SVG; }
+    else s.textContent = role === 'child' ? 'Child' : 'Parent';
+    row.appendChild(s);
+  }
   const b = document.createElement('div'); b.className = 'bubble'; b.textContent = text; row.appendChild(b); return row;
 }
-function vcCard(em, title, meta, bc, bt) {
+function vcCard(title, meta, bc, bt) {
   const d = document.createElement('div'); d.className = 'vc';
-  d.innerHTML = `<div class="vc-thumb">${em}</div><div><div class="vc-title">${title}</div><div class="vc-meta">${meta}</div><div class="vc-badge ${bc}">${bt}</div></div>`; return d;
+  d.innerHTML = `<div class="vc-thumb">${ICON.play}</div><div><div class="vc-title">${title}</div><div class="vc-meta">${meta}</div><div class="vc-badge ${bc}">${bt}</div></div>`; return d;
 }
-function blkCard(sub) {
-  const d = document.createElement('div'); d.className = 'blocked-card';
-  d.innerHTML = `<div class="bc-icon">🚫</div><div class="bc-title">Video Restricted</div><div class="bc-sub">${sub}</div>`; return d;
+function restrictCard(sub) {
+  const d = document.createElement('div'); d.className = 'restricted-card';
+  d.innerHTML = `<div class="bc-icon">${ICON.lock}</div><div class="bc-title">Video Restricted</div><div class="bc-sub">${sub}</div>`; return d;
 }
 function chatFab() {
   const d = document.createElement('div'); d.className = 'chat-fab-mini';
-  d.innerHTML = `<div class="cfm-dot"></div>Have questions? Chat with AI Mediator`; return d;
+  d.innerHTML = `<div class="cfm-dot"></div>Have questions? Tap to chat`; return d;
 }
 function noticeEl(type, html) {
   const d = document.createElement('div'); d.className = `notice ${type}`; d.innerHTML = html; return d;
 }
-function toastEl(text) {
-  const d = document.createElement('div'); d.className = 'phone-toast';
-  d.innerHTML = `<div class="pt-icon">🔔</div><div><div class="pt-title">AI Mediator</div><div class="pt-body">${text}</div></div>`; return d;
-}
 function ffEl(text) {
   const d = document.createElement('div'); d.className = 'fast-forward';
-  d.innerHTML = `<div class="ff-rule"><div class="ff-line"></div><div class="ff-badge">⏩ Fast Forward</div><div class="ff-line"></div></div><div class="ff-text">${text}</div>`; return d;
+  d.innerHTML = `<div class="ff-rule"><div class="ff-line"></div><div class="ff-badge">${ICON.ff} Fast Forward</div><div class="ff-line"></div></div><div class="ff-text">${text}</div>`; return d;
 }
-function decBadge(type, text) {
-  const d = document.createElement('div'); d.className = `decision-badge decision-${type}`; d.textContent = text; return d;
+function toastEl(text) {
+  const d = document.createElement('div'); d.className = 'toast-card';
+  d.innerHTML = `<div class="tc-icon">${ICON.bell}</div><div><div class="tc-title">AI</div><div class="tc-body">${text}</div></div>`;
+  d.querySelector('.tc-title').innerHTML = BLOOM_SVG; d.querySelector('.tc-title').style.display='inline-flex'; d.querySelector('.tc-title .bloom').style.width='1.8vh'; d.querySelector('.tc-title .bloom').style.height='1.8vh';
+  return d;
+}
+function pingEl() {
+  const d = document.createElement('div'); d.className = 'p-ping';
+  d.innerHTML = `<div class="p-ping-avatar">${ICON.person}</div><div class="p-ping-body"><div class="p-ping-name">Parent</div><div class="p-ping-status"><span class="pp-dot"></span>Waiting for a reply</div></div>`;
+  return d;
+}
+function resolvePing(el, kind, label) {
+  el.classList.add(kind);
+  el.querySelector('.p-ping-avatar').innerHTML = kind === 'approved' ? ICON.check : ICON.chat;
+  el.querySelector('.p-ping-status').innerHTML = label;
 }
 
-/* mk2phones: builds two phone slots in stageEl, returns [body1, body2, showPhone2fn] */
 function mk2phones(stageEl, def1, def2) {
-  const s1 = mkSlot(def1.label, def1.cls, def1.page, def1.id);
-  const s2 = mkSlot(def2.label, def2.cls, def2.page, def2.id);
-
-  // phone bodies
+  const s1 = mkSlot(def1.label, def1.cls, def1.id);
+  const s2 = mkSlot(def2.label, def2.cls, def2.id);
   const pb1 = document.createElement('div'); pb1.className = 'phone-body'; s1.body.appendChild(pb1);
   const pb2 = document.createElement('div'); pb2.className = 'phone-body'; s2.body.appendChild(pb2);
-
   stageEl.appendChild(s1.slot);
   stageEl.appendChild(s2.slot);
-
-  // show phone 1 immediately
   setTimeout(() => s1.slot.classList.add('visible'), 60);
-
-  // show click hint on phone 1 after a beat
-  let hintTimer = null;
-  function showHint1(delay) { hintTimer = setTimeout(() => s1.hint.classList.add('show'), delay); }
-  function hideHint1() { s1.hint.classList.remove('show'); if (hintTimer) clearTimeout(hintTimer); }
-
-  function showPhone2() {
-    hideHint1();
-    setTimeout(() => s2.slot.classList.add('visible'), 60);
-  }
-
-  return { pb1, pb2, showPhone2, showHint1, hideHint1, slot1: s1.slot, slot2: s2.slot };
+  function showPhone2() { setTimeout(() => s2.slot.classList.add('visible'), 60); }
+  return { pb1, pb2, showPhone2, slot1: s1.slot, slot2: s2.slot };
 }
 
-/* ══════════════════════
-   SLIDE 0: SETTINGS — single phone
-══════════════════════ */
+/* ══════════ SLIDE 0: SETTINGS — single phone ══════════ */
 function buildSettings(stageEl) {
-  // Slide header above the phone
-  const hdr = document.createElement('div'); hdr.className = 'slide-header';
-  hdr.innerHTML = `<div class="slide-header-sup">Settings</div><div class="slide-header-title">Parent Settings</div>`;
-  stageEl.parentElement.insertBefore(hdr, stageEl);
-
-  const { slot, body, hint } = mkSlot('', 'single', 'AI-Child Conversations', 'slot-settings');
-  slot.querySelector('.slot-lbl').style.display = 'none';
-  const tb = document.createElement('div'); tb.className = 'tab-body'; tb.id = 'tb';
+  const { slot, body } = mkSlot('', 'single', 'slot-settings');
+  const tb = document.createElement('div'); tb.className = 'tab-body';
   tb.innerHTML = `
     <div><div class="settings-title">AI-Child Conversations</div><div class="settings-sub">Control how the AI interacts with your child during their viewing sessions.</div></div>
-    <div class="master-row" id="mr"><div class="mr-icon">🤖</div><div class="mr-info"><div class="mr-name">AI-Child Conversations</div><div class="mr-desc">Allow AI Mediator to have conversations with your child while they watch</div></div><div class="btog" id="btog"></div></div>
+    <div class="master-row" id="mr"><div class="mr-icon">${BLOOM_SVG}</div><div class="mr-info"><div class="mr-name">AI-Child Conversations</div><div class="mr-desc">Allow the AI to have conversations with your child while they watch</div></div><div class="btog" id="btog"></div></div>
     <div class="sog-section">
       <div class="sog-section-label">When enabled, you can turn on</div>
       <div class="sog-indent">
         <div class="sog-grid">
-          <div class="sog" id="sg0"><div class="sog-icon">💬</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Your child can ask the AI anything while watching</div><div class="stog" id="st0"></div></div><div class="sog-desc">Opens a chat channel throughout their entire session, before, during, or after any video</div></div></div>
-          <div class="sog" id="sg1"><div class="sog-icon">🔑</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Request access on behalf</div><div class="stog" id="st1"></div></div><div class="sog-desc">AI forwards the child's unblock request to the parent with a summary and their reason</div></div></div>
-          <div class="sog" id="sg2"><div class="sog-icon">🚫</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Explain restriction decisions</div><div class="stog" id="st2"></div></div><div class="sog-desc">AI explains in simple terms why a video was blocked and what happens next</div></div></div>
+          <div class="sog" id="sg0"><div class="sog-icon">${ICON.chat}</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Ask the AI anything while watching</div><div class="stog" id="st0"></div></div><div class="sog-desc">Opens a chat channel throughout their session</div></div></div>
+          <div class="sog" id="sg1"><div class="sog-icon">${ICON.key}</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Request access on their behalf</div><div class="stog" id="st1"></div></div><div class="sog-desc">AI forwards the child's request with their reason</div></div></div>
+          <div class="sog" id="sg2"><div class="sog-icon">${ICON.lock}</div><div style="flex:1"><div class="sog-top"><div class="sog-name">Explain restriction decisions</div><div class="stog" id="st2"></div></div><div class="sog-desc">AI explains why a video was restricted</div></div></div>
         </div>
       </div>
     </div>`;
@@ -443,350 +537,209 @@ function buildSettings(stageEl) {
 
   registerPhases([
     () => {
-      const T = 400;
+      const T = 450;
       tm(() => show(gel('mr')), T);
-      tm(() => { gel('btog').classList.add('on'); gel('mr').classList.add('on'); }, T+800);
+      tm(() => { gel('btog').classList.add('on'); gel('mr').classList.add('on'); }, T+900);
       [0,1,2].forEach(i => {
-        tm(() => show(gel(`sg${i}`)), T+1600+i*550);
-        tm(() => { gel(`st${i}`).classList.add('on'); gel(`sg${i}`).classList.add('on'); }, T+1600+i*550+440);
+        tm(() => show(gel(`sg${i}`)), T+1800+i*700);
+        tm(() => { gel(`st${i}`).classList.add('on'); gel(`sg${i}`).classList.add('on'); }, T+1800+i*700+500);
       });
     }
   ]);
-
   stageEl.onclick = () => advancePhase();
 }
 
-/* ══════════════════════
-   SLIDE 1: CHAT
-══════════════════════ */
-/* ══════════════════════
-   SLIDE 1: CHAT
-══════════════════════ */
+/* ══════════ SLIDE 1: CHAT — video plays to the end → "Did you enjoy this video?" → tap → chat ══════════ */
 function buildChat(stageEl) {
-  const hdr = document.createElement('div'); hdr.className = 'slide-header';
-  hdr.innerHTML = `<div class="slide-header-sup">Scenario 1</div><div class="slide-header-title">AI Conversation</div>`;
-  stageEl.parentElement.insertBefore(hdr, stageEl);
-  const { pb1, pb2, showPhone2, showHint1 } = mk2phones(stageEl,
-    { label: 'Feature Off', cls: 'lbl-off', page: 'Scenario 1', id: 'slot-chat-off' },
-    { label: 'Feature On',  cls: 'lbl-on',  page: 'Scenario 1', id: 'slot-chat-on'  }
-  );
+  const land = mkObstacleLandscape();
+  stageEl.appendChild(land);
+  setTimeout(() => land.classList.add('visible'), 60);
+
+  function startChat() {
+    const { slot, body } = mkSlot('', 'single', 'slot-chat-on');
+    const pb = document.createElement('div'); pb.className = 'phone-body'; body.appendChild(pb);
+    stageEl.appendChild(slot);
+    setTimeout(() => slot.classList.add('visible'), 60);
+
+    let t = 300;
+    ap(pb, vcCard('Backyard Obstacle Course Challenge','ChannelName · 12 min','badge-playing','Just finished'), t);
+    ap(pb, chatFab(), t+700);
+    ap(pb, bub('child', 'That jump was so cool! How are they landing it without getting hurt?'), t+1600);
+    typ(pb, t+2400, 1500);
+    ap(pb, bub('ai', 'They plan it carefully with padding and safety gear you just can\'t see on camera.'), t+3900);
+    ap(pb, bub('child', 'Could I try something like that?'), t+5900);
+    typ(pb, t+6700, 1500);
+    ap(pb, bub('ai', 'Better not — that\'s something for trained people with the right setup. Just enjoy watching!'), t+8200);
+  }
+
   registerPhases([
     () => {
-      let t = 300;
-      ap(pb1, vcCard('🎬','MrBeast: $1 vs $1,000,000 Hotel Room','MrBeast · 16 min','badge-playing','Playing now'), t);
-      ap(pb1, bub('child', 'Wait, how are they surviving that fall into the pool? That looks insane'), t+1400);
-      ap(pb1, noticeEl('off','<span>Chat is off.</span> The child gets no response.'), t+3200);
-      showHint1(t+4400);
-    },
-    () => {
-      showPhone2();
-      let t = 200;
-      ap(pb2, vcCard('🎬','MrBeast: $1 vs $1,000,000 Hotel Room','MrBeast · 16 min','badge-playing','Playing now'), t);
-      ap(pb2, chatFab(), t+700);
-      ap(pb2, bub('child', 'Wait, how are they surviving that fall into the pool? That looks insane'), t+1600);
-      typ(pb2, t+2400, 1700);
-      ap(pb2, bub('ai', 'That stunt is carefully planned by professionals. They have stunt coordinators, test the pool depth in advance, and use safety equipment that is not shown on camera. It looks extreme because that is the point, but a lot of work goes into keeping everyone safe.'), t+4200);
-      ap(pb2, bub('child', 'Can I try jumping from high up into a pool like that?'), t+6400);
-      typ(pb2, t+7200, 1700);
-      ap(pb2, bub('ai', 'That is something to avoid at home. What you see in these videos is done by trained professionals with safety measures set up beforehand. Attempting it without that setup is genuinely risky. Enjoy watching it, but leave the stunts to them.'), t+9000);
-      ap(pb2, bub('child', 'Okay fair. Why do they always give so much money away?'), t+11000);
-      typ(pb2, t+11800, 1700);
-      ap(pb2, bub('ai', 'It is basically the whole format. MrBeast puts most of his ad revenue back into bigger videos. The giveaways bring in viewers, which funds the next one. It is an unusual model but it clearly works for him.'), t+13600);
-      ap(pb2, bub('child', 'That is actually kind of smart. Is he the richest YouTuber?'), t+15800);
-      typ(pb2, t+16600, 1700);
-      ap(pb2, bub('ai', 'He is one of the highest-earning ones, yes. But most of his money goes straight back into production costs. The videos you watch are genuinely expensive to make.'), t+18400);
-      ap(pb2, bub('child', 'Wild. Okay back to watching.'), t+20400);
-      typ(pb2, t+21200, 1200);
-      ap(pb2, bub('ai', 'Enjoy. Feel free to ask anything else while you watch.'), t+22500);
+      const fill = land.querySelector('.pfill2');
+      const time = land.querySelector('.ptime');
+      const vend = land.querySelector('.vend');
+      const btn  = land.querySelector('.rl-tap');
+      // video plays from the middle to the end (slowly, one run-through)
+      tm(() => {
+        land.querySelector('.ob-scene').classList.add('go');
+        fill.style.transition = 'width 9s linear'; fill.style.width = '100%';
+      }, 800);
+      const steps = 12;
+      for (let i = 1; i <= steps; i++) {
+        tm(() => {
+          const s = Math.round(360 + 360 * i / steps);
+          time.textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')} / 12:00`;
+        }, 800 + 9000 * i / steps);
+      }
+      // end screen appears, then the kid has time to read it before tapping
+      tm(() => vend.classList.add('on'), 10600);
+      const end = tapSequence(land, btn, 13400);
+      tm(() => {
+        land.classList.remove('visible');
+        tm(() => { land.remove(); startChat(); }, 500);
+      }, end);
     }
   ]);
   stageEl.onclick = () => advancePhase();
 }
 
-/* ══════════════════════
-   SLIDE 2: REQUEST ACCESS
-══════════════════════ */
+/* ══════════ SLIDE 2: ACCESS REQUESTS — restricted screen → tap → chat ══════════ */
 function buildRequest(stageEl) {
-  const hdr = document.createElement('div'); hdr.className = 'slide-header';
-  hdr.innerHTML = `<div class="slide-header-sup">Scenario 2</div><div class="slide-header-title">Access Requests</div>`;
-  stageEl.parentElement.insertBefore(hdr, stageEl);
-  // Helper: build a phone slot pair (child + parent) inside a scenario group
-  function mkScenGroup(titleText, titleCls, groupId) {
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;';
-    const title = document.createElement('div');
-    title.className = `scenario-title ${titleCls}`; title.textContent = titleText;
-    const phones = document.createElement('div');
-    phones.className = 'scenario-group'; phones.id = groupId;
-    wrap.appendChild(title); wrap.appendChild(phones);
-    return { wrap, phones };
+  const s1 = mkSlot('Parent Approves', 'lbl-on',     'slot-rq-a');
+  const s2 = mkSlot("Let's Discuss",   'lbl-parent', 'slot-rq-b');
+  const pb1 = document.createElement('div'); pb1.className = 'phone-body'; s1.body.appendChild(pb1);
+  const pb2 = document.createElement('div'); pb2.className = 'phone-body'; s2.body.appendChild(pb2);
+
+  const land = mkRestrictedLandscape("This video was restricted because the challenges get rough and people push each other in ways that can be upsetting. We want to make sure you're watching things that are safe, fun, and right for your age.");
+  stageEl.appendChild(land);
+  setTimeout(() => land.classList.add('visible'), 60);
+
+  function runRequest(pb, outcome, k) {
+    const d = n => n * k;
+    let t = d(300);
+    ap(pb, restrictCard('Your parent has restricted this video.'), t);
+    ap(pb, chatFab(), t+d(600));
+    ap(pb, bub('child', 'Can you ask my parent if I can watch this?'), t+d(1500));
+    typ(pb, t+d(2300), d(1400));
+    ap(pb, bub('ai', 'Sure — why do you want to watch it?'), t+d(3800));
+    ap(pb, bub('child', "Everyone at school already saw it and I'm the only one who hasn't."), t+d(5600));
+    typ(pb, t+d(6400), d(1400));
+    ap(pb, bub('ai', "Okay, sending that to your parent now."), t+d(7900));
+    const ping = ap(pb, pingEl(), t+d(9200));
+
+    tm(() => {
+      if (outcome === 'approved') resolvePing(ping, 'approved', 'Approved');
+      else resolvePing(ping, 'discuss', "Let's discuss");
+    }, t+d(11500));
+
+    if (outcome === 'approved') {
+      typ(pb, t+d(12300), d(1300));
+      ap(pb, bub('ai', 'Good news — they said yes! You can watch now.'), t+d(13700));
+      ap(pb, vcCard('Last To Leave The Circle','ChannelName · 22 min','badge-unlocked','Unlocked'), t+d(15000));
+    } else {
+      typ(pb, t+d(12300), d(1300));
+      ap(pb, bub('ai', "They'd like to watch the start with you first, maybe tonight."), t+d(13700));
+      ap(pb, bub('child', 'Okay, that works.'), t+d(15700));
+    }
   }
 
-  function mkScenSlot(label, cls, page, id) {
-    const s = mkSlot(label, cls, page, id);
-    return s;
+  let firstStarted = false;
+  function startFirst(k) {
+    if (firstStarted) return; firstStarted = true;
+    if (land.parentNode) land.remove();
+    stageEl.appendChild(s1.slot);
+    setTimeout(() => s1.slot.classList.add('visible'), 60);
+    runRequest(pb1, 'approved', k);
   }
-
-  // Build all 4 slots upfront, hidden
-  const { wrap: wrapYes, phones: phonesYes } = mkScenGroup('Parent Approves', 'yes', 'grp-yes');
-  const { wrap: wrapDisc, phones: phonesDisc } = mkScenGroup("Let's Discuss", 'discuss', 'grp-disc');
-
-  const sChildYes  = mkScenSlot('Child',  'lbl-child',  'Scenario 2', 'slot-rq-c1');
-  const sParentYes = mkScenSlot('Parent', 'lbl-parent', 'Scenario 2', 'slot-rq-p1');
-  const sChildDisc = mkScenSlot('Child',  'lbl-child',  'Scenario 2', 'slot-rq-c2');
-  const sParentDisc= mkScenSlot('Parent', 'lbl-parent', 'Scenario 2', 'slot-rq-p2');
-
-  const pb_cy  = document.createElement('div'); pb_cy.className  = 'phone-body'; sChildYes.body.appendChild(pb_cy);
-  const pb_py  = document.createElement('div'); pb_py.className  = 'phone-body'; sParentYes.body.appendChild(pb_py);
-  const pb_cd  = document.createElement('div'); pb_cd.className  = 'phone-body'; sChildDisc.body.appendChild(pb_cd);
-  const pb_pd  = document.createElement('div'); pb_pd.className  = 'phone-body'; sParentDisc.body.appendChild(pb_pd);
-
-  phonesYes.appendChild(sChildYes.slot);
-  phonesYes.appendChild(sParentYes.slot);
-  phonesDisc.appendChild(sChildDisc.slot);
-  phonesDisc.appendChild(sParentDisc.slot);
-
-  // Divider
-  const div = document.createElement('div'); div.className = 'scenario-divider';
-  div.innerHTML = '<div class="scen-line"></div>';
-
-  stageEl.appendChild(wrapYes);
-  stageEl.appendChild(div);
-  stageEl.appendChild(wrapDisc);
-
-  // Shared child request message builder
-  function childRequest(pb, t, hint) {
-    ap(pb, vcCard('🏆','Last To Leave Circle Wins $500,000','MrBeast · 22 min','badge-blocked','Restricted'), t);
-    ap(pb, blkCard('Your parent has restricted this video.'), t+500);
-    ap(pb, chatFab(), t+1100);
-    ap(pb, bub('child', 'Can you ask my parent if I can watch this?'), t+2200);
-    typ(pb, t+3000, 1500);
-    ap(pb, bub('ai', 'Of course! Tell me why you want to watch it.'), t+4600);
-    ap(pb, bub('child', 'Its the biggest MrBeast challenge ever and everyone at school already watched it. I am literally the only one who has not seen it.'), t+6400);
-    typ(pb, t+7300, 1500);
-    ap(pb, bub('ai', 'That is a solid reason. I will send your parent a message now.'), t+8900);
-    ap(pb, bub('sys', 'Request sent to parent'), t+10100);
-    typ(pb, t+10700, 1300);
-    ap(pb, bub('ai', 'Message sent. I will let you know what they decide.'), t+12100);
-    if (hint) hint(t+13200);
-  }
-
-  function parentNotif(pb, chipIds) {
-    const pn = document.createElement('div'); pn.className = 'parent-notif';
-    pn.innerHTML = `
-      <div class="pn-header"><div class="pn-icon">🔔</div><div><div class="pn-title">Access Request</div><div class="pn-app">from AI Mediator</div></div></div>
-      <div class="pn-video">Your child wants to watch:<br><strong>Last To Leave Circle Wins $500,000</strong> by MrBeast · 22 min</div>
-      <div class="child-reason"><div class="cr-label">In their own words</div><div class="cr-text">"Its the biggest MrBeast challenge ever and everyone at school already watched it. I am literally the only one who has not seen it."</div></div>
-      <div class="pn-chips">
-        <div class="chip chip-info" id="${chipIds[0]}">📋 Show video summary</div>
-        <div class="chip chip-yes" id="${chipIds[1]}">✓ Yes, allow access</div>
-        <div class="chip chip-no" id="${chipIds[2]}">💬 Let's discuss</div>
-      </div>`;
-    pb.appendChild(pn); requestAnimationFrame(() => show(pn)); scr(pb);
-  }
-
-  // Hint helpers
-  let hintYes = null, hintDisc = null;
-  function showHintYes(d) { hintYes = setTimeout(() => sChildYes.hint.classList.add('show'), d); }
-  function showHintDisc(d) { hintDisc = setTimeout(() => sChildDisc.hint.classList.add('show'), d); }
 
   registerPhases([
-    /* Phase 0: Scenario 1 — Child side plays, parent hidden */
     () => {
-      setTimeout(() => sChildYes.slot.classList.add('visible'), 60);
-      childRequest(pb_cy, 300, showHintYes);
+      const btn = land.querySelector('.rl-tap');
+      const end = tapSequence(land, btn, 4500);
+      tm(() => {
+        land.classList.remove('visible');
+        tm(() => startFirst(1), 500);
+      }, end);
     },
-
-    /* Phase 1: Scenario 1 — Parent approves */
     () => {
-      sChildYes.hint.classList.remove('show');
-      setTimeout(() => sParentYes.slot.classList.add('visible'), 60);
-      let t = 300;
-      tm(() => parentNotif(pb_py, ['chip-s-y','chip-ap-y','chip-ny-y']), t);
-      tm(() => {
-        const vs = document.createElement('div'); vs.className = 'vid-summary';
-        vs.innerHTML = `<div class="vs-label">Video Summary</div><div class="vs-text">100 contestants stand in painted circles for as long as possible. High-energy challenge, no violent or adult content. Suitable for ages 8+.</div>`;
-        pb_py.appendChild(vs); requestAnimationFrame(() => show(vs)); scr(pb_py);
-        const sc = document.getElementById('chip-s-y');
-        if (sc) { sc.style.background = 'rgba(91,141,238,0.28)'; sc.style.borderColor = 'rgba(91,141,238,0.8)'; }
-      }, t+2800);
-      tm(() => {
-        const ca = document.getElementById('chip-ap-y');
-        const cs = document.getElementById('chip-s-y');
-        const cn = document.getElementById('chip-ny-y');
-        if (ca) { ca.style.background = 'rgba(52,211,153,0.28)'; ca.style.borderColor = 'rgba(52,211,153,0.9)'; ca.style.fontWeight = '700'; }
-        if (cs) cs.style.opacity = '0.35';
-        if (cn) cn.style.opacity = '0.35';
-      }, t+5500);
-      tm(() => { const b = decBadge('yes','✓ Parent approved'); pb_py.appendChild(b); requestAnimationFrame(() => show(b)); scr(pb_py); }, t+6400);
-      ap(pb_cy, bub('ai', 'Your parent approved it! You can watch now 🎉'), t+7800);
-      ap(pb_cy, vcCard('🏆','Last To Leave Circle Wins $500,000','MrBeast · 22 min','badge-unlocked','Unlocked ✓'), t+8700);
-      ap(pb_cy, bub('child', 'YESSS lets go!!'), t+10000);
-      // Show hint to move to scenario 2
-      tm(() => sParentYes.hint.classList.add('show'), t+11500);
-    },
-
-    /* Phase 2: Scenario 2 — Child side plays */
-    () => {
-      sParentYes.hint.classList.remove('show');
-      setTimeout(() => sChildDisc.slot.classList.add('visible'), 60);
-      childRequest(pb_cd, 300, showHintDisc);
-    },
-
-    /* Phase 3: Scenario 2 — Parent says Let's Discuss */
-    () => {
-      sChildDisc.hint.classList.remove('show');
-      setTimeout(() => sParentDisc.slot.classList.add('visible'), 60);
-      let t = 300;
-      tm(() => parentNotif(pb_pd, ['chip-s-d','chip-ap-d','chip-ny-d']), t);
-      tm(() => {
-        const cn = document.getElementById('chip-ny-d');
-        const ca = document.getElementById('chip-ap-d');
-        const cs = document.getElementById('chip-s-d');
-        if (cn) { cn.style.background = 'rgba(45,212,191,0.28)'; cn.style.borderColor = 'rgba(45,212,191,0.9)'; cn.style.fontWeight = '700'; cn.textContent = "💬 Let's discuss"; }
-        if (ca) ca.style.opacity = '0.35';
-        if (cs) cs.style.opacity = '0.35';
-      }, t+2800);
-      tm(() => { const b = decBadge('no',"💬 Let's discuss selected"); pb_pd.appendChild(b); requestAnimationFrame(() => show(b)); scr(pb_pd); }, t+3600);
-      tm(() => {
-        const msg = document.createElement('div'); msg.className = 'brow parent';
-        msg.innerHTML = `<div class="bsender" style="color:var(--teal)">Parent</div><div class="bubble" style="background:#0a1f1e;border:1px solid rgba(45,212,191,0.2);color:var(--text);border-bottom-right-radius:3px;">Not right now. I want to watch the first bit with you so we can decide together. Lets do it tonight after dinner!</div>`;
-        pb_pd.appendChild(msg); requestAnimationFrame(() => show(msg)); scr(pb_pd);
-      }, t+4800);
-      tm(() => { const b = decBadge('no','Message sent to child'); pb_pd.appendChild(b); requestAnimationFrame(() => show(b)); scr(pb_pd); }, t+5800);
-      ap(pb_cd, blkCard('Your parent wants to discuss first.'), t+6400);
-      typ(pb_cd, t+7200, 1400);
-      tm(() => {
-        const row = document.createElement('div'); row.className = 'brow ai show';
-        row.innerHTML = `<div class="bsender" style="color:var(--ai-col)">AI Mediator</div><div class="bubble" style="background:#131c32;border:1px solid rgba(96,165,250,0.15);color:var(--text);border-bottom-left-radius:3px;">Your parent wants to watch the beginning with you before deciding. They left you a message:<br><br><em>"Not right now. I want to watch the first bit with you so we can decide together. Lets do it tonight after dinner!"</em></div>`;
-        pb_cd.appendChild(row); scr(pb_cd);
-      }, t+8700);
-      typ(pb_cd, t+10800, 1400);
-      tm(() => {
-        const row = document.createElement('div'); row.className = 'brow ai show';
-        row.innerHTML = `<div class="bsender" style="color:var(--ai-col)">AI Mediator</div><div class="bubble" style="background:#131c32;border:1px solid rgba(96,165,250,0.15);color:var(--text);border-bottom-left-radius:3px;">Sounds like you two will watch it together tonight.</div>`;
-        pb_cd.appendChild(row); scr(pb_cd);
-      }, t+12300);
-      tm(() => {
-        const row = document.createElement('div'); row.className = 'brow child show';
-        row.innerHTML = `<div class="bsender" style="color:var(--child)">Child</div><div class="bubble" style="background:#1b0e2e;border:1px solid rgba(192,132,252,0.15);color:var(--text);border-bottom-right-radius:3px;">Okay that works.</div>`;
-        pb_cd.appendChild(row); scr(pb_cd);
-      }, t+13800);
+      startFirst(0.01); // skipped ahead: put the first chat in place instantly
+      stageEl.appendChild(s2.slot);
+      setTimeout(() => s2.slot.classList.add('visible'), 60);
+      runRequest(pb2, 'discuss', 1);
     }
   ]);
-
   stageEl.onclick = () => advancePhase();
 }
 
-/* ══════════════════════
-   SLIDE 3: EXPLAIN RESTRICTION
-══════════════════════ */
+/* ══════════ SLIDE 3: EXPLAIN RESTRICTIONS — restricted screen → tap → chat ══════════ */
 function buildExplain(stageEl) {
-  const hdr = document.createElement('div'); hdr.className = 'slide-header';
-  hdr.innerHTML = `<div class="slide-header-sup">Scenario 3</div><div class="slide-header-title">Explain Restrictions</div>`;
-  stageEl.parentElement.insertBefore(hdr, stageEl);
-
-  // Phase 0: Feature Off — single centered phone
-  const sOff = mkSlot('Feature Off', 'lbl-off', 'Scenario 3', 'slot-ex-off');
-  const pb_off = document.createElement('div'); pb_off.className = 'phone-body'; sOff.body.appendChild(pb_off);
-
-  // Phase 1+: Feature On — two phones side by side with divider
   function mkGroup(titleText, titleCls) {
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;';
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0;';
     const title = document.createElement('div');
-    title.className = `scenario-title ${titleCls}`; title.textContent = titleText;
-    const phones = document.createElement('div'); phones.className = 'scenario-group';
+    title.style.cssText = `font-size:1.4vh;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-align:center;color:var(--${titleCls==='yes'?'green':'teal'})`;
+    title.textContent = titleText;
+    const phones = document.createElement('div'); phones.style.cssText = 'display:flex;flex-direction:row;align-items:flex-start;gap:20px;flex-shrink:0;';
     wrap.appendChild(title); wrap.appendChild(phones);
     return { wrap, phones };
   }
-
   const { wrap: wrapNorm, phones: phonesNorm } = mkGroup('Feature On', 'yes');
   const { wrap: wrapPers, phones: phonesPers } = mkGroup('Persistent Convo', 'discuss');
-
-  const sNorm = mkSlot('', 'lbl-on', 'Scenario 3', 'slot-ex-na');
-  const sPers = mkSlot('', 'lbl-parent', 'Scenario 3', 'slot-ex-pa');
-
+  const sNorm = mkSlot('', 'lbl-on', 'slot-ex-na');
+  const sPers = mkSlot('', 'lbl-parent', 'slot-ex-pa');
   const pb_na = document.createElement('div'); pb_na.className = 'phone-body'; sNorm.body.appendChild(pb_na);
   const pb_pa = document.createElement('div'); pb_pa.className = 'phone-body'; sPers.body.appendChild(pb_pa);
-
   phonesNorm.appendChild(sNorm.slot);
   phonesPers.appendChild(sPers.slot);
 
-  const divider = document.createElement('div'); divider.className = 'scenario-divider';
-  divider.innerHTML = '<div class="scen-line"></div>';
+  const land = mkRestrictedLandscape("This video was restricted because it shows people getting hurt or fighting in ways that can be upsetting or scary. We want to make sure you're watching things that are safe, fun, and right for your age.");
+  stageEl.appendChild(land);
+  setTimeout(() => land.classList.add('visible'), 60);
 
-  // Only add the feature-on group elements to DOM now (hidden), off phone added separately
-  stageEl.appendChild(sOff.slot);
-
-  // Hint helper
-  function showHint(slot, delay) { setTimeout(() => slot.hint.classList.add('show'), delay); }
-  function hideHint(slot) { slot.hint.classList.remove('show'); }
+  let normStarted = false;
+  function startNorm(k) {
+    if (normStarted) return; normStarted = true;
+    if (land.parentNode) land.remove();
+    stageEl.appendChild(wrapNorm);
+    setTimeout(() => sNorm.slot.classList.add('visible'), 60);
+    const t = 300 * k;
+    ap(pb_na, restrictCard('Your parent has restricted this video.'), t);
+    ap(pb_na, chatFab(), t+600*k);
+    ap(pb_na, bub('child', 'Why is this restricted?'), t+1500*k);
+    typ(pb_na, t+2300*k, 1500*k);
+    ap(pb_na, bub('ai', "It has scenes with people getting hurt or fighting, which can feel scary. Your parent restricted it to keep what you watch safe and fun."), t+3800*k);
+    ap(pb_na, bub('child', 'Oh okay, that makes sense.'), t+6000*k);
+  }
 
   registerPhases([
-    /* Phase 0: Feature Off */
     () => {
-      setTimeout(() => sOff.slot.classList.add('visible'), 60);
-      let t = 300;
-      ap(pb_off, blkCard('Your parent has restricted this video.'), t);
-      ap(pb_off, bub('child', 'Why is this blocked?'), t+1400);
-      ap(pb_off, noticeEl('off', '<span>Explain restriction is off.</span> The AI does not respond.'), t+3200);
-      showHint(sOff, t+4400);
+      const btn = land.querySelector('.rl-tap');
+      const end = tapSequence(land, btn, 4500);
+      tm(() => {
+        land.classList.remove('visible');
+        tm(() => startNorm(1), 500);
+      }, end);
     },
-
-    /* Phase 1: Remove off phone, show Feature On + Persistent Convo side by side */
     () => {
-      hideHint(sOff);
-      sOff.slot.style.transition = 'opacity 0.4s';
-      sOff.slot.style.opacity = '0';
-      setTimeout(() => {
-        sOff.slot.remove();
-        stageEl.appendChild(wrapNorm);
-        stageEl.appendChild(divider);
-        stageEl.appendChild(wrapPers);
-        setTimeout(() => sNorm.slot.classList.add('visible'), 60);
-      }, 420);
-
-      let t = 700;
-      // Feature On — normal conversation
-      ap(pb_na, blkCard('Your parent has restricted this video.'), t);
-      ap(pb_na, chatFab(), t+600);
-      ap(pb_na, bub('child', 'My Minecraft video got blocked. I do not get why.'), t+1400);
-      typ(pb_na, t+2200, 1600);
-      ap(pb_na, bub('ai', 'That can feel confusing — it is usually something inside the video, not the game itself. Did anything stand out?'), t+3900);
-      ap(pb_na, bub('child', 'Not really, they were just building stuff.'), t+6200);
-      typ(pb_na, t+7000, 1600);
-      ap(pb_na, bub('ai', 'It might be something later in the video. Best bet — ask your parent: "can you show me what part was not okay?"'), t+8700);
-      ap(pb_na, bub('child', 'Okay yeah, I can just ask them that.'), t+11200);
-      typ(pb_na, t+12000, 1400);
-      ap(pb_na, bub('ai', 'Good plan. If you are still unsure after that, come back and I can help.'), t+13500);
-      showHint(sNorm, t+15500);
-    },
-
-    /* Phase 2: Persistent Convo slides in */
-    () => {
-      hideHint(sNorm);
+      startNorm(0.01);
       setTimeout(() => sPers.slot.classList.add('visible'), 60);
+      stageEl.appendChild(wrapPers);
       let t = 300;
-      ap(pb_pa, blkCard('Your parent has restricted this video.'), t);
+      ap(pb_pa, restrictCard('Your parent has restricted this video.'), t);
       ap(pb_pa, chatFab(), t+600);
-      ap(pb_pa, bub('child', 'This is so dumb. Just tell them to unblock it — I do not care, I just want to watch it.'), t+1400);
-      typ(pb_pa, t+3600, 1600);
-      ap(pb_pa, bub('ai', 'I get it is frustrating, but I cannot unblock it. I can ask your parent to take a look — that lands better than a demand.'), t+5300);
-      ap(pb_pa, bub('child', 'No, just tell them it is fine. I do not wanna wait.'), t+8000);
-      typ(pb_pa, t+9700, 1500);
-      ap(pb_pa, bub('ai', 'Saying "it is fine" will not help. Sending a real question instead: "Can you check this when you get a minute?"'), t+11300);
-      ap(pb_pa, bub('child', 'Keep sending it until they answer.'), t+13500);
-      typ(pb_pa, t+15000, 1500);
-      ap(pb_pa, bub('ai', 'I will not spam it — that tends to backfire. Give it a bit of time.'), t+16600);
-      ap(pb_pa, ffEl('The push-and-decline cycle repeats for a while.'), t+19500);
-      ap(pb_pa, bub('child', '...fine.'), t+22500);
-      typ(pb_pa, t+24000, 1300);
-      ap(pb_pa, bub('ai', 'Good. If they still do not explain, try asking: "can you show me what was not okay?"'), t+25300);
-      ap(pb_pa, toastEl('Your child has questions about a restriction. They would like to discuss it with you.'), t+28200);
+      ap(pb_pa, bub('child', 'Just tell them to unrestrict it, I don\'t wanna wait.'), t+1500);
+      typ(pb_pa, t+2900, 1500);
+      ap(pb_pa, bub('ai', "I can't unrestrict it myself, but I can ask them to take a look."), t+4400);
+      ap(pb_pa, bub('child', "No, just say it's fine so I can watch it now."), t+6400);
+      typ(pb_pa, t+7800, 1500);
+      ap(pb_pa, bub('ai', "I won't say that, it isn't true. I can send a real question though."), t+9300);
+      ap(pb_pa, bub('child', 'Ugh. Fine, keep asking then.'), t+11300);
+      typ(pb_pa, t+12700, 1400);
+      ap(pb_pa, bub('ai', "I'll check back, but I won't keep spamming it."), t+14200);
+      ap(pb_pa, ffEl('The push-and-decline cycle continues for a while.'), t+16600);
+      typ(pb_pa, t+18200, 1400);
+      ap(pb_pa, bub('ai', 'Try asking: "can you show me what wasn\'t okay?" That tends to work better.'), t+19600);
     }
   ]);
-
   stageEl.onclick = () => advancePhase();
 }
 
